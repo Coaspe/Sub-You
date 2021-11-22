@@ -1,25 +1,59 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import useAuthListner from './hooks/use-auth';
+import { lazy, Suspense } from 'react';
+import UserContext from "./context/user";
+import IsUserLoggedIn from "./helpers/Is-user-logged-in";
+import ProtectedRoute from "./helpers/Protected.route";
 
-function App() {
+const Login = lazy(() => import("./page/Login"))
+const Dashboard = lazy(() => import("./page/Dashboard"))
+const Signup = lazy(() => import("./page/Signup"))
+const App = () => {
+  const { user } = useAuthListner()
+  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <UserContext.Provider value={{ user }}>
+      <Router>
+        <Suspense
+          fallback={
+            <div className="w-screen h-screen flex items-center justify-center">
+              <img
+                className="w-14 opacity-50"
+                src="/images/loading.png"
+                alt="loading"
+              />
+            </div>
+          }
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute user={user}>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+              />
+          <Route
+            path="/login"
+            element={
+              <IsUserLoggedIn user={user}>
+                <Login />
+              </IsUserLoggedIn>
+            }
+            />
+          <Route
+            path="/signup"
+            element={
+              <IsUserLoggedIn user={user}>
+                <Signup />
+              </IsUserLoggedIn>
+            }
+          />
+          </Routes>
+        </Suspense>
+      </Router>
+    </UserContext.Provider>
   );
 }
 
