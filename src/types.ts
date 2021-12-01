@@ -60,3 +60,64 @@ export type errorType = {
 export const errorInitial = {
     "message" : ""
 }
+
+export type userInfoType = {
+    "uid": string,
+    "email": string,
+    "emailVerified": string,
+    "displayName": string,
+    "isAnonymous": string,
+    "photoURL":string,
+    "providerData": [
+        {
+            "providerId": string,
+            "uid": string,
+            "displayName": string,
+            "email": string,
+            "phoneNumber": boolean,
+            "photoURL": string
+        }
+    ],
+    "stsTokenManager": {
+        "refreshToken": string,
+        "accessToken": string,
+        "expirationTime": number
+    },
+    "createdAt": string,
+    "lastLoginAt": string,
+    "apiKey": string,
+    "appName": string
+}
+
+export type getUserType = {
+    dateCreated: number
+    followers: Array<string>
+    following: Array<string>
+    profileCaption: string
+    profileImg: string
+    uid: string
+    userEmail: string
+    username: string
+}
+
+export type getUserType2 = {
+    dateCreated: number
+    docId: string
+    followers: Array<string>
+    following: Array<string>
+    profileCaption: string
+    profileImg: string
+    uid: string
+    userEmail: string
+    username: string
+}
+
+export type photoContent = {
+    content: {
+    dateCreated: number
+    userEmail: string
+    username: string
+    imageUrl: string
+    profileImg: string
+    }
+}

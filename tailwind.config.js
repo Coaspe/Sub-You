@@ -18,6 +18,7 @@ module.exports = {
     },
     colors: {
       main: "#736578",
+      white: "#ffffff",
     },
   },
   variants: {},

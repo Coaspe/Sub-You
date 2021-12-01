@@ -1,16 +1,17 @@
 import { useContext } from "react";
 import FirebaseContext from "../context/firebase";
 import { FieldValue, firebase, storageRef } from "../lib/firebase";
+import { getUserType } from "../types";
 
 export const singInWithGoogleInfoToFB = async (info) => {
   await firebase
     .firestore()
-    .collection("usersGoogle")
+    .collection("users")
     .doc(info.additionalUserInfo.profile.email)
     .set({
-      userEmail: info.additionalUserInfo.profile.email,
+      userEmail: info.additionalUserInfo.profile.email.toLowerCase(),
       uid: info.user.uid,
-      username: info.additionalUserInfo.profile.name,
+      username: info.additionalUserInfo.profile.name.toLowerCase(),
       following: [],
       followers: [],
       dateCreated: Date.now(),
@@ -21,12 +22,12 @@ export const singInWithGoogleInfoToFB = async (info) => {
 export const signInWithFacebookInfoToFB = async (info) => {
   await firebase
     .firestore()
-    .collection("usersFacebook")
+    .collection("users")
     .doc(info.additionalUserInfo.profile.email)
     .set({
-      userEmail: info.additionalUserInfo.profile.email,
+      userEmail: info.additionalUserInfo.profile.email.toLowerCase(),
       uid: info.user.uid,
-      username: info.additionalUserInfo.profile.name,
+      username: info.additionalUserInfo.profile.name.toLowerCase(),
       following: [],
       followers: [],
       dateCreated: Date.now(),
@@ -38,7 +39,7 @@ export const signInWithFacebookInfoToFB = async (info) => {
 export async function doesEmailExist(username) {
   const result = await firebase
     .firestore()
-    .collection("usersGoogle")
+    .collection("users")
     .where("userEmail", "==", username)
     .get();
 
@@ -57,13 +58,23 @@ export const signupWithEmail = async (email, password, username) => {
   });
   console.log(createdUserResult);
   await firebase.firestore().collection("users").doc("email").set({
-    userId: createdUserResult.user.uid,
+    uid: createdUserResult.user.uid,
     username: username.toLowerCase(),
-    emailAddress: email.toLowerCase(),
+    userEmail: email.toLowerCase(),
     following: [],
     followers: [],
     dateCreated: Date.now(),
     profileImg: "",
     profileCaption: "",
   });
+};
+
+export const getUserByEmail = async (email) => {
+  const result = await firebase
+    .firestore()
+    .collection("users")
+    .where("userEmail", "==", email.toLowerCase())
+    .get();
+
+  return result.docs.map((item) => ({ ...item.data() }))[0];
 };

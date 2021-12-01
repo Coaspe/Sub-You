@@ -10,6 +10,9 @@ import { ReactCountryFlag } from "react-country-flag"
 import { signInWithFacebook, signInWithGoogle } from '../helpers/auth-OAuth2';
 import { styled } from '@mui/system';
 import ColoredLine from '../components/ColoredLine';
+import './Login.css'
+import { getUserType, getUserType2 } from "../types";
+import { getUserByEmail } from "../services/firebase";
 
 const Login = () => {
     const [location, setLocation] = useState<locationType>(locationTypeInitial);
@@ -19,8 +22,12 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState<errorType>(errorInitial);
     const { firebase } = useContext(FirebaseContext);
-    
     useEffect(() => {
+        const getTimeline = async () => {
+            const { following } = await getUserByEmail("aspalt85@gmail.com") as getUserType
+            console.log(following);
+        }
+        getTimeline()
         axios.get('https://ipapi.co/json/')
             .then((response: any) => {
                 let data = response.data;
@@ -50,11 +57,18 @@ const Login = () => {
     };
 
     return (
-        <div className="container flex justify-center items-center w-screen h-screen font-stix sm:max-w-full">
-            <div className="w-1/2 sm:w-0 sm:invisible">
-                <img src="/images/loginLeft.jpg" alt="loginLeft" />
+        <div className="container flex justify-center items-center w-screen h-screen font-stix sm:max-w-full bg-main bg-opacity-10">
+            <div className="w-1/2 sm:w-0 sm:invisible flex mx-auto">
+                {/* <img src="/images/loginLeft.jpg" alt="loginLeft" /> */}
+
+                    <div className="flex flex-col ml-36">
+                        <p className="font-black text-5xl">We Sub You!</p>
+                        {/* <p className="font-black text-5xl">We Sup You!</p> */}
+                        <p className="text-lg">You can subscribe your stars and own their photos with NFT tech in our flatform.</p>
+                    <p className="text-lg">You can be a star and put your pictures up for auction in our flatform.</p>
+                    </div>
             </div>
-            <div className="w-1/2 flex flex-col items-center justify-center rounded-xl py-10 sm:w-full">
+            <div className="w-1/2 flex flex-col items-center justify-center rounded-xl py-10 sm:w-full z-10">
                 <img className="w-40 mb-5" src="/images/logo.png" alt="logo" />
                 <Box
                     className="flex flex-col items-center justify-center font-stix"
@@ -122,7 +136,21 @@ const Login = () => {
                     Don't have an account?
                 </span>
                 <ReactCountryFlag countryCode={location.country} svg/>
-            </div>
+                    </div>
+                    <div className="area flex items-center justify-center absolute z-0">
+                        <ul className="circles">
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                        </ul>
+                </div >
         </div>
     )
 }
