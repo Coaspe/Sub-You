@@ -98,8 +98,21 @@ export type getUserType = {
     uid: string
     userEmail: string
     username: string
+    postDicId: Array<string>
 }
-
+export type getUserPropType = {
+    user: {
+        dateCreated: number
+        followers: Array<string>
+        following: Array<string>
+        profileCaption: string
+        profileImg: string
+        uid: string
+        userEmail: string
+        username: string
+        postDicId: Array<string>
+    }
+}
 export type getUserType2 = {
     dateCreated: number
     docId: string
@@ -110,14 +123,34 @@ export type getUserType2 = {
     uid: string
     userEmail: string
     username: string
+    postDicId: Array<string>
 }
 
-export type photoContent = {
-    content: {
+export type postContent = {
+    postContentProps: {
+        caption: string
+        category: string
+        comments: Array<string>
+        dateCreated: number
+        docId: string
+        imageSrc: Array<string>
+        likes: Array<string>
+        postId: Array<string>
+        userId: string
+        userLikedPhoto: boolean
+        username: string
+        averageColor: Array<string>
+    }
+}
+
+export type userInfoFromFirestore = {
     dateCreated: number
+    docId: string
+    followers: Array<string>
+    following: Array<string>
+    profileCaption: string
+    profileImg: string
+    uid: string
     userEmail: string
     username: string
-    imageUrl: string
-    profileImg: string
-    }
 }

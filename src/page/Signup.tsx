@@ -2,15 +2,13 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { locationType, locationTypeInitial } from '../types';
-import FirebaseContext from "../context/firebase";
 import { useNavigate } from 'react-router-dom';
 import { ReactCountryFlag } from "react-country-flag"
 import { doesEmailExist, signupWithEmail } from '../services/firebase';
 import axios from 'axios'
 import { styled } from '@mui/system';
-import ColoredLine from '../components/ColoredLine';
 
 const Signup = () => {
     const [location, setLocation] = useState<locationType>(locationTypeInitial);
@@ -20,7 +18,7 @@ const Signup = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string>("");
-    const { firebase } = useContext(FirebaseContext);
+
     useEffect(() => {
         axios.get('https://ipapi.co/json/')
             .then((response: any) => {
@@ -52,7 +50,7 @@ const Signup = () => {
     font-family: "STIX";
     `
     return (
-        <div className="container flex justify-center items-center w-screen h-screen font-stix sm:max-w-full">
+        <div className="flex justify-center items-center w-screen h-screen font-stix sm:max-w-full">
             {error !== "" ? (<Alert severity="error">{error}</Alert>) : null}
             <div className="w-1/2 sm:w-0 sm:invisible">
                 <img src="/images/loginLeft.jpg" alt="loginLeft" />

@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 const IsUserLoggedIn = ({ children, user }) => {
   if (user !== null || user !== {}) {

@@ -1,5 +1,3 @@
-import { borderTop } from "@mui/system";
-
 const ColoredLine = ({ color }: ColoredLinePropsType) => {
     return (
         <hr

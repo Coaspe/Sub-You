@@ -1,35 +1,43 @@
-import {useState} from "react"
+import {useContext, useEffect, useState} from "react"
 import Avatar from '@mui/material/Avatar';
-import { photoContent } from '../../types';
+import { postContent } from '../../types';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import UserContext from "../../context/user";
+import { deletePost } from "../../services/firebase";
+ 
+const PostHeader = ({postContentProps} : postContent) => {
 
-const PostHeader = ({content}: photoContent) => {
-    const options = [
-        'Save',
-        'Purchase',
-      'Auction',
-        "Report"
-    ];
-    const ITEM_HEIGHT = 48;
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const open = Boolean(anchorEl);
-    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-    return (
-        <div className="flex item-center justify-between bg-white px-2 py-2 border-t-2 border-l-2 border-r-2 font-stix ">
-            <div className="flex items-center justify-center">
-                <Avatar className="mr-2" alt="user avatar" src="/images/1.jpg" />
-                <span>{content.username}</span>
-            </div>
-            <div>
-              <IconButton
+  const [whetherMyPost, setWhetherMyPost] = useState(false);
+  const ITEM_HEIGHT = 48;
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+      setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+      setAnchorEl(null);
+  };
+
+  const { user } = useContext(UserContext);
+
+  useEffect(() => { 
+    if (postContentProps.userId === user.uid) {
+      setWhetherMyPost(true)
+    }
+  }, [])
+  
+  return (
+      <div className="flex item-center justify-between bg-white px-2 py-2 font-stix">
+          <div className="flex items-center justify-center">
+              <Avatar className="mr-2" alt="user avatar" src="/images/1.jpg" />
+              <span>{postContentProps.username}</span>
+          </div>
+          <div>
+            <IconButton
               aria-label="more"
               id="long-button"
               aria-controls="long-menu"
@@ -38,8 +46,8 @@ const PostHeader = ({content}: photoContent) => {
               onClick={handleClick}
               >
                 <MoreVertIcon />
-              </IconButton>
-          <Menu
+            </IconButton>
+            <Menu
               id="long-menu"
               MenuListProps={{
                 'aria-labelledby': 'long-button',
@@ -52,17 +60,19 @@ const PostHeader = ({content}: photoContent) => {
                   maxHeight: ITEM_HEIGHT * 4.5,
                   width: '20ch',
                 },
-                }}
-              >
-              {options.map((option) => (
-                <MenuItem key={option} selected={option === 'Save'} onClick={handleClose}>
-                  {option}
-                </MenuItem>
-              ))}
-              </Menu>
-            </div>
-        </div>
-    )
+                }}>
+              <MenuItem onClick={handleClose}>Save</MenuItem>
+              <MenuItem onClick={handleClose}>Purchase</MenuItem>
+              <MenuItem onClick={handleClose}>Auction</MenuItem>
+              <MenuItem onClick={handleClose}>Report</MenuItem>
+              {whetherMyPost ? (<MenuItem onClick={() => {
+                deletePost(postContentProps.docId, user.email, postContentProps.postId)
+                handleClose()
+              }}>Delete</MenuItem>) : null}
+            </Menu>
+          </div>
+      </div>
+  )
 }
 
 export default PostHeader;

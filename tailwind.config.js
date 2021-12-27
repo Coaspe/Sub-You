@@ -15,10 +15,14 @@ module.exports = {
         noto: "Noto Serif KR",
         stix: "STIX Two Text",
       },
-    },
-    colors: {
-      main: "#736578",
-      white: "#ffffff",
+      colors: {
+        main: "#736578",
+        white: "#ffffff",
+      },
+      height: {
+        bgpost: "650px",
+        smpost: "450px",
+      },
     },
   },
   variants: {},

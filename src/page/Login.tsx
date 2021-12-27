@@ -11,7 +11,7 @@ import { signInWithFacebook, signInWithGoogle } from '../helpers/auth-OAuth2';
 import { styled } from '@mui/system';
 import ColoredLine from '../components/ColoredLine';
 import './Login.css'
-import { getUserType, getUserType2 } from "../types";
+import { getUserType } from "../types";
 import { getUserByEmail } from "../services/firebase";
 
 const Login = () => {
@@ -45,25 +45,21 @@ const Login = () => {
 
     try {
       await firebase.auth().signInWithEmailAndPassword(emailAddress, password);
-        navigate("/");
-        
+      navigate("/");
     } catch (error: any) {
       setEmailAddress("");
       setPassword("");
         setError(error);
         console.log(error.message);
-        
     }
     };
 
     return (
-        <div className="container flex justify-center items-center w-screen h-screen font-stix sm:max-w-full bg-main bg-opacity-10">
-            <div className="w-1/2 sm:w-0 sm:invisible flex mx-auto">
-                {/* <img src="/images/loginLeft.jpg" alt="loginLeft" /> */}
+        <div className="flex justify-center items-center w-screen h-screen font-stix sm:max-w-full bg-main bg-opacity-10">
+            <div className="w-1/2 sm:w-0 sm:invisible flex mx-auto z-10">
 
                     <div className="flex flex-col ml-36">
                         <p className="font-black text-5xl">We Sub You!</p>
-                        {/* <p className="font-black text-5xl">We Sup You!</p> */}
                         <p className="text-lg">You can subscribe your stars and own their photos with NFT tech in our flatform.</p>
                     <p className="text-lg">You can be a star and put your pictures up for auction in our flatform.</p>
                     </div>
@@ -139,18 +135,19 @@ const Login = () => {
                     </div>
                     <div className="area flex items-center justify-center absolute z-0">
                         <ul className="circles">
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
+                        <img className="max-w-full max-h-full blur"src="/images/1.jpg" alt="login" />
+                        <img className="max-w-full max-h-full blur"src="/images/2.jpg" alt="login" />
+                        <img className="max-w-full max-h-full blur"src="/images/3.jpg" alt="login" />
+                        <img className="max-w-full max-h-full blur"src="/images/4.jpg" alt="login" />
+                        <img className="max-w-full max-h-full blur"src="/images/5.jpg" alt="login" />
+                        <img className="max-w-full max-h-full blur"src="/images/6.jpg" alt="login" />
+                        <img className="max-w-full max-h-full blur"src="/images/7.jpg" alt="login" />
+                        <img className="max-w-full max-h-full blur"src="/images/2.jpg" alt="login" />
+                        <img className="max-w-full max-h-full blur"src="/images/3.jpg" alt="login" />
+                        <img className="max-w-full max-h-full blur"src="/images/1.jpg" alt="login" />
                         </ul>
-                </div >
+                    </div >
+
         </div>
     )
 }

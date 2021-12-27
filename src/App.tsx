@@ -8,6 +8,8 @@ import ProtectedRoute from "./helpers/Protected.route";
 const Login = lazy(() => import("./page/Login"))
 const Dashboard = lazy(() => import("./page/Dashboard"))
 const Signup = lazy(() => import("./page/Signup"))
+const Artists = lazy(() => import("./page/Artists"))
+
 const App = () => {
   const { user } = useAuthListner()
   
@@ -18,8 +20,8 @@ const App = () => {
           fallback={
             <div className="w-screen h-screen flex items-center justify-center">
               <img
-                className="w-14 opacity-50"
-                src="/images/loading.png"
+                className="w-20 opacity-50"
+                src="/images/logo.png"
                 alt="loading"
               />
             </div>
@@ -34,22 +36,30 @@ const App = () => {
                 </ProtectedRoute>
               }
               />
-          <Route
-            path="/login"
-            element={
-              <IsUserLoggedIn user={user}>
-                <Login />
-              </IsUserLoggedIn>
-            }
+            <Route
+              path="/login"
+              element={
+                <IsUserLoggedIn user={user}>
+                  <Login />
+                </IsUserLoggedIn>
+              }
+              />
+            <Route
+              path="/signup"
+              element={
+                <IsUserLoggedIn user={user}>
+                  <Signup />
+                </IsUserLoggedIn>
+              }
             />
-          <Route
-            path="/signup"
-            element={
-              <IsUserLoggedIn user={user}>
-                <Signup />
-              </IsUserLoggedIn>
-            }
-          />
+            <Route
+              path="/artist"
+              element={
+                <ProtectedRoute user={user}>
+                  <Artists />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </Suspense>
       </Router>
