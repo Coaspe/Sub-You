@@ -1,15 +1,19 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Artist from "../components/Artist";
 import Header from "../components/Header"
-import { getAllUser } from "../services/firebase";
+import UserContext from "../context/user";
+import { getAllUser, getUserByEmail } from "../services/firebase";
 import { getUserType } from "../types"
 const Artists = () => {
     const [users, setUsers] = useState<getUserType[]>([])
-
+    const { user } = useContext(UserContext)
+    console.log(user);
+    
     useEffect(() => {
         getAllUser().then((res: any) => {
             setUsers(res)
         })
+
     }, [])
 
     return (

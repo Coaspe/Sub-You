@@ -9,7 +9,8 @@ import UserContext from "../../context/user";
 import { deletePost } from "../../services/firebase";
  
 const PostHeader = ({postContentProps} : postContent) => {
-
+  console.log(postContentProps);
+  
   const [whetherMyPost, setWhetherMyPost] = useState(false);
   const ITEM_HEIGHT = 48;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -21,7 +22,7 @@ const PostHeader = ({postContentProps} : postContent) => {
   const handleClose = () => {
       setAnchorEl(null);
   };
-
+  
   const { user } = useContext(UserContext);
 
   useEffect(() => { 
@@ -33,7 +34,7 @@ const PostHeader = ({postContentProps} : postContent) => {
   return (
       <div className="flex item-center justify-between bg-white px-2 py-2 font-stix">
           <div className="flex items-center justify-center">
-              <Avatar className="mr-2" alt="user avatar" src="/images/1.jpg" />
+        <Avatar className="mr-2" alt="user avatar" src={postContentProps.avatarImgSrc} />
               <span>{postContentProps.username}</span>
           </div>
           <div>

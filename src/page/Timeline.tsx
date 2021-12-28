@@ -7,7 +7,6 @@ import { postContent, userInfoFromFirestore } from "../types";
 const Timeline = () => {
   const [posts, setPosts] = useState<postContent[]>([]);
   const { user: contextUser } = useContext(UserContext)
-  
   useEffect(() => {
     
     async function getTimelinePhotos() {
@@ -24,7 +23,8 @@ const Timeline = () => {
       
       const userTemp = user as userInfoFromFirestore[]
       const { following } = userTemp[0]
-
+      console.log(following);
+      
       return getPhotos(contextUser.uid, following)
     }
 

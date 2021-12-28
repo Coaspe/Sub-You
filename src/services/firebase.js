@@ -82,6 +82,7 @@ export async function uploadImage(caption, ImageUrl, userInfo, category) {
   let averageColor = [];
 
   const fac = new FastAverageColor();
+
   ImageUrl.map(async (imUrl) => {
     await storageRef.child(`${userInfo.email}/${imUrl.name}`).put(imUrl);
     await storageRef
@@ -113,6 +114,7 @@ export async function uploadImage(caption, ImageUrl, userInfo, category) {
               userId: userInfo.uid,
               category: category,
               averageColor: averageColor,
+              avatarImgSrc: userInfo.photoURL,
             })
             .then(async (res) => {
               await firebase
@@ -120,7 +122,6 @@ export async function uploadImage(caption, ImageUrl, userInfo, category) {
                 .collection("users")
                 .doc(userInfo.email)
                 .update({
-                  // Already following remove ! Add following
                   postDocId: FieldValue.arrayUnion(res.id),
                 });
             })
@@ -226,4 +227,36 @@ export async function getDocFirstImage(postDocIdArr) {
       ).data()
     )
   );
+}
+
+export async function updateLoggedInUserFollowing(
+  loggedInUserDocId, //currently logged in user document id // the user that someone requests to follow
+  user,
+  isFollowingProfile
+) {
+  return await firebase
+    .firestore()
+    .collection("users")
+    .doc(loggedInUserDocId)
+    .update({
+      // Already following remove ! Add following
+      following: isFollowingProfile
+        ? FieldValue.arrayRemove(user)
+        : FieldValue.arrayUnion(user),
+    });
+}
+export async function updateFollowedUserFollowers(
+  profileDocId, //currently logged in user document id// the user that someone requests to follow
+  user,
+  isFollowingProfile
+) {
+  return await firebase
+    .firestore()
+    .collection("users")
+    .doc(profileDocId)
+    .update({
+      followers: isFollowingProfile
+        ? FieldValue.arrayRemove(user)
+        : FieldValue.arrayUnion(user),
+    });
 }

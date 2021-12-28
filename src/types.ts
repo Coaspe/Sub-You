@@ -140,9 +140,24 @@ export type postContent = {
         userLikedPhoto: boolean
         username: string
         averageColor: Array<string>
+        avatarImgSrc: string
     }
 }
 
+export type postContent2 = {
+        caption: string
+        category: string
+        comments: Array<string>
+        dateCreated: number
+        docId: string
+        imageSrc: Array<string>
+        likes: Array<string>
+        postId: Array<string>
+        userId: string
+        userLikedPhoto: boolean
+        username: string
+        averageColor: Array<string>
+}
 export type userInfoFromFirestore = {
     dateCreated: number
     docId: string

@@ -25,7 +25,7 @@ const Header = () => {
     const [previewURL, setPriviewURL] = useState(["/images/logo.png"]);
     const [file, setFile] = useState<Blob[]>([]);
     const [page, setPage] = useState(1);
-
+    
     const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);
     };

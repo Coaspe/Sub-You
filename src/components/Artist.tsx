@@ -1,8 +1,9 @@
 import { getUserPropType, postContent2} from "../types"
 import Avatar from '@mui/material/Avatar';
-import { getDocFirstImage, getUserByEmail } from "../services/firebase";
-import { useEffect, useState } from "react";
+import { getDocFirstImage, getUserByEmail, updateLoggedInUserFollowing, updateFollowedUserFollowers } from "../services/firebase";
+import { useContext, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion"
+import UserContext from "../context/user";
 
 const Artist = ({ user }: getUserPropType) => {
 
@@ -15,7 +16,8 @@ const Artist = ({ user }: getUserPropType) => {
     const [expanded, setExpanded] = useState<boolean>(false)
     const [load, setLoad] = useState(false)
     const [screen, setScreen] = useState(false)
-
+    const { user: contextUser } = useContext(UserContext)
+    
     const svgVariant = {
         hover: {
             scale: 1.2
@@ -91,10 +93,13 @@ const Artist = ({ user }: getUserPropType) => {
                             className="mr-3"
                             variants={svgVariant}
                             whileHover="hover">
-                            <motion.svg
-                                className="w-6"
+                        <motion.svg
+                            onClick={() => {
+                                updateLoggedInUserFollowing(contextUser.email, user.uid, false)
+                                updateFollowedUserFollowers(user.userEmail, contextUser.uid, false)
+                                }}
+                                className="w-6 cursor-pointer"
                                 fill="red"
-                                
                                 x="0px" y="0px"
                                 viewBox="0 0 490.4 490.4" >
                                 <g>
