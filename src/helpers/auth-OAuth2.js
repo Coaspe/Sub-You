@@ -3,6 +3,7 @@ import "firebase/compat/auth";
 import {
   singInWithGoogleInfoToFB,
   signInWithFacebookInfoToFB,
+  doesEmailExist,
 } from "../services/firebase";
 import propType from "prop-types";
 
@@ -14,8 +15,15 @@ export const signInWithGoogle = (navi) => {
     .auth()
     .signInWithPopup(provider)
     .then((result) => {
-      singInWithGoogleInfoToFB(result);
-      navi("/");
+      doesEmailExist(result.additionalUserInfo.profile.email).then((r) => {
+        if (!r) {
+          singInWithGoogleInfoToFB(result).then(() => {
+            navi("/");
+          });
+        } else {
+          navi("/");
+        }
+      });
     })
     .catch((error) => {
       console.log(error.message);

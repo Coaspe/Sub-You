@@ -13,10 +13,10 @@ const Artists = () => {
     }, [])
 
     return (
-        <div className="bg-main bg-opacity-20 w-full h-screen">
+        <div className="w-full h-full">
             <Header />
-            <div className="grid grid-cols-6 justify-between mx-auto max-w-screen-lg">
-                <div className="col-start-3 col-span-2 flex flex-col items-center">
+            <div className="grid grid-cols-7 justify-between mx-auto max-w-screen-lg">
+                <div className="col-start-3 col-span-3 flex flex-col items-center sm:col-span-6 sm:mx-3">
                     {users !== [] ? (
                         users.map((user: getUserType) => (<Artist user={user} />))
                     ) : null}

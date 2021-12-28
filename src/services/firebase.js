@@ -12,6 +12,7 @@ export const singInWithGoogleInfoToFB = async (info) => {
       username: info.additionalUserInfo.profile.name.toLowerCase(),
       following: [],
       followers: [],
+      postDocId: [],
       dateCreated: Date.now(),
       profileImg: info.user.photoURL,
       profileCaption: "",
@@ -34,11 +35,11 @@ export const signInWithFacebookInfoToFB = async (info) => {
     });
 };
 
-export async function doesEmailExist(username) {
+export async function doesEmailExist(userEmail) {
   const result = await firebase
     .firestore()
     .collection("users")
-    .where("userEmail", "==", username)
+    .where("userEmail", "==", userEmail)
     .get();
 
   return result.docs.length > 0;
@@ -144,8 +145,6 @@ export async function getUserByUserId(userId) {
 }
 
 export async function getPhotos(userId, following) {
-  //get firestore docs that someone follows
-
   const result1 =
     following.length > 0
       ? await firebase
@@ -215,11 +214,16 @@ export async function getAllUser() {
   return result;
 }
 
-export async function getUserPostDocId(userEmail) {
-  let result = await firebase
-    .firestore()
-    .collection("users")
-    .doc(userEmail)
-    .get();
-  return result.data();
+export async function getDocFirstImage(postDocIdArr) {
+  if (postDocIdArr.length === 0) {
+    console.log("No post !");
+    return;
+  }
+  return await Promise.all(
+    postDocIdArr.map(async (postDocId) =>
+      (
+        await firebase.firestore().collection("posts").doc(postDocId).get()
+      ).data()
+    )
+  );
 }

@@ -32,7 +32,7 @@ const Dashboard = () => {
     const [direction, setDirection] = useState(1);
 
     return (
-        <div className="bg-main bg-opacity-20 w-full h-full">
+        <div className="w-full h-full">
             <Header />
             <div className="grid grid-cols-3 gap-4 justify-between mx-auto max-w-screen-lg">
                 <Timeline />

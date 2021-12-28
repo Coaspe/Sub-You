@@ -98,7 +98,7 @@ export type getUserType = {
     uid: string
     userEmail: string
     username: string
-    postDicId: Array<string>
+    postDocId: Array<string>
 }
 export type getUserPropType = {
     user: {
@@ -110,7 +110,7 @@ export type getUserPropType = {
         uid: string
         userEmail: string
         username: string
-        postDicId: Array<string>
+        postDocId: Array<string>
     }
 }
 export type getUserType2 = {
@@ -123,7 +123,7 @@ export type getUserType2 = {
     uid: string
     userEmail: string
     username: string
-    postDicId: Array<string>
+    postDocId: Array<string>
 }
 
 export type postContent = {
@@ -153,4 +153,13 @@ export type userInfoFromFirestore = {
     uid: string
     userEmail: string
     username: string
+}
+
+export type artistImageProptype = {
+    prop: {
+        src : string
+    }
+}
+export type artistImage = {
+        src : string
 }

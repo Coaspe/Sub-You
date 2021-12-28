@@ -116,7 +116,7 @@ const Header = () => {
     };
 
     return (
-        <header className="h-20 bg-main bg-opacity-20 mb-3 sm:h-10 font-stix grid grid-cols-8">
+        <header className="h-20 bg-main bg-opacity-20 mb-3 sm:h-10 font-stix flex items-center justify-evenly ">
             <Modal
                 open={open}
                 onClose={handleClose}
@@ -188,7 +188,10 @@ const Header = () => {
             </Modal>
 
             <div className="w-full h-full flex items-center justify-between col-start-2 col-span-5">
-                <div className="ml-20 font-stix font-black text-2xl sm:ml-3 ">
+                <div className="ml-20 font-stix font-black text-2xl sm:ml-3 cursor-pointer"
+                    onClick={() => {
+                    navigate("/")
+                }}>
                     SubYou
                 </div>
                 <div className="sm:hidden">
@@ -211,7 +214,7 @@ const Header = () => {
                         />
                     </Paper>
                 </div>
-                <div className=" flex items-center justify-center sm:mr-3 sm:hidden">
+                <div className=" flex items-center justify-center mr-20 sm:mr-3 sm:hidden">
                     <Avatar className="mr-2" alt="user avatar" src={user.photoURL as string}/>
                     <span className="mr-5 sm:text-sm sm:mr-0">{user.displayName}</span>
                     <svg

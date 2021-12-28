@@ -23,6 +23,9 @@ module.exports = {
         bgpost: "650px",
         smpost: "450px",
       },
+      maxWidth: {
+        "1/3": "33%",
+      },
     },
   },
   variants: {},
