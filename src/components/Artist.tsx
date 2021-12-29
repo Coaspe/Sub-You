@@ -16,11 +16,15 @@ const Artist = ({ user }: getUserPropType) => {
     const [expanded, setExpanded] = useState<boolean>(false)
     const [load, setLoad] = useState(false)
     const [screen, setScreen] = useState(false)
+    const [doesFollow, setDoesFollow] = useState(false)
     const { user: contextUser } = useContext(UserContext)
     
-    const svgVariant = {
+    const divVariant = {
         hover: {
             scale: 1.2
+        },
+        tap: {
+            scale: 1
         }
     }
     const cacheImages = async (srcArray: string[]) => {
@@ -48,8 +52,7 @@ const Artist = ({ user }: getUserPropType) => {
         }
 
         getUserByEmail(user.userEmail).then((res) => {
-            getDocFirstImage(res.postDocId).then((re : postContent2[] | undefined) => {
-                
+            getDocFirstImage(res.postDocId).then((re: postContent2[] | undefined) => {
                 const x : Array<firstImageInfo> = (re as postContent2[]).map((data) => ({
                     src : data.imageSrc[0],
                     color : data.averageColor[0]
@@ -78,7 +81,11 @@ const Artist = ({ user }: getUserPropType) => {
         }
     }, [])
     return (
-            <motion.div className="border-2 border-black rounded-md w-full flex flex-col items-center px-3 py-5 justify-between mt-3">
+        <AnimatePresence>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity:1 }}
+                className="border-2 border-black rounded-md w-full flex flex-col items-center px-3 py-5 justify-between mt-3">
                 <div className="w-full flex items-center justify-between">
                     <div className="flex items-center">
                         <Avatar className="mr-2" alt="user avatar" src={user.profileImg} />
@@ -90,16 +97,18 @@ const Artist = ({ user }: getUserPropType) => {
                             <span>{user.followers.length}</span>
                         </div>
                         <motion.div
-                            className="mr-3"
-                            variants={svgVariant}
-                            whileHover="hover">
+                        className="mr-3"
+                        variants={divVariant}
+                        whileHover="hover"
+                        whileTap="tap">
                         <motion.svg
                             onClick={() => {
-                                updateLoggedInUserFollowing(contextUser.email, user.uid, false)
-                                updateFollowedUserFollowers(user.userEmail, contextUser.uid, false)
+                                updateLoggedInUserFollowing(contextUser.email, user.uid, doesFollow)
+                                updateFollowedUserFollowers(user.userEmail, contextUser.uid, doesFollow)
+                                setDoesFollow(!doesFollow)
                                 }}
-                                className="w-6 cursor-pointer"
-                                fill="red"
+                            className="w-6 cursor-pointer"
+                                fill={doesFollow ? "red" : ""}
                                 x="0px" y="0px"
                                 viewBox="0 0 490.4 490.4" >
                                 <g>
@@ -141,6 +150,7 @@ const Artist = ({ user }: getUserPropType) => {
                             : null}
                 </AnimatePresence>
             </motion.div>
+        </AnimatePresence>
     )
 }
 

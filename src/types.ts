@@ -99,7 +99,9 @@ export type getUserType = {
     userEmail: string
     username: string
     postDocId: Array<string>
+    userEmailEncrypted: string
 }
+
 export type getUserPropType = {
     user: {
         dateCreated: number

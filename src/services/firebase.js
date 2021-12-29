@@ -2,6 +2,16 @@ import { firebase, storageRef, FieldValue } from "../lib/firebase";
 import FastAverageColor from "fast-average-color";
 
 export const singInWithGoogleInfoToFB = async (info) => {
+  const CryptoJS = require("crypto-js");
+
+  const secretKey = info.user.uid;
+  const encrypted = CryptoJS.AES.encrypt(
+    JSON.stringify(info.additionalUserInfo.profile.email.toLowerCase()),
+    secretKey
+  )
+    .toString()
+    .replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/ ]/gim, "");
+
   await firebase
     .firestore()
     .collection("users")
@@ -16,8 +26,10 @@ export const singInWithGoogleInfoToFB = async (info) => {
       dateCreated: Date.now(),
       profileImg: info.user.photoURL,
       profileCaption: "",
+      userEmailEncrypted: encrypted,
     });
 };
+
 export const signInWithFacebookInfoToFB = async (info) => {
   await firebase
     .firestore()
@@ -137,12 +149,13 @@ export async function getUserByUserId(userId) {
     .collection("users")
     .where("uid", "==", userId)
     .get();
+
   const user = result.docs.map((item) => ({
     ...item.data(),
     docId: item.id,
   }));
 
-  return user;
+  return user[0];
 }
 
 export async function getPhotos(userId, following) {
@@ -175,14 +188,12 @@ export async function getPhotos(userId, following) {
       if (photo.likes.includes(userId)) {
         userLikedPhoto = true;
       }
-      // photo.userId = 2
       const user = await getUserByUserId(photo.userId);
-      // raphael
-      const { username } = user[0]; // first user
+      const { username } = user;
       return { username, ...photo, userLikedPhoto };
     })
   );
-  return photosWithUserDetails;
+  return photosWithUserDetails.sort((a, b) => b.dateCreated - a.dateCreated);
 }
 
 export async function deletePost(docId, userEmail, storageImageNameArr) {
@@ -260,3 +271,13 @@ export async function updateFollowedUserFollowers(
         : FieldValue.arrayUnion(user),
     });
 }
+
+export const getUserByEmailEncrypted = async (emailEncrypted) => {
+  const result = await firebase
+    .firestore()
+    .collection("users")
+    .where("userEmailEncrypted", "==", emailEncrypted)
+    .get();
+
+  return result.docs.map((item) => ({ ...item.data() }))[0];
+};

@@ -23,7 +23,6 @@ const Signup = () => {
         axios.get('https://ipapi.co/json/')
             .then((response: any) => {
                 let data = response.data;
-                console.log(data);
                 setLocation(data)
             });
     }, [])

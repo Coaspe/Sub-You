@@ -5,21 +5,23 @@ import { motion, AnimatePresence } from "framer-motion";
  
 
 const variants = {
-  enter: (direction: number) => {
-    return {
+  enter: {
       opacity: 0
-    };
   },
   center: {
     zIndex: 1,
     x: 0,
     opacity: 1
   },
-  exit: (direction: number) => {
-    return {
+  exit: {
       zIndex: 0,
       opacity: 0
-    };
+  },
+  tap: {
+    scale: 1.3,
+    transition: {
+      duration: 0.1
+    }
   }
 };
 const swipeConfidenceThreshold = 10000;
@@ -67,6 +69,7 @@ const Imagesw = ({ postContentProps }: postContent) => {
           className="flex flex-col items-center justify-center w-full h-bgpost sm:h-smpost">
         {load ? <AnimatePresence custom={direction} exitBeforeEnter>
           <motion.img
+            whileTap="tap"
             key={page}
             custom={direction}
             variants={variants}

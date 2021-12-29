@@ -25,13 +25,11 @@ const Login = () => {
     useEffect(() => {
         const getTimeline = async () => {
             const { following } = await getUserByEmail("aspalt85@gmail.com") as getUserType
-            console.log(following);
         }
         getTimeline()
         axios.get('https://ipapi.co/json/')
             .then((response: any) => {
                 let data = response.data;
-                console.log(data);
                 setLocation(data)
             });
     }, [])
@@ -142,9 +140,9 @@ const Login = () => {
                         <img className="max-w-full max-h-full blur"src="/images/5.jpg" alt="login" />
                         <img className="max-w-full max-h-full blur"src="/images/6.jpg" alt="login" />
                         <img className="max-w-full max-h-full blur"src="/images/7.jpg" alt="login" />
-                        <img className="max-w-full max-h-full blur"src="/images/2.jpg" alt="login" />
-                        <img className="max-w-full max-h-full blur"src="/images/3.jpg" alt="login" />
-                        <img className="max-w-full max-h-full blur"src="/images/1.jpg" alt="login" />
+                        <img className="max-w-full max-h-full blur"src="/images/8.jpg" alt="login" />
+                        <img className="max-w-full max-h-full blur"src="/images/9.jpg" alt="login" />
+                        <img className="max-w-full max-h-full blur"src="/images/6.jpg" alt="login" />
                         </ul>
                     </div >
 

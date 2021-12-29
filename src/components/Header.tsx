@@ -3,20 +3,26 @@ import Paper from '@mui/material/Paper';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/system';
-import { signOut } from '../helpers/auth-OAuth2';
-import { useNavigate } from 'react-router';
-import UserContext from '../context/user';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import TextField from '@mui/material/TextField';
 import Pagination from '@mui/material/Pagination';
 import CheckCircleTwoToneIcon from '@mui/icons-material/CheckCircleTwoTone';
+
+import { signOut } from '../helpers/auth-OAuth2';
+import { useNavigate } from 'react-router';
+import UserContext from '../context/user';
 import { memo, useContext, useState} from "react";
 import { uploadImage } from '../services/firebase';
 import Compressor from "compressorjs";
+import { getUserType } from '../types';
 
-const Header = () => {
+interface headerProps {
+    userInfo : getUserType
+}
+
+const Header : React.FC<headerProps> = ({ userInfo }) => {
 
     const navigate = useNavigate()
     const { user } = useContext(UserContext);
@@ -25,6 +31,7 @@ const Header = () => {
     const [previewURL, setPriviewURL] = useState(["/images/logo.png"]);
     const [file, setFile] = useState<Blob[]>([]);
     const [page, setPage] = useState(1);
+    
     
     const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);
@@ -36,9 +43,11 @@ const Header = () => {
         setPriviewURL(["/images/logo.png"])
         setComment("")
     };
+
     const handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setComment(event.target.value);
     };
+
     const handleFileOnChange = (event: any) => {
 
         event.preventDefault();
@@ -76,6 +85,12 @@ const Header = () => {
         });
         }
     };
+
+    const handleClickProfile = () => {
+        console.log(userInfo);
+        
+        navigate(`/p/${userInfo?.userEmailEncrypted}`)
+    }
 
     const BootstrapButton = styled(Button)({
         color: "black",
@@ -116,7 +131,7 @@ const Header = () => {
     };
 
     return (
-        <header className="h-20 bg-main bg-opacity-20 mb-3 sm:h-10 font-stix flex items-center justify-evenly ">
+        <header className="h-20 bg-main bg-opacity-20 sm:h-10 font-stix flex items-center justify-evenly ">
             <Modal
                 open={open}
                 onClose={handleClose}
@@ -195,12 +210,20 @@ const Header = () => {
                     SubYou
                 </div>
                 <div className="sm:hidden">
-                    <BootstrapButton><span className="font-stix font-bold">In Auction</span></BootstrapButton>
+                    <BootstrapButton>
+                        <span className="font-stix font-bold">
+                            In Auction
+                        </span>
+                    </BootstrapButton>
                     <BootstrapButton
                         onClick={() => {
                             navigate("/artist")
                         }}
-                    ><span className="font-stix font-bold">Artist</span></BootstrapButton>
+                    >
+                        <span className="font-stix font-bold">
+                            Artist
+                        </span>
+                    </BootstrapButton>
                 </div>
                 <div className="w-1/3 font-stix sm:h-7 sm:mr-3 sm:hidden">
                     <Paper
@@ -215,8 +238,8 @@ const Header = () => {
                     </Paper>
                 </div>
                 <div className=" flex items-center justify-center mr-20 sm:mr-3 sm:hidden">
-                    <Avatar className="mr-2" alt="user avatar" src={user.photoURL as string}/>
-                    <span className="mr-5 sm:text-sm sm:mr-0">{user.displayName}</span>
+                    <Avatar onClick={handleClickProfile} className="mr-2 cursor-pointer" alt="user avatar" src={user.photoURL as string}/>
+                    <span onClick={handleClickProfile} className="mr-5 cursor-pointer sm:text-sm sm:mr-0">{user.displayName}</span>
                     <svg
                         className="w-6 h-6"
                         onClick={handleOpen}

@@ -11,9 +11,9 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        serif: "Merriweather",
+        serif: ["Merriweather"],
         noto: "Noto Serif KR",
-        stix: "STIX Two Text",
+        stix: ["STIX Two Text"],
       },
       colors: {
         main: "#736578",

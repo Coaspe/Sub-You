@@ -6,8 +6,11 @@ import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import RestoreIcon from '@mui/icons-material/Restore';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import {useState} from 'react'
+import {useContext, useEffect, useState} from 'react'
 import { motion, AnimatePresence } from "framer-motion";
+import UserContext from "../context/user";
+import { getUserByUserId } from "../services/firebase";
+import { getUserType } from "../types";
 
 
 const variants = {
@@ -30,10 +33,21 @@ const variants = {
 const Dashboard = () => {
     const [value, setValue] = useState(0);
     const [direction, setDirection] = useState(1);
+    const { user: contextUser } = useContext(UserContext);
+    const [userInfo, setUserInfo] = useState<getUserType>({} as getUserType)
+
+    useEffect(() => {
+        const dashboardInit = async () => {
+            await getUserByUserId(contextUser.uid).then((res: any) => {
+                setUserInfo(res)
+            })
+        }
+        dashboardInit()
+    }, [])
 
     return (
         <div className="w-full h-full">
-            <Header />
+            <Header userInfo={userInfo}/>
             <div className="grid grid-cols-3 gap-4 justify-between mx-auto max-w-screen-lg">
                 <Timeline />
                 <Sidebar />

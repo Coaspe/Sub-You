@@ -4,6 +4,7 @@ import { lazy, Suspense } from 'react';
 import UserContext from "./context/user";
 import IsUserLoggedIn from "./helpers/Is-user-logged-in";
 import ProtectedRoute from "./helpers/Protected.route";
+import Profile from "./page/Profile";
 
 const Login = lazy(() => import("./page/Login"))
 const Dashboard = lazy(() => import("./page/Dashboard"))
@@ -37,6 +38,22 @@ const App = () => {
               }
               />
             <Route
+              path="/artist"
+              element={
+                <ProtectedRoute user={user}>
+                  <Artists />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/p/:userEmailEncrypted"
+              element={
+                <ProtectedRoute user={user}>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/login"
               element={
                 <IsUserLoggedIn user={user}>
@@ -50,14 +67,6 @@ const App = () => {
                 <IsUserLoggedIn user={user}>
                   <Signup />
                 </IsUserLoggedIn>
-              }
-            />
-            <Route
-              path="/artist"
-              element={
-                <ProtectedRoute user={user}>
-                  <Artists />
-                </ProtectedRoute>
               }
             />
           </Routes>
