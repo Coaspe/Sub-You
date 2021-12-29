@@ -1,24 +1,29 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom"
 import Header from "../components/Header";
-import { getUserByEmailEncrypted, getPhotos } from "../services/firebase";
+import { getUserByEmailEncrypted, getDocFirstImage } from "../services/firebase";
 import { getUserType } from "../types";
 import { ReactCountryFlag } from "react-country-flag"
 import axios from 'axios'
-import { locationType, userInfoFromFirestore, postContent } from '../types';
-import firebase from "firebase/compat";
-import UserContext from "../context/user";
-import Post from "../components/post/Post";
+import { locationType, postContent2 } from '../types';
+import {motion} from 'framer-motion'
 
 const Profile = () => {
+    interface firstImageInfo {
+        src: string;
+        color: string;
+        docId: string;
+    }
 
     const { userEmailEncrypted } = useParams();
     const [userInfo, setUserInfo] = useState<getUserType>({} as getUserType)
-    const [posts, setPosts] = useState<postContent[]>([]);
+    const [imageInfo, setImageInfo] = useState<firstImageInfo[]>([]);
     const [location, setLocation] = useState<locationType>({} as locationType);
-    const { user: contextUser } = useContext(UserContext)
-    
+    const [screen, setScreen] = useState(false)
+
     useEffect(() => { 
+
+        // Get profile owner's firestore information from params(encrypted email)
         getUserByEmailEncrypted(userEmailEncrypted).then((res:any) => {
             setUserInfo(res)
         })
@@ -26,61 +31,75 @@ const Profile = () => {
     }, [userEmailEncrypted])
 
     useEffect(() => {
+        
+        // Get location information.
         axios.get('https://ipapi.co/json/')
             .then((response: any) => {
                 let data = response.data;
                 setLocation(data)
             });
+        
     }, [])
 
-    useEffect(() => {
-        
-        async function getTimelinePhotos() {
-        const result = await firebase
-            .firestore()
-            .collection("users")
-            .where("uid", "==", contextUser.uid)
-            .get();
-        
-        const user = result.docs.map((item) => ({
-            ...item.data(),
-            docId: item.id,
-        }));
-        
-        const userTemp = user as userInfoFromFirestore[]
-        const { following } = userTemp[0]
-        
-        return getPhotos(contextUser.uid, following)
-        }
+    useEffect(() => { 
 
-        getTimelinePhotos().then((res: any) => {
-        const tmp = res.map((r: any) => ({
-            postContentProps: {
-            ...r
-            }
-        }))
-            
-        setPosts(tmp)
-            
-        })
-    }, [contextUser])
+        // Get Each Posts's first image src, avearage color and Firestore docId 
+        // And set those values to variable imageInfo
+        if (userInfo.postDocId) {
+            getDocFirstImage(userInfo.postDocId).then((re: postContent2[] | undefined) => {
+                const x : firstImageInfo[] = (re as postContent2[]).map((data) => ({
+                    src : data.imageSrc[0],
+                    color: data.averageColor[0],
+                    docId : data.docId
+                }))
+                setImageInfo(x)
+            })
+        }
+    }, [userInfo])
+    
+    // For responsive web UI, detect window size.
+    window.onresize = function () {
+        
+        if (window.innerWidth >= 1400 && !screen) {
+            setScreen(true)
+        }
+        if (window.innerWidth < 1400 && screen) {
+            setScreen(false)
+        }
+        
+    }
+
+    useEffect(() => {
+        if (window.innerWidth >= 1400) {
+            setScreen(true)
+        }
+    }, [])
+
     return (
         <>
             <Header userInfo={userInfo} />
-            <div className="grid grid-cols-7 w-full">
+            <div className="grid grid-cols-7 w-full justify-items-center">
                 {userInfo.postDocId ?
                     (
-                    <div className="flex col-span-5 col-start-2 items-start mt-6">
+                    <div className="flex col-span-5 col-start-2 items-start mt-6 ">
+                        {/* Profile Image Div */}
                         <div className="flex w-1/3 items-start">
-                            <img className="w-full max-h-full max-w-full object-cover rounded-md" src="/images/7.jpg" alt="profile" />
+                            <img className="w-full max-h-full max-w-full object-cover rounded-md shadow-xl" src="/images/7.jpg" alt="profile" />
                         </div>
+                        
+                        {/* Username, User Intro comment, Nationality, Message Btn, 
+                        Setting Btn, Follow Btn, Followers, Photos Div */}
                         <div className="flex flex-col w-2/3 ml-5 justify-around h-full">
                             <div className="flex flex-col">
+
+                                {/* Username and Country flag */}
                                 <div className="flex items-center">
                                     <span className="font-noto font-bold text-2xl mr-2">{userInfo.username}</span>
                                     <ReactCountryFlag countryCode={location.country} svg />
                                 </div>
-                                <div className="font-noto flex text-gray-500 mb-2">
+                                
+                                {/* The Numbers of posts and The numbers of Followers */}
+                                <div className="font-noto flex text-gray-500 my-2">
                                     <div className="mr-3">
                                         <span className="text-xs mr-1">{userInfo.postDocId.length}</span>
                                         <span className="text-xs">Photos</span>
@@ -90,6 +109,8 @@ const Profile = () => {
                                         <span className="text-xs">Followers</span>
                                     </div>
                                 </div>
+
+                                {/* Message Btn, Follow Btn, Setting Btn */}
                                 <div className="w-full flex">
                                     <svg
                                         className="w-6 mr-5"
@@ -98,7 +119,7 @@ const Profile = () => {
                                     </svg>
 
                                     <svg
-                                    className="w-6"
+                                    className="w-6 mr-5"
                                     x="0px" y="0px"
                                     viewBox="0 0 13.066 13.066">
                                         <g>
@@ -109,28 +130,45 @@ const Profile = () => {
                                                 C6.751,12.524,6.653,12.558,6.555,12.558z"/>
                                         </g>
                                     </svg>
+                                        <svg
+                                            className="w-6"
+                                            viewBox="0 0 1024 1024">
+                                     <path d="M512.5 390.6c-29.9 0-57.9 11.6-79.1 32.8-21.1 21.2-32.8 49.2-32.8 79.1 0 29.9 11.7 57.9 32.8 79.1 21.2 21.1 49.2 32.8 79.1 32.8 29.9 0 57.9-11.7 79.1-32.8 21.1-21.2 32.8-49.2 32.8-79.1 0-29.9-11.7-57.9-32.8-79.1a110.96 110.96 0 0 0-79.1-32.8zm412.3 235.5l-65.4-55.9c3.1-19 4.7-38.4 4.7-57.7s-1.6-38.8-4.7-57.7l65.4-55.9a32.03 32.03 0 0 0 9.3-35.2l-.9-2.6a442.5 442.5 0 0 0-79.6-137.7l-1.8-2.1a32.12 32.12 0 0 0-35.1-9.5l-81.2 28.9c-30-24.6-63.4-44-99.6-57.5l-15.7-84.9a32.05 32.05 0 0 0-25.8-25.7l-2.7-.5c-52-9.4-106.8-9.4-158.8 0l-2.7.5a32.05 32.05 0 0 0-25.8 25.7l-15.8 85.3a353.44 353.44 0 0 0-98.9 57.3l-81.8-29.1a32 32 0 0 0-35.1 9.5l-1.8 2.1a445.93 445.93 0 0 0-79.6 137.7l-.9 2.6c-4.5 12.5-.8 26.5 9.3 35.2l66.2 56.5c-3.1 18.8-4.6 38-4.6 57 0 19.2 1.5 38.4 4.6 57l-66 56.5a32.03 32.03 0 0 0-9.3 35.2l.9 2.6c18.1 50.3 44.8 96.8 79.6 137.7l1.8 2.1a32.12 32.12 0 0 0 35.1 9.5l81.8-29.1c29.8 24.5 63 43.9 98.9 57.3l15.8 85.3a32.05 32.05 0 0 0 25.8 25.7l2.7.5a448.27 448.27 0 0 0 158.8 0l2.7-.5a32.05 32.05 0 0 0 25.8-25.7l15.7-84.9c36.2-13.6 69.6-32.9 99.6-57.5l81.2 28.9a32 32 0 0 0 35.1-9.5l1.8-2.1c34.8-41.1 61.5-87.4 79.6-137.7l.9-2.6c4.3-12.4.6-26.3-9.5-35zm-412.3 52.2c-97.1 0-175.8-78.7-175.8-175.8s78.7-175.8 175.8-175.8 175.8 78.7 175.8 175.8-78.7 175.8-175.8 175.8z"/>
+                                    </svg>
                                 </div>
                             </div>
+                            {/* Caption */}
                             <p className="font-noto text-sm text-gray-400">{userInfo.profileCaption}</p>
                         </div>
    
                     </div>
                     ) : null}
-                <hr
-                    className="col-span-3 col-start-3 opacity-50 my-12 "
-                    style={{
-                    color: "gray",
-                    backgroundColor: "gray",
-                    height: .5,
-                    borderColor: "gray",
-                    borderTop: 0,
-                    }} />
-                <div className="grid grid-cols-3 col-span-5 col-start-2 items-start mt-6">
-                    {posts.length > 0 ? (
-                        posts.map(({ postContentProps }: postContent) => (
-                            <Post postContentProps={postContentProps} />
+                
+                {/* Recent Auctions list */}
+                <div className="flex justify-center w-2/3 col-span-3 col-start-3 py-12 border-b-2">
+                    <span className="text-4xl font-noto">Recent Auctions</span>
+                </div>
+
+                {/* Posts list */}
+                <div className="flex justify-center w-2/3 col-span-3 col-start-3 py-12 border-b-2">
+                    <span className="text-4xl font-noto">Posts</span>
+                </div>
+                <div className="grid grid-cols-3 gap-3 col-span-5 col-start-2 items-start mt-6">
+                    {imageInfo.length > 0 ? (
+                        imageInfo.map((data: firstImageInfo) => (
+                            <motion.div
+                                style={{backgroundColor : data.color}}
+                                whileHover={{scale : 1.2}}
+                                initial={{opacity : 0, height:0}}
+                                animate={{ opacity: 1, height: screen ? 500 : 400}}
+                                exit={{ opacity: 0, height:0 }}
+                                className="w-full h-full flex items-center justify-center">
+                                    <motion.img className="max-h-full max-w-full" src={data.src} alt="sss" />
+                            </motion.div>
                         ))
-                    ) : null}
+                    ): (
+                        null 
+                        )}
                 </div>
             </div>
         </>
