@@ -232,10 +232,9 @@ export async function getDocFirstImage(postDocIdArr) {
     return;
   }
   return await Promise.all(
-    postDocIdArr.map(async (postDocId) =>
-      (
+    postDocIdArr.map(
+      async (postDocId) =>
         await firebase.firestore().collection("posts").doc(postDocId).get()
-      ).data()
     )
   );
 }
@@ -280,4 +279,10 @@ export const getUserByEmailEncrypted = async (emailEncrypted) => {
     .get();
 
   return result.docs.map((item) => ({ ...item.data() }))[0];
+};
+
+export const getPostByDocId = async (docId) => {
+  return (
+    await firebase.firestore().collection("posts").doc(docId).get()
+  ).data();
 };

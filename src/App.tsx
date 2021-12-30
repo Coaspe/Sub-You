@@ -53,6 +53,7 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/login"
               element={

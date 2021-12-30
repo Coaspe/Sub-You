@@ -7,6 +7,7 @@ import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import UserContext from "../../context/user";
 import { deletePost } from "../../services/firebase";
+import { motion } from "framer-motion";
  
 const PostHeader = ({postContentProps} : postContent) => {
   
@@ -31,7 +32,7 @@ const PostHeader = ({postContentProps} : postContent) => {
   }, [user])
   
   return (
-      <div className="flex items-center justify-between bg-white px-2 py-2 font-stix sm:h-12">
+      <motion.div layout className="flex items-center justify-between bg-white px-2 py-2 font-stix sm:h-12">
           <div className="flex items-center justify-center ml-2">
             <Avatar sx={{width : 35, height : 35}} className="mr-2" alt="user avatar" src={postContentProps.avatarImgSrc} />
             <span className="font-noto font-semibold text-sm">{postContentProps.username}</span>
@@ -71,7 +72,7 @@ const PostHeader = ({postContentProps} : postContent) => {
               }}>Delete</MenuItem>) : null}
           </Menu>
           </div>
-      </div>
+      </motion.div>
   )
 }
 

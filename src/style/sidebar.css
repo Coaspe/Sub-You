@@ -1,0 +1,19 @@
+ol,
+li {
+  list-style: none;
+  user-select: none;
+}
+
+ol {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translateZ(0);
+}
+
+.underline {
+  width: 4px;
+  height: 100%;
+  border-radius: 4px;
+  position: absolute;
+}

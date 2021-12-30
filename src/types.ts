@@ -159,6 +159,7 @@ export type postContent2 = {
         userLikedPhoto: boolean
         username: string
         averageColor: Array<string>
+        avatarImgSrc: string
 }
 export type userInfoFromFirestore = {
     dateCreated: number

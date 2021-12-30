@@ -5,8 +5,12 @@ import { getPhotos } from "../services/firebase";
 import { firebase } from "../lib/firebase";
 import { postContent, userInfoFromFirestore } from "../types";
 import Postskeleton from "../components/Postskeleton";
+import {motion } from 'framer-motion'
 
-const Timeline = () => {
+interface timelineProps {
+  sideExpanded : boolean
+}
+const Timeline: React.FC<timelineProps> = ({ sideExpanded }) => {
   const [posts, setPosts] = useState<postContent[]>([]);
   const { user: contextUser } = useContext(UserContext)
   useEffect(() => {
@@ -40,7 +44,7 @@ const Timeline = () => {
   }, [contextUser])
   
   return (
-    <div className="flex flex-col items-center justify-center col-span-2 ml-20 h-full sm:col-span-3 sm:mx-5">
+    <motion.div layout className={`flex mt-7 flex-col items-center justify-center ${sideExpanded ? "col-span-2" : "col-span-3"} h-full sm:col-span-3 sm:mx-5`}>
       {posts.length > 0 ? (
         posts.map(({ postContentProps }: postContent) => (
           <Post postContentProps={postContentProps} />
@@ -51,7 +55,7 @@ const Timeline = () => {
             <Postskeleton />
           </>
         )}
-    </div>
+    </motion.div>
   )
 }
 export default memo(Timeline);

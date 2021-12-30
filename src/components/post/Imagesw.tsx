@@ -42,7 +42,7 @@ const Imagesw = ({ postContentProps }: postContent) => {
 
   useEffect(() => {
     const cacheImages = async (srcArray: string[]) => {
-      const promise = srcArray.map((src: string) => {
+      await Promise.all(srcArray.map((src: string) => {
         
         return new Promise(function (resolve, reject) {
           const img = new Image();
@@ -51,9 +51,7 @@ const Imagesw = ({ postContentProps }: postContent) => {
           img.onload = () => resolve(src);
           img.onerror = () => reject();
         })
-      })
-
-      await Promise.all(promise).then(() => {
+      })).then(() => {
         setLoad(true)
       })
     }
@@ -63,12 +61,15 @@ const Imagesw = ({ postContentProps }: postContent) => {
   }, [postContentProps.imageSrc]);
   
   return (
-    <div className="flex flex-col items-center">
+    <motion.div layout className="flex flex-col items-center border-t-2 border-b-2 border-main border-opacity-30">
         <motion.div
+          layout
           animate={{ backgroundColor: postContentProps.averageColor[page-1] }}
           className="flex flex-col items-center justify-center w-full h-bgpost sm:h-smpost">
-        {load ? <AnimatePresence custom={direction} exitBeforeEnter>
+        {load ?
+          <AnimatePresence custom={direction} exitBeforeEnter>
           <motion.img
+          layout
             whileTap="tap"
             key={page}
             custom={direction}
@@ -99,7 +100,7 @@ const Imagesw = ({ postContentProps }: postContent) => {
         </AnimatePresence> : null}
         </motion.div>
       <Pagination className="text-white" count={postContentProps.imageSrc.length} page={page} onChange={handlePageChange} />
-    </div>
+    </motion.div>
     )
 }
 

@@ -7,6 +7,7 @@ const Post = ({ postContentProps } : postContent) => {
     
     return (
         <motion.div
+            layout
             initial={{ opacity: 0 }}
             animate={{ opacity:1 }}
             className="mb-10 flex flex-col justify-center w-full max-w-md border-2 border-main border-opacity-30 bg-white sm:col-span-3 ">

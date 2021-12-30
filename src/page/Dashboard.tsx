@@ -7,7 +7,7 @@ import RestoreIcon from '@mui/icons-material/Restore';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import {useContext, useEffect, useState} from 'react'
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, AnimateSharedLayout } from "framer-motion";
 import UserContext from "../context/user";
 import { getUserByUserId } from "../services/firebase";
 import { getUserType } from "../types";
@@ -35,7 +35,7 @@ const Dashboard = () => {
     const [direction, setDirection] = useState(1);
     const { user: contextUser } = useContext(UserContext);
     const [userInfo, setUserInfo] = useState<getUserType>({} as getUserType)
-
+    const [sideExpanded, setSideExpanded] = useState(true)
     useEffect(() => {
         const dashboardInit = async () => {
             await getUserByUserId(contextUser.uid).then((res: any) => {
@@ -43,14 +43,14 @@ const Dashboard = () => {
             })
         }
         dashboardInit()
-    }, [])
+    }, [contextUser.uid])
 
     return (
         <div className="w-full h-full">
             <Header userInfo={userInfo}/>
             <div className="grid grid-cols-3 gap-4 justify-between mx-auto max-w-screen-lg">
-                <Timeline />
-                <Sidebar />
+                    <Sidebar userInfo={userInfo} setSideExpanded={setSideExpanded} sideExpanded={sideExpanded}/>
+                    <Timeline sideExpanded={sideExpanded} />
             </div>
             <AnimatePresence initial={false}>
                 {direction > 0 ?
