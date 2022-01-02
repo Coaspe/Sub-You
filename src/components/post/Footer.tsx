@@ -1,7 +1,12 @@
 import { postContent } from "../../types"
-const Footer = ({ postContentProps }: postContent) => {
+
+interface footerProps{
+    postContentProps : postContent
+}
+
+const Footer : React.FC<footerProps> = ({ postContentProps }) => {
     return (
-        <div>
+        <div className="flex flex-col">
             <div className="flex justify-between">
                 <div>
                     Emo
@@ -12,7 +17,7 @@ const Footer = ({ postContentProps }: postContent) => {
             </div>
             
             <div>
-                <span>{postContentProps.comments}</span>
+                <span>{postContentProps.caption}</span>
             </div>
         </div>
     )

@@ -8,8 +8,21 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import UserContext from "../../context/user";
 import { deletePost } from "../../services/firebase";
 import { motion } from "framer-motion";
- 
-const PostHeader = ({postContentProps} : postContent) => {
+interface postHeaderProps {
+  postContentProps: postContent
+  setPostSetChanged : React.Dispatch<React.SetStateAction<(string | boolean)[]>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setAlert: React.Dispatch<React.SetStateAction<[boolean, string, string]>>
+  postVisible: (number | boolean)[]
+  setPostsVisible: React.Dispatch<React.SetStateAction<(number | boolean)[][]>>
+ }
+const PostHeader: React.FC<postHeaderProps> = (
+  { postContentProps,
+    setPostSetChanged,
+    setIsLoading,
+    setAlert,
+    postVisible,
+    setPostsVisible}) => {
   
   const [whetherMyPost, setWhetherMyPost] = useState(false);
   const ITEM_HEIGHT = 48;
@@ -29,7 +42,7 @@ const PostHeader = ({postContentProps} : postContent) => {
     if (postContentProps.userId === user.uid) {
       setWhetherMyPost(true)
     }
-  }, [user])
+  }, [postContentProps.userId, user.uid])
   
   return (
       <motion.div layout className="flex items-center justify-between bg-white px-2 py-2 font-stix sm:h-12">
@@ -66,8 +79,21 @@ const PostHeader = ({postContentProps} : postContent) => {
               <MenuItem onClick={handleClose}>Purchase</MenuItem>
               <MenuItem onClick={handleClose}>Auction</MenuItem>
               <MenuItem onClick={handleClose}>Report</MenuItem>
+              
               {whetherMyPost ? (<MenuItem onClick={() => {
-                deletePost(postContentProps.docId, user.email, postContentProps.postId)
+            deletePost(
+              postContentProps.docId,
+              user.email,
+              postContentProps.postId,
+              setPostSetChanged,
+              setIsLoading,
+              setAlert
+            )
+            setPostsVisible((origin) => {
+              let tmp = origin
+              tmp[postVisible[0] as number] = [postVisible[0] as number, false]
+              return tmp
+            })
                 handleClose()
               }}>Delete</MenuItem>) : null}
           </Menu>

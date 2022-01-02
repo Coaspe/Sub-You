@@ -9,7 +9,7 @@ import { Fragment } from 'react';
 const Postskeleton = () => {
     return (
         <>
-        <Card sx={{ width: 444, m: 2 }}>
+        <Card sx={{ width: 444, m: 2, height: 770}}>
           <CardHeader
             avatar={<Skeleton animation="wave" variant="circular" width={35} height={35} />}
             action={(<IconButton aria-label="settings"><MoreVertIcon /></IconButton>)}

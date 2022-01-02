@@ -129,7 +129,6 @@ export type getUserType2 = {
 }
 
 export type postContent = {
-    postContentProps: {
         caption: string
         category: string
         comments: Array<string>
@@ -143,7 +142,6 @@ export type postContent = {
         username: string
         averageColor: Array<string>
         avatarImgSrc: string
-    }
 }
 
 export type postContent2 = {

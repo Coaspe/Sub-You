@@ -28,8 +28,10 @@ const swipeConfidenceThreshold = 10000;
 const swipePower = (offset: number, velocity: number) => {
   return Math.abs(offset) * velocity;
 };
-
-const Imagesw = ({ postContentProps }: postContent) => {
+interface imageswProps {
+  postContentProps : postContent
+}
+const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
     
   const [direction, setDirection] = useState(0);
   const [page, setPage] = useState(1);

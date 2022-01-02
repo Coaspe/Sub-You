@@ -11,12 +11,24 @@ import { uploadImage } from '../services/firebase';
 import Compressor from "compressorjs";
 
 interface newPostModalProps { 
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     open: boolean;
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    
     setSelected: React.Dispatch<React.SetStateAction<number>>;
+    setIsLoading :React.Dispatch<React.SetStateAction<boolean>>;
+    setPostSetChanged: React.Dispatch<React.SetStateAction<(string | boolean)[]>>
+    setAlert: React.Dispatch<React.SetStateAction<[boolean, string, string]>>
 }
 
-const Newpostmodal: React.FC<newPostModalProps> = ({ setOpen, open, setSelected }) => {
+const Newpostmodal: React.FC<newPostModalProps> = (
+    {
+        setOpen,
+        open,
+        setSelected,
+        setIsLoading,
+        setPostSetChanged,
+        setAlert
+    }) => {
     
     const { user } = useContext(UserContext);
     const [comment, setComment] = useState("");
@@ -81,24 +93,25 @@ const Newpostmodal: React.FC<newPostModalProps> = ({ setOpen, open, setSelected 
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    height: 1000,
     bgcolor: 'background.paper',
     border: '1px solid #000',
     boxShadow: 24,
     p: 4,
     };
+
     useEffect(() => {
         return () => {
             setSelected(0)
         }
-    },[])
+    }, [])
+
     return (
         <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-                className="sm:hidden"
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+            className="sm:hidden"
             >
                 <Box sx={style} className="flex flex-col items-center justify-between">
                     <Typography id="modal-modal-title" variant="h6" component="h2">
@@ -107,7 +120,7 @@ const Newpostmodal: React.FC<newPostModalProps> = ({ setOpen, open, setSelected 
                     {previewURL[0] !== "/images/logo.png" ? 
                         (
                             <div className="flex flex-col items-center">
-                                <div style={{ width: 650, height: 650 }} className="flex flex-col justify-center items-center">
+                                <div style={{ width: 500, height: 500 }} className="flex flex-col justify-center items-center">
                                     <img
                                         className='max-h-full max-w-full'
                                         src={previewURL[page-1]}
@@ -119,15 +132,19 @@ const Newpostmodal: React.FC<newPostModalProps> = ({ setOpen, open, setSelected 
                             )          
                         : 
                         (
-                    <div className="flex flex-col justify-between items-center h-5/6">
+                    <div 
+                        className="flex flex-col justify-between items-center h-5/6"
+                        style={{ width: 500, height: 500 }}
+                        >
+                        
                         <div></div>
                         <img
+                            className='max-w-full max-h-full'
                             src="./images/logo.png"
                             alt="asef"
                         />
                         <div></div>
                     </div>)}
-                    <br />
                     <label
                         className="font-noto pt-1 pb-1 pl-3 pr-3 mr-2 mt-2 w-1/6 text-center bg-main rounded-md cursor-pointer"
                         htmlFor="input-file"
@@ -154,7 +171,15 @@ const Newpostmodal: React.FC<newPostModalProps> = ({ setOpen, open, setSelected 
                     />
                     <CheckCircleTwoToneIcon
                         onClick={() => {
-                            uploadImage(comment, file, user, "SNS")
+                        uploadImage(
+                            comment,
+                            file,
+                            user,
+                            "SNS",
+                            setPostSetChanged,
+                            setIsLoading,
+                            setAlert
+                        )
                             handleClose()
                         }}
                         className={`${previewURL[0] === "/images/logo.png" ? "hidden" : "visible"} cursor-pointer`}

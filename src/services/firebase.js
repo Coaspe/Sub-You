@@ -88,7 +88,17 @@ export const getUserByEmail = async (email) => {
   return result.docs.map((item) => ({ ...item.data() }))[0];
 };
 
-export async function uploadImage(caption, ImageUrl, userInfo, category) {
+export async function uploadImage(
+  caption,
+  ImageUrl,
+  userInfo,
+  category,
+  setPostSetChanged,
+  setIsLoading,
+  setAlert
+) {
+  setIsLoading(true);
+
   const postId = ImageUrl.map((image) => image.name);
   let aaa = [];
   let averageColor = [];
@@ -135,9 +145,26 @@ export async function uploadImage(caption, ImageUrl, userInfo, category) {
                 .doc(userInfo.email)
                 .update({
                   postDocId: FieldValue.arrayUnion(res.id),
+                })
+                .then(() => {
+                  setAlert([true, "Upload", "success"]);
+                  setTimeout(() => {
+                    setAlert([false, "", ""]);
+                  }, 3000);
+                  setIsLoading(false);
+                  setPostSetChanged((ch) => {
+                    return ["upload", !ch[0]];
+                  });
+                })
+                .catch((error) => {
+                  setAlert([true, "Upload", "error"]);
+                  setTimeout(() => {
+                    setAlert([false, "", ""]);
+                  }, 3000);
+                  console.log(error);
+                  setIsLoading(false);
                 });
-            })
-            .then(() => window.location.reload());
+            });
         }
       });
   });
@@ -196,7 +223,16 @@ export async function getPhotos(userId, following) {
   return photosWithUserDetails.sort((a, b) => b.dateCreated - a.dateCreated);
 }
 
-export async function deletePost(docId, userEmail, storageImageNameArr) {
+export async function deletePost(
+  docId,
+  userEmail,
+  storageImageNameArr,
+  setPostSetChanged,
+  setIsLoading,
+  setAlert
+) {
+  setIsLoading(true);
+
   await firebase.firestore().collection("posts").doc(docId).delete();
   await firebase
     .firestore()
@@ -206,18 +242,31 @@ export async function deletePost(docId, userEmail, storageImageNameArr) {
       postDocId: FieldValue.arrayRemove(docId),
     });
 
-  storageImageNameArr.map((imageName) => {
-    let desertRef = storageRef.child(`${userEmail}/${imageName}`);
-
-    desertRef
-      .delete()
-      .then(function () {
-        window.location.reload();
-      })
-      .catch(function (error) {
-        window.location.reload();
+  await Promise.all(
+    storageImageNameArr.map((imageName) => {
+      let desertRef = storageRef.child(`${userEmail}/${imageName}`);
+      return desertRef.delete();
+    })
+  )
+    .then(function () {
+      setPostSetChanged((ch) => {
+        return ["delete", !ch[0]];
       });
-  });
+      setAlert([true, "Delete", "success"]);
+      setTimeout(() => {
+        setAlert([false, "", ""]);
+      }, 3000);
+      setIsLoading(false);
+    })
+    .catch(function (error) {
+      console.log(error);
+      setIsLoading(false);
+      setAlert([true, "Delete", "error"]);
+      setTimeout(() => {
+        setAlert([false, "", ""]);
+      }, 3000);
+      return;
+    });
 }
 
 export async function getAllUser() {
