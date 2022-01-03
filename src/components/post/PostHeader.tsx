@@ -90,8 +90,10 @@ const PostHeader: React.FC<postHeaderProps> = (
               setAlert
             )
             setPostsVisible((origin) => {
+              
               let tmp = origin
               tmp[postVisible[0] as number] = [postVisible[0] as number, false]
+              console.log(tmp);
               return tmp
             })
                 handleClose()

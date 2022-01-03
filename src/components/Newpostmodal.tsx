@@ -14,7 +14,7 @@ interface newPostModalProps {
     open: boolean;
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     
-    setSelected: React.Dispatch<React.SetStateAction<number>>;
+    setSelectedPage: React.Dispatch<React.SetStateAction<string>>;
     setIsLoading :React.Dispatch<React.SetStateAction<boolean>>;
     setPostSetChanged: React.Dispatch<React.SetStateAction<(string | boolean)[]>>
     setAlert: React.Dispatch<React.SetStateAction<[boolean, string, string]>>
@@ -24,7 +24,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     {
         setOpen,
         open,
-        setSelected,
+        setSelectedPage,
         setIsLoading,
         setPostSetChanged,
         setAlert
@@ -101,7 +101,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
 
     useEffect(() => {
         return () => {
-            setSelected(0)
+            setSelectedPage("Timeline")
         }
     }, [])
 

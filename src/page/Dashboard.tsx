@@ -1,17 +1,20 @@
-import Header from "../components/Header";
-import Timeline from "./Timeline";
-import Sidebar from "./Sidebar";
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import RestoreIcon from '@mui/icons-material/Restore';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import Alert from '@mui/material/Alert';
+
+import Header from "../components/Header";
+import Timeline from "./Timeline";
+import Sidebar from "./Sidebar";
 import {useContext, useEffect, useState} from 'react'
 import { motion, AnimatePresence } from "framer-motion";
 import UserContext from "../context/user";
-import { getUserByUserId } from "../services/firebase";
-import { getUserType } from "../types";
-import Alert from '@mui/material/Alert';
+import { getUserByUserId, getPhotos } from "../services/firebase";
+import { getUserType, postContent, userInfoFromFirestore } from "../types";
+import ProfileSetting from '../components/Profile/ProfileSetting';
+import firebase from 'firebase/compat';
 
 const variants = {
   enter: {
@@ -31,6 +34,7 @@ const variants = {
 };
 
 const Dashboard = () => {
+    
     const [alert, setAlert] = useState<[boolean, string, string]>([false, "", ""])
     const [value, setValue] = useState(0);
     const [direction, setDirection] = useState(1);
@@ -39,7 +43,10 @@ const Dashboard = () => {
     const [sideExpanded, setSideExpanded] = useState(true)
     const [isLoading, setIsLoading] = useState(false)
     const [postSetChanged, setPostSetChanged] = useState<(string | boolean)[]>(["", false]);
-
+    const [selectedPage, setSelectedPage] = useState("Timeline")
+    const [posts, setPosts] = useState<postContent[]>([]);
+    const [postsVisible, setPostsVisible] = useState<(number | boolean)[][]>([])
+  
     useEffect(() => {
         const dashboardInit = async () => {
             await getUserByUserId(contextUser.uid).then((res: any) => {
@@ -47,7 +54,40 @@ const Dashboard = () => {
             })
         }
         dashboardInit()
-    }, [contextUser.uid, postSetChanged])
+    }, [contextUser.uid])
+
+    useEffect(() => {
+        async function getTimelinePhotos() {
+            const result = await firebase
+                .firestore()
+                .collection("users")
+                .where("uid", "==", contextUser.uid)
+                .get();
+            
+            const user = result.docs.map((item) => ({
+                ...item.data(),
+                docId: item.id,
+            }));
+            
+            const userTemp = user as userInfoFromFirestore[]
+            const { following } = userTemp[0]
+            
+            return getPhotos(contextUser.uid, following)
+        }
+
+        if (postSetChanged[0] !== "delete") {
+            setPosts([])
+            getTimelinePhotos().then((res: any) => {
+                setPosts(res)
+                const tmp = []
+                for (let i = 0; i < res.length; i++) {
+                    tmp.push([i, true])
+                }
+              setPostsVisible(tmp)
+            })
+        }
+        
+    }, [contextUser, postSetChanged])
 
     const alertVariants = {
         initial: {
@@ -87,26 +127,34 @@ const Dashboard = () => {
                 }
             </AnimatePresence>
             <Header userInfo={userInfo}/>
-            <div className="grid grid-cols-7 justify-between mx-auto max-w-screen-lg">
+            <motion.div className="grid grid-cols-7 justify-between mx-auto max-w-screen-lg">
                 <Sidebar
                     userInfo={userInfo}
+                    sideExpanded={sideExpanded}
                     setSideExpanded={setSideExpanded}
-                    sideExpanded={sideExpanded}
                     isLoading={isLoading}
                     setIsLoading={setIsLoading}
-                    postSetChanged={postSetChanged}
                     setPostSetChanged={setPostSetChanged}
                     setAlert={setAlert}
+                    selectedPage={selectedPage}
+                    setSelectedPage={setSelectedPage}
                 />
-                <Timeline
-                    sideExpanded={sideExpanded}
-                    isLoading={isLoading}
-                    setIsLoading={setIsLoading}
-                    postSetChanged={postSetChanged}
-                    setPostSetChanged={setPostSetChanged}
-                    setAlert={setAlert}
-                />
-            </div>
+                {(selectedPage === "Timeline" || selectedPage === "New Post") &&
+                    <Timeline
+                        sideExpanded={sideExpanded}
+                        setIsLoading={setIsLoading}
+                        posts={posts}
+                        postsVisible={postsVisible}
+                        setPostsVisible={setPostsVisible}
+                        postSetChanged={postSetChanged}
+                        setPostSetChanged={setPostSetChanged}
+                        setAlert={setAlert}
+                    />
+                }
+                {selectedPage === "Setting" &&
+                    <ProfileSetting sideExpanded={sideExpanded}  />
+                }
+            </motion.div>
             <AnimatePresence initial={false}>
                 {direction > 0 ?
                     <motion.div

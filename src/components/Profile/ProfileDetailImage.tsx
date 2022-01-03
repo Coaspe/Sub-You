@@ -7,15 +7,16 @@ import { postContent } from "../../types";
 interface profileDetailImageProps {
     setDocId : React.Dispatch<React.SetStateAction<string>>
     docId: string
-    ff: string
+    firstImageSrc: string
 }
-const ProfileDetailImage: React.FC<profileDetailImageProps> = ({ docId, setDocId, ff }) => {
-    const [imageSrcArr, setImageSrcArr] = useState<string[]>([ff])
+const ProfileDetailImage: React.FC<profileDetailImageProps> = ({ docId, setDocId, firstImageSrc }) => {
+
     const [postInfo, setPostInfo] = useState<DocumentData | postContent | undefined>(undefined)
     const [windowInfo, setWindowInfo] = useState(0)
     const [postImagePageIndex, setPostImagePageIndex] = useState(0)
-    const [load, setLoad] = useState(false)
+    const [load, setLoad] = useState(true)
 
+    // To improve images loading speed, In advance cache all photoes of post
     const cacheImages = async (srcArray: string[]) => {
         const promise = srcArray.map((src: string) => {
             
@@ -34,6 +35,7 @@ const ProfileDetailImage: React.FC<profileDetailImageProps> = ({ docId, setDocId
     }
 
     useEffect(() => {
+        // Check window ratio.
         setWindowInfo(window.innerWidth / window.innerHeight)
         return () => {
             setDocId("")
@@ -41,12 +43,12 @@ const ProfileDetailImage: React.FC<profileDetailImageProps> = ({ docId, setDocId
     }, [])
 
     useEffect(() => {
+        // Request Post's information related to the thumbnail photo. 
         getPostByDocId(docId).then((res: postContent | DocumentData | undefined) => {
             setPostInfo(res)
-            setImageSrcArr((origin) => {
-                return origin.concat(res?.imageSrc.slice(1))
-            })
-            cacheImages(imageSrcArr)
+            if(res?.imageSrc.length > 1){
+                cacheImages(res?.imageSrc)
+            }
         })
     }, [docId])
 
@@ -54,11 +56,19 @@ const ProfileDetailImage: React.FC<profileDetailImageProps> = ({ docId, setDocId
         setWindowInfo(window.innerWidth / window.innerHeight);
     }
 
-    useEffect(() => {
-        console.log(load);
-    },[load])
-
+    const svgVariants = {
+        initial: {
+            opacity:0
+        },
+        animate: {
+            opacity:1
+        },
+        exit: {
+            opacity:0
+        }
+    }
     return (
+        // To reduce bundle size, use Lazy Motion
         <LazyMotion features={domAnimation}>
             <AnimatePresence>
                     <m.div
@@ -76,48 +86,57 @@ const ProfileDetailImage: React.FC<profileDetailImageProps> = ({ docId, setDocId
                                 onClick={(event)=> {event.stopPropagation()}}
                                 className={`${windowInfo <= 0.9 ? "w-3/5" : "w-1/3"} relative z-50`}
                                 >
-                                {postInfo !== undefined && load &&
+                                {load && 
                                     <>
-                                        <m.svg x="0px" y="0px"
-                                            fill="gray"
-                                            onClick={()=>setPostImagePageIndex((origin) => { return origin + 1 })}
-                                            className="w-7 absolute right-2 top-1/2 cursor-pointer z-50"
-                                            viewBox="0 0 490.4 490.4" >
-                                            <g>
-                                                <g>
-                                                    <path d="M245.2,490.4c135.2,0,245.2-110,245.2-245.2S380.4,0,245.2,0S0,110,0,245.2S110,490.4,245.2,490.4z M245.2,24.5
-                                                        c121.7,0,220.7,99,220.7,220.7s-99,220.7-220.7,220.7s-220.7-99-220.7-220.7S123.5,24.5,245.2,24.5z"/>
-                                                    <path d="M138.7,257.5h183.4l-48,48c-4.8,4.8-4.8,12.5,0,17.3c2.4,2.4,5.5,3.6,8.7,3.6s6.3-1.2,8.7-3.6l68.9-68.9
-                                                        c4.8-4.8,4.8-12.5,0-17.3l-68.9-68.9c-4.8-4.8-12.5-4.8-17.3,0s-4.8,12.5,0,17.3l48,48H138.7c-6.8,0-12.3,5.5-12.3,12.3
-                                                        C126.4,252.1,131.9,257.5,138.7,257.5z"/>
-                                                </g>
-                                            </g>
-                                        </m.svg>
                                         <m.svg
-                                            x="0px" y="0px"
-                                            fill="gray"
-                                            onClick={()=>setPostImagePageIndex((origin) => { return origin - 1 })}
-                                            className="w-7 absolute left-2 top-1/2 rotate-180 cursor-pointer"
-                                            viewBox="0 0 490.4 490.4" >
-                                            <g>
-                                                <g>
-                                                    <path d="M245.2,490.4c135.2,0,245.2-110,245.2-245.2S380.4,0,245.2,0S0,110,0,245.2S110,490.4,245.2,490.4z M245.2,24.5
-                                                        c121.7,0,220.7,99,220.7,220.7s-99,220.7-220.7,220.7s-220.7-99-220.7-220.7S123.5,24.5,245.2,24.5z"/>
-                                                    <path d="M138.7,257.5h183.4l-48,48c-4.8,4.8-4.8,12.5,0,17.3c2.4,2.4,5.5,3.6,8.7,3.6s6.3-1.2,8.7-3.6l68.9-68.9
-                                                        c4.8-4.8,4.8-12.5,0-17.3l-68.9-68.9c-4.8-4.8-12.5-4.8-17.3,0s-4.8,12.5,0,17.3l48,48H138.7c-6.8,0-12.3,5.5-12.3,12.3
-                                                        C126.4,252.1,131.9,257.5,138.7,257.5z"/>
-                                                </g>
-                                            </g>
+                                        variants={svgVariants}
+                                        initial="initial"
+                                        animate="animate"
+                                        exit="exit"
+                                        x="0px" y="0px" 
+                                        fill="#e2e1e1"
+                                        onClick={()=>setPostImagePageIndex((origin) => { return origin + 1 })}
+                                        viewBox="0 0 330 330"
+                                        className={`opacity-80 w-6 absolute right-2 top-1/2 cursor-pointer z-50 ${(postImagePageIndex >= postInfo?.imageSrc.length - 1 || postInfo?.imageSrc.length === 1) && "hidden"}`}
+                                        >
+                                            <path d="M165,0C74.019,0,0,74.019,0,165s74.019,165,165,165s165-74.019,165-165S255.981,0,165,0z M225.606,175.605
+                                                l-80,80.002C142.678,258.535,138.839,260,135,260s-7.678-1.464-10.606-4.394c-5.858-5.857-5.858-15.355,0-21.213l69.393-69.396
+                                                l-69.393-69.392c-5.858-5.857-5.858-15.355,0-21.213c5.857-5.858,15.355-5.858,21.213,0l80,79.998
+                                                c2.814,2.813,4.394,6.628,4.394,10.606C230,168.976,228.42,172.792,225.606,175.605z"/>
+                                        </m.svg>
+
+                                        <m.svg
+                                        variants={svgVariants}
+                                        initial="initial"
+                                        animate="animate"
+                                        exit="exit"
+                                        fill="#e2e1e1"
+                                        onClick={()=>setPostImagePageIndex((origin) => { return origin - 1 })}
+                                        className={`opacity-80 w-6 absolute left-2 top-1/2 cursor-pointer ${(postImagePageIndex <= 0 || postInfo?.imageSrc.length === 1 ) && "hidden"}`}
+                                        x="0px" y="0px"
+                                            viewBox="0 0 330 330" >
+                                            <path id="XMLID_6_" d="M165,0C74.019,0,0,74.019,0,165s74.019,165,165,165s165-74.019,165-165S255.981,0,165,0z M205.606,234.394
+                                                c5.858,5.857,5.858,15.355,0,21.213C202.678,258.535,198.839,260,195,260s-7.678-1.464-10.606-4.394l-80-79.998
+                                                c-2.813-2.813-4.394-6.628-4.394-10.606c0-3.978,1.58-7.794,4.394-10.607l80-80.002c5.857-5.858,15.355-5.858,21.213,0
+                                                c5.858,5.857,5.858,15.355,0,21.213l-69.393,69.396L205.606,234.394z"/>
                                         </m.svg>
                                     </>
                                 }
-                        
-                        <m.img
-                            className="max-h-full max-w-full"
-                            layoutId={`image-${docId}`}
-                            src={imageSrcArr[postImagePageIndex]}>
-                        </m.img>
-                        
+                        {/* To Solve unintended animation problem. */}
+                        {postImagePageIndex === 0
+                            ?
+                            <m.img
+                                className="max-h-full max-w-full"
+                                layoutId={`image-${docId}`}
+                                src={firstImageSrc}>
+                            </m.img>
+                            :
+                            <m.img
+                                className="max-h-full max-w-full"
+                                layoutId={`image-${docId}`}
+                                src={postInfo?.imageSrc[postImagePageIndex]}>
+                            </m.img>
+                        }
                         <span>sedfsdf</span>
                         </m.div>
                     </m.div>

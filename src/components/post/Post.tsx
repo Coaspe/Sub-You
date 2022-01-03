@@ -3,6 +3,7 @@ import Footer from "./Footer"
 import Imagesw from "./Imagesw"
 import PostHeader from "./PostHeader"
 import { AnimatePresence, LazyMotion, m, domAnimation } from "framer-motion"
+import { useEffect } from "react"
 
 interface postProps {
     postContentProps: postContent
@@ -12,12 +13,19 @@ interface postProps {
     postVisible: (number | boolean)[]
     setPostsVisible: React.Dispatch<React.SetStateAction<(number | boolean)[][]>>
 }
-const Post: React.FC<postProps> = ({ postContentProps, setPostSetChanged, setIsLoading, setAlert, postVisible, setPostsVisible }) => {
+const Post: React.FC<postProps> = (
+    {
+        postContentProps,
+        setPostSetChanged,
+        setIsLoading,
+        setAlert, 
+        postVisible, 
+        setPostsVisible }) => {
     
     return (
         <AnimatePresence>
             <LazyMotion features={domAnimation}>
-                {postVisible && postVisible[1] &&
+                {(postVisible && postVisible[1]) &&
                     <m.div
                         layout
                         initial={{ opacity: 0, }}

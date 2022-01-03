@@ -1,82 +1,79 @@
-import {  memo, useContext, useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import Post from "../components/post/Post";
-import UserContext from "../context/user";
-import { getPhotos } from "../services/firebase";
-import { firebase } from "../lib/firebase";
-import { postContent, userInfoFromFirestore } from "../types";
+import { postContent } from "../types";
 import Postskeleton from "../components/Postskeleton";
 import { motion } from 'framer-motion'
-import { BoxProps } from "@mui/material";
+
 
 interface timelineProps {
   sideExpanded: boolean
-  isLoading: boolean
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-  postSetChanged: (string | boolean)[]
+  postSetChanged:(string | boolean)[]
   setPostSetChanged: React.Dispatch<React.SetStateAction<(string | boolean)[]>>
   setAlert: React.Dispatch<React.SetStateAction<[boolean, string, string]>>
+  posts: postContent[]
+  postsVisible: (number | boolean)[][]
+  setPostsVisible: React.Dispatch<React.SetStateAction<(number | boolean)[][]>>
 }
 
-const Timeline: React.FC<timelineProps> = ({ sideExpanded, isLoading ,setIsLoading, postSetChanged, setPostSetChanged, setAlert }) => {
-  const [posts, setPosts] = useState<postContent[]>([]);
-  const { user: contextUser } = useContext(UserContext)
-  const [postsVisible, setPostsVisible] = useState<(number | boolean)[][]>([])
-
-  useEffect(() => {
-    async function getTimelinePhotos() {
-      const result = await firebase
-        .firestore()
-        .collection("users")
-        .where("uid", "==", contextUser.uid)
-        .get();
-    
-      const user = result.docs.map((item) => ({
-        ...item.data(),
-        docId: item.id,
-      }));
-    
-      const userTemp = user as userInfoFromFirestore[]
-      const { following } = userTemp[0]
-    
-      return getPhotos(contextUser.uid, following)
-    }
-
-    if (postSetChanged[0] !== "delete") {
-      setPosts([])
-      getTimelinePhotos().then((res: any) => {
-        setPosts(res)
-        const tmp = []
-        for (let i = 0; i < res.length; i++) {
-          tmp.push([i, true])
-        }
-        setPostsVisible(tmp)
-      })
-    }
-    
-  }, [contextUser, postSetChanged])
+const Timeline: React.FC<timelineProps> = (
+  {
+    sideExpanded,
+    setIsLoading,
+    postSetChanged,
+    setPostSetChanged,
+    setAlert,
+    posts,
+    postsVisible,
+    setPostsVisible,
+  }) => {
   
+    const [load, setLoad] = useState(false)
+
+    const cacheImages = async (srcArray: string[]) => {
+        const promise = srcArray.map((src: string) => {
+            
+            return new Promise(function (resolve, reject) {
+            const img = new Image();
+
+            img.src = src;
+            img.onload = () => resolve(src);
+            img.onerror = () => reject();
+            })
+        })
+
+        return await Promise.all(promise)
+    }  
+    
+    useEffect(() => {
+        if (posts.length > 0) {
+            Promise.all(posts.map((post) => (cacheImages(post.imageSrc)))).then((res) => {
+                setLoad(true)
+            })
+        }
+    }, [posts])
+
   return (
     <>
-      <motion.div layout className={`h-full flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-3 sm:mx-5`}>
-        {posts.length > 0 && postsVisible.length > 0 ? (
-          posts.map((data, index) => (
-            <Post
-              postContentProps={data}
-              setPostSetChanged={setPostSetChanged}
-              setIsLoading={setIsLoading}
-              setAlert={setAlert}
-              postVisible={postsVisible[index]}
-              setPostsVisible={setPostsVisible}
-            />
-            ))
+      <motion.div layout className={`${load ? "h-full": "h-screen" } flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-3 sm:mx-5`}>
+            {load ? (
+              posts.map((data, index) => (
+                <Post
+                  postContentProps={data}
+                  setPostSetChanged={setPostSetChanged}
+                  setIsLoading={setIsLoading}
+                  setAlert={setAlert}
+                  postVisible={postsVisible[index]}
+                  setPostsVisible={setPostsVisible}
+                />
+                ))
             ) : (
-              <>
-                <Postskeleton />
-                <Postskeleton />
-                <Postskeleton />
-              </>
-          )}
-        
+                  <>
+                    <Postskeleton />
+                    <Postskeleton />
+                    <Postskeleton />
+                  </>)
+           }
       </motion.div>
     </>
   )

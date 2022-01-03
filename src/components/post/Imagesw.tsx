@@ -1,6 +1,6 @@
 import { postContent } from "../../types"
 import Pagination from '@mui/material/Pagination';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
  
 
@@ -35,32 +35,12 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
     
   const [direction, setDirection] = useState(0);
   const [page, setPage] = useState(1);
-  const [load, setLoad] = useState(false);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     (value - page > 0) ? setDirection(1) : setDirection(-1)
     setPage(value)
   };
 
-  useEffect(() => {
-    const cacheImages = async (srcArray: string[]) => {
-      await Promise.all(srcArray.map((src: string) => {
-        
-        return new Promise(function (resolve, reject) {
-          const img = new Image();
-
-          img.src = src;
-          img.onload = () => resolve(src);
-          img.onerror = () => reject();
-        })
-      })).then(() => {
-        setLoad(true)
-      })
-    }
-
-    cacheImages(postContentProps.imageSrc)
-
-  }, [postContentProps.imageSrc]);
   
   return (
     <motion.div layout className="flex flex-col items-center border-t-2 border-b-2 border-main border-opacity-30">
@@ -68,7 +48,6 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
           layout
           animate={{ backgroundColor: postContentProps.averageColor[page-1] }}
           className="flex flex-col items-center justify-center w-full h-bgpost sm:h-smpost">
-        {load ?
           <AnimatePresence custom={direction} exitBeforeEnter>
           <motion.img
           layout
@@ -99,7 +78,7 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
             src={postContentProps.imageSrc[page - 1]}
             alt={`Page : ${page - 1}`}
           />
-        </AnimatePresence> : null}
+        </AnimatePresence>
         </motion.div>
       <Pagination className="text-white" count={postContentProps.imageSrc.length} page={page} onChange={handlePageChange} />
     </motion.div>
