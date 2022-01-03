@@ -10,7 +10,7 @@ import { ReactCountryFlag } from "react-country-flag"
 import { signInWithFacebook, signInWithGoogle } from '../helpers/auth-OAuth2';
 import { styled } from '@mui/system';
 import ColoredLine from '../components/ColoredLine';
-import './Login.css'
+import '../style/Login.css'
 import { getUserType } from "../types";
 import { getUserByEmail } from "../services/firebase";
 

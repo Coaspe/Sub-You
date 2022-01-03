@@ -36,6 +36,7 @@ const Sidebar: React.FC<sidebarProps> = (
 
     const [modalOpen, setModalOpen] = useState(false)
     const [selected, setSelected] = useState(0);
+    const [windowInfo, setWindowInfo] = useState(0)
     const [contextUserInfo, setContextUserInfo] = useState<getUserType>({} as getUserType)
     const navigate = useNavigate()
     
@@ -51,16 +52,17 @@ const Sidebar: React.FC<sidebarProps> = (
                 x: 0, opacity: 0,
             },
             animate: {
-                x: sideExpanded ? 0 : "-90%", opacity: 1,
+                x: sideExpanded ? 0 : windowInfo > 0.9 ? "-90%" : "-85%", opacity: 1,
                 transition: {
                     duration : 0.3
                 }
             },
     }
-    
+
     useEffect(() => {
         setContextUserInfo(userInfo)
     }, [userInfo])
+
     useEffect(() => {
         const cacheImages = async () => {
         await new Promise(function (resolve, reject) {
@@ -73,9 +75,18 @@ const Sidebar: React.FC<sidebarProps> = (
         }
         cacheImages()
     }, [])
+
     useEffect(() => {
         console.log(isLoading);
     }, [isLoading])
+
+    window.onresize = function () {
+        setWindowInfo(window.innerWidth / window.innerHeight);
+    }
+
+    useEffect(() => {
+        setWindowInfo(window.innerWidth / window.innerHeight)
+    }, [])
 
     const bounceTransition = {
         x: {
@@ -89,17 +100,16 @@ const Sidebar: React.FC<sidebarProps> = (
       <>
         <AnimatePresence initial={false}>
             <motion.div 
-            key="main div"
-            variants={divVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            className="h-full font-noto items-center col-span-2 bg-main bg-opacity-10 flex flex-col sm:hidden z-10 ">
+                    key="main div"
+                    variants={divVariants}
+                    initial="initial"
+                    animate="animate"
+                    className={`col-span-2 h-full font-noto items-center bg-main bg-opacity-10 flex flex-col sm:hidden z-10`}>
             {contextUserInfo.postDocId ? (
                     <motion.div
                     initial={{opacity:0}}
                     animate={{opacity:1}}
-                    className={`flex flex-col items-center left-2 h-screen ${!sideExpanded && "bg-main bg-opacity-10 absolute"}`}>
+                    className={`flex flex-col items-center left-2 h-full`}>
                         <div className="w-full relative">
                             <motion.svg 
                             animate={{

@@ -57,7 +57,7 @@ const Timeline: React.FC<timelineProps> = ({ sideExpanded, isLoading ,setIsLoadi
   
   return (
     <>
-      <motion.div layout className={`h-full flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-3" : "col-start-2"} sm:col-span-3 sm:mx-5 bg-main bg-opacity-10`}>
+      <motion.div layout className={`h-full flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-3 sm:mx-5`}>
         {posts.length > 0 && postsVisible.length > 0 ? (
           posts.map((data, index) => (
             <Post

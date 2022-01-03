@@ -65,7 +65,7 @@ const Dashboard = () => {
     }
 
     return (
-        <div className="w-full h-full relative">
+        <div className="w-full h-full relative bg-opacity-10 bg-main">
             <AnimatePresence>
                 {alert[1] && alert[0] &&
                     <motion.div
@@ -87,7 +87,7 @@ const Dashboard = () => {
                 }
             </AnimatePresence>
             <Header userInfo={userInfo}/>
-            <div className="grid grid-cols-5 justify-between mx-auto max-w-screen-lg">
+            <div className="grid grid-cols-7 justify-between mx-auto max-w-screen-lg">
                 <Sidebar
                     userInfo={userInfo}
                     setSideExpanded={setSideExpanded}
@@ -118,8 +118,7 @@ const Dashboard = () => {
                     dragConstraints={{ top:0, bottom:50 }}
                     transition={{
                         y: { type: "spring", stiffness: 300, damping: 30 },
-                    }}
->
+                    }}>
                     <BottomNavigation
                         showLabels
                         value={value}
