@@ -38,14 +38,6 @@ const App = () => {
               }
               />
             <Route
-              path="/artist"
-              element={
-                <ProtectedRoute user={user}>
-                  <Artists />
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/p/:userEmailEncrypted"
               element={
                 <ProtectedRoute user={user}>

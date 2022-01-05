@@ -102,7 +102,7 @@ const Profile = () => {
                                 className="flex col-span-5 col-start-2 items-start mt-6 ">
                                 {/* Profile Image Div */}
                                 <div className="flex w-1/3 items-start">
-                                    <img className="w-full max-h-full max-w-full object-cover rounded-md shadow-xl" src="/images/7.jpg" alt="profile" />
+                                    <img className="w-full max-h-full max-w-full object-cover rounded-md shadow-xl" src="/images/applecircle.png" alt="profile" />
                                 </div>
                                 
                                 {/* Username, User Intro comment, Nationality, Message Btn, 

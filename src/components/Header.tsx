@@ -65,15 +65,6 @@ const Header : React.FC<headerProps> = ({ userInfo }) => {
                             In Auction
                         </span>
                     </BootstrapButton>
-                    <BootstrapButton
-                        onClick={() => {
-                            navigate("/artist")
-                        }}
-                    >
-                        <span className="font-stix font-bold">
-                            Artist
-                        </span>
-                    </BootstrapButton>
                 </div>
                 <div className="w-1/3 font-stix sm:h-7 sm:mr-3 sm:hidden">
                     <Paper

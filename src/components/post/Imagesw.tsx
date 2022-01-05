@@ -11,11 +11,17 @@ const variants = {
   center: {
     zIndex: 1,
     x: 0,
-    opacity: 1
+    opacity: 1,
+    transition: {
+      duration: 0.2
+    }
   },
   exit: {
       zIndex: 0,
-      opacity: 0
+      opacity: 0,
+      transition: {
+      duration: 0.2
+    }
   },
   tap: {
     scale: 1.3,
@@ -49,35 +55,35 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
           animate={{ backgroundColor: postContentProps.averageColor[page-1] }}
           className="flex flex-col items-center justify-center w-full h-bgpost sm:h-smpost">
           <AnimatePresence custom={direction} exitBeforeEnter>
-          <motion.img
-          layout
-            whileTap="tap"
-            key={page}
-            custom={direction}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
-            }}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.3}
-            onDragEnd={(e, { offset, velocity }) => {
-              const swipe = swipePower(offset.x, velocity.x);
+            <motion.img
+            layout
+              whileTap="tap"
+              key={page}
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+              }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.3}
+              onDragEnd={(e, { offset, velocity }) => {
+                const swipe = swipePower(offset.x, velocity.x);
 
-              if (swipe < -swipeConfidenceThreshold) {
-                page === postContentProps.imageSrc.length ? setPage(page) : setPage(page + 1)
-              } else if (swipe > swipeConfidenceThreshold) {
-                page === 1 ? setPage(page) : setPage(page - 1)
-              }
+                if (swipe < -swipeConfidenceThreshold) {
+                  page === postContentProps.imageSrc.length ? setPage(page) : setPage(page + 1)
+                } else if (swipe > swipeConfidenceThreshold) {
+                  page === 1 ? setPage(page) : setPage(page - 1)
+                }
 
-            }}
-            className="max-h-full max-w-full"
-            src={postContentProps.imageSrc[page - 1]}
-            alt={`Page : ${page - 1}`}
-          />
+              }}
+              className="max-h-full max-w-full"
+              src={postContentProps.imageSrc[page - 1]}
+              alt={`Page : ${page - 1}`}
+            />
         </AnimatePresence>
         </motion.div>
       <Pagination className="text-white" count={postContentProps.imageSrc.length} page={page} onChange={handlePageChange} />

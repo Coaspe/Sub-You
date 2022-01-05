@@ -15,6 +15,7 @@ import { getUserByUserId, getPhotos } from "../services/firebase";
 import { getUserType, postContent, userInfoFromFirestore } from "../types";
 import ProfileSetting from '../components/Profile/ProfileSetting';
 import firebase from 'firebase/compat';
+import Artists from '../page/Artists';
 
 const variants = {
   enter: {
@@ -153,6 +154,9 @@ const Dashboard = () => {
                 }
                 {selectedPage === "Setting" &&
                     <ProfileSetting sideExpanded={sideExpanded}  />
+                }
+                {selectedPage === "Explore" &&
+                    <Artists sideExpanded={sideExpanded} />
                 }
             </motion.div>
             <AnimatePresence initial={false}>

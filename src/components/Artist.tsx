@@ -27,6 +27,7 @@ const Artist = ({ user }: getUserPropType) => {
             scale: 1
         }
     }
+    
     const cacheImages = async (srcArray: string[]) => {
         const promise = srcArray.map((src: string) => {
             
@@ -50,19 +51,23 @@ const Artist = ({ user }: getUserPropType) => {
         if (firstSrc.length > 0) {
             return
         }
-
-        getUserByEmail(user.userEmail).then((res) => {
-            getDocFirstImage(res.postDocId).then((re: postContent2[] | undefined) => {
-                const x : Array<firstImageInfo> = (re as postContent2[]).map((data) => ({
-                    src : data.imageSrc[0],
-                    color : data.averageColor[0]
-                }))
-                setFirstSrc(x)
-                const y = x.map((data: firstImageInfo) => (data.src))
-                cacheImages(y)
-            })
+        if (expanded === true) {
+            getUserByEmail(user.userEmail).then((res) => {
+                if (res.postDocId.length === 0) {
+                    return;
+                }
+                getDocFirstImage(res.postDocId).then((re: postContent2[] | undefined) => {
+                    const x: Array<firstImageInfo> = (re as postContent2[]).map((data) => ({
+                        src: data.imageSrc[0],
+                        color: data.averageColor[0]
+                    }))
+                    setFirstSrc(x)
+                    const y = x.map((data: firstImageInfo) => (data.src))
+                    cacheImages(y)
+                })
             
-        })
+            })
+        }
     }
 
     window.onresize = function () {
@@ -83,9 +88,7 @@ const Artist = ({ user }: getUserPropType) => {
     return (
         <AnimatePresence>
             <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity:1 }}
-                className="border-2 border-black rounded-md w-full flex flex-col items-center px-3 py-5 justify-between mt-3">
+                className="font-noto border-2 border-black rounded-md w-full flex flex-col items-center px-3 py-5 justify-between mt-3">
                 <div className="w-full flex items-center justify-between">
                     <div className="flex items-center">
                         <Avatar className="mr-2" alt="user avatar" src={user.profileImg} />
@@ -126,28 +129,42 @@ const Artist = ({ user }: getUserPropType) => {
                         <img className="w-6 cursor-pointer" src="/images/down-arrow.png" alt="down arrow" onClick={handleExpand} />
                     </div>
                 </div>
-                <AnimatePresence initial={false}>
-                    {expanded && load && firstSrc !== [] ? 
-                        (
-                            <motion.div
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0, height:0 }}
-                                className="w-full grid grid-cols-2 gap-2 px-3 grid-col-center justify-items-center ">
-                            {firstSrc.map((data) => (
-                                <motion.div
-                                    style={{backgroundColor : data.color}}
-                                    whileHover={{scale : 1.2}}
-                                    initial={{opacity : 0, height:0}}
-                                    animate={{ opacity: 1, height: screen ? 256 : 128}}
+                <AnimatePresence>
+                    {expanded
+                        ?
+                            load && firstSrc !== [] ? 
+                                (<motion.div
+                                    animate={{ opacity: 1 }}
                                     exit={{ opacity: 0, height:0 }}
-                                    className="w-full h-full flex items-center justify-center">
-                                        <motion.img
-                                            className="max-h-full max-w-full" src={data.src} alt="sss" />
-                                    </motion.div>
-                                ))}
-                            </motion.div>
-                        )
-                            : null}
+                                    className="w-full grid grid-cols-2 gap-2 px-3 grid-col-center justify-items-center ">
+                                {firstSrc.map((data) => (
+                                    <motion.div
+                                        style={{backgroundColor : data.color}}
+                                        whileHover={{scale : 1.2}}
+                                        initial={{opacity : 0, height:0}}
+                                        animate={{ opacity: 1, height: screen ? 256 : 128}}
+                                        exit={{ opacity: 0, height:0 }}
+                                        className="w-full h-full flex items-center justify-center">
+                                            <motion.img
+                                                className="max-h-full max-w-full" src={data.src} alt="sss" />
+                                        </motion.div>
+                                    ))}
+                                </motion.div>)
+                            : 
+                            (<motion.div
+                                initial={{opacity : 0}}
+                                animate={{ opacity : 1}}
+                                exit={{ opacity : 0, height:0}}
+                                className="w-full px-3">
+                                <motion.span
+                                    initial={{opacity : 0}}
+                                    animate={{ opacity : 1}}
+                                    exit={{ opacity : 0, height:0}}
+                                    className="text-2xl font-bold text-gray-400" >No posts</motion.span>
+                            </motion.div>)
+                        :
+                            null
+                            }
                 </AnimatePresence>
             </motion.div>
         </AnimatePresence>

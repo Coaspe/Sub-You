@@ -1,11 +1,15 @@
+import { motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
 import Artist from "../components/Artist";
-import Header from "../components/Header"
 import UserContext from "../context/user";
 import { getAllUser,  getUserByUserId } from "../services/firebase";
 import { getUserType } from "../types"
 
-const Artists = () => {
+interface artistsProps {
+    sideExpanded: boolean
+}
+
+const Artists: React.FC<artistsProps> = ({ sideExpanded }) => {
     const [users, setUsers] = useState<getUserType[]>([])
     const [me, setMe] = useState<getUserType>({} as getUserType)
     const { user: contextUser } = useContext(UserContext)
@@ -28,17 +32,13 @@ const Artists = () => {
     }, [contextUser.uid])
     
     return (
-        <div className="w-full h-full">
-            <Header userInfo={me}/>
-            <div className="grid grid-cols-7 justify-between mx-auto max-w-screen-lg">
-                <div className="col-start-3 col-span-3 flex flex-col items-center sm:col-span-6 sm:mx-3">
+        <motion.div layout className={`h-screen flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-7 sm:mx-5 sm:col-start-1`}>
+                <motion.div className="w-full flex flex-col items-center sm:col-span-6 sm:mx-3">
                     {users !== [] ? (
                         users.map((user: getUserType) => (<Artist user={user} />))
                     ) : null}
-                </div>
-            </div>
-
-        </div>
+                </motion.div>
+        </motion.div>
     )
 }
 
