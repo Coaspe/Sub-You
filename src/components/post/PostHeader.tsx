@@ -39,17 +39,20 @@ const PostHeader: React.FC<postHeaderProps> = (
   const { user } = useContext(UserContext);
 
   useEffect(() => { 
+    
     if (postContentProps.userId === user.uid) {
       setWhetherMyPost(true)
     }
   }, [postContentProps.userId, user.uid])
   
   return (
-      <motion.div layout className="flex items-center justify-between bg-white px-2 py-2 font-stix sm:h-12">
-          <div className="flex items-center justify-center ml-2">
+    <motion.div
+      layout
+      className="flex items-center justify-between bg-white px-2 py-2 font-stix sm:h-12">
+          <motion.div className="flex items-center justify-center ml-2">
             <Avatar sx={{width : 35, height : 35}} className="mr-2" alt="user avatar" src={postContentProps.avatarImgSrc} />
             <span className="font-noto font-semibold text-sm">{postContentProps.username}</span>
-          </div>
+          </motion.div>
           <div>
           <IconButton
             aria-label="more"

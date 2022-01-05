@@ -8,10 +8,10 @@ import Alert from '@mui/material/Alert';
 import Header from "../components/Header";
 import Timeline from "./Timeline";
 import Sidebar from "./Sidebar";
-import {useContext, useEffect, useState} from 'react'
+import {useCallback, useContext, useEffect, useState, useRef} from 'react'
 import { motion, AnimatePresence } from "framer-motion";
 import UserContext from "../context/user";
-import { getUserByUserId, getPhotos } from "../services/firebase";
+import { getUserByUserId, getPhotos, getPhotosInfiniteScroll } from "../services/firebase";
 import { getUserType, postContent, userInfoFromFirestore } from "../types";
 import ProfileSetting from '../components/Profile/ProfileSetting';
 import firebase from 'firebase/compat';
@@ -47,7 +47,32 @@ const Dashboard = () => {
     const [selectedPage, setSelectedPage] = useState("Timeline")
     const [posts, setPosts] = useState<postContent[]>([]);
     const [postsVisible, setPostsVisible] = useState<(number | boolean)[][]>([])
-  
+    // Due to load variable issue from Timeline.tsx
+    const [subLoading, setSubLoading] = useState<boolean>(false)
+    const [key, setKey] = useState(0)
+    const [page, setPage] = useState(0)
+    const options = {
+        root: null, //기본 null, 관찰대상의 부모요소를 지정 
+        rootMargin: "20px", // 관찰하는 뷰포트의 마진 지정 
+        threshold: 1.0, // 관찰요소와 얼만큼 겹쳤을 때 콜백을 수행하도록 지정하는 요소 
+    };
+
+    const handleObserver = useCallback(async (entries) => {
+        const target = entries[0];
+        if (target.isIntersecting) {
+            console.log("is InterSecting");
+            setPage((prev) => prev + 1);
+            console.log(page);
+            
+        }
+    }, []);
+    
+    useEffect(() => {
+        const observer = new IntersectionObserver(handleObserver, options);
+        if (divRef.current) observer.observe(divRef.current);
+        return () => observer.disconnect();
+    }, [handleObserver]);
+
     useEffect(() => {
         const dashboardInit = async () => {
             await getUserByUserId(contextUser.uid).then((res: any) => {
@@ -58,6 +83,7 @@ const Dashboard = () => {
     }, [contextUser.uid])
 
     useEffect(() => {
+
         async function getTimelinePhotos() {
             const result = await firebase
                 .firestore()
@@ -78,17 +104,47 @@ const Dashboard = () => {
 
         if (postSetChanged[0] !== "delete") {
             setPosts([])
+            setSubLoading(false)
             getTimelinePhotos().then((res: any) => {
                 setPosts(res)
                 const tmp = []
                 for (let i = 0; i < res.length; i++) {
                     tmp.push([i, true])
                 }
-              setPostsVisible(tmp)
+                setKey(res.length)
+                setPostsVisible(tmp)
+                setSubLoading(true)
             })
         }
         
     }, [contextUser, postSetChanged])
+
+    const fetchData = useCallback(
+        async (key: number) => {
+            try {
+                await getPhotosInfiniteScroll(contextUser.uid, userInfo.following, key).then((res: any) => {
+                    console.log(res);
+                    setPosts(posts.concat(res))
+                })
+            } catch (err) {
+                console.log(err);
+            }
+        }
+        , [posts, contextUser.uid, userInfo.following])
+    
+    useEffect(() => {
+        if (key !== 0) {
+            fetchData(key)
+        }
+    }, [page])
+
+    useEffect(() => {
+        console.log(posts);
+    }, [posts])
+    useEffect(() => {
+        console.log("key", key);
+    }, [key])
+    const divRef = useRef(null)
 
     const alertVariants = {
         initial: {
@@ -150,6 +206,8 @@ const Dashboard = () => {
                         postSetChanged={postSetChanged}
                         setPostSetChanged={setPostSetChanged}
                         setAlert={setAlert}
+                        subLoading={subLoading}
+                        setSubLoading={setSubLoading}
                     />
                 }
                 {selectedPage === "Setting" &&
@@ -186,6 +244,7 @@ const Dashboard = () => {
                     </BottomNavigation>
                 </motion.div> : null}
             </AnimatePresence>
+            <div ref={divRef} className='h-1 w-full absolute bottom-0'></div>
         </div>
     );
 }

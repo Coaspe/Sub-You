@@ -152,14 +152,10 @@ const Artist = ({ user }: getUserPropType) => {
                                 </motion.div>)
                             : 
                             (<motion.div
-                                initial={{opacity : 0}}
-                                animate={{ opacity : 1}}
+                                animate={{ opacity: 1 }}
                                 exit={{ opacity : 0, height:0}}
                                 className="w-full px-3">
                                 <motion.span
-                                    initial={{opacity : 0}}
-                                    animate={{ opacity : 1}}
-                                    exit={{ opacity : 0, height:0}}
                                     className="text-2xl font-bold text-gray-400" >No posts</motion.span>
                             </motion.div>)
                         :

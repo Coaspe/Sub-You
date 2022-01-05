@@ -67,6 +67,7 @@ const ProfileDetailImage: React.FC<profileDetailImageProps> = ({ docId, setDocId
             opacity:0
         }
     }
+    // "hsla(0, 0%, 0%, 0.8)"
     return (
         // To reduce bundle size, use Lazy Motion
         <LazyMotion features={domAnimation}>

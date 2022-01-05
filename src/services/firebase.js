@@ -123,13 +123,16 @@ export async function uploadImage(
         aaa.push(res);
 
         if (aaa.length === ImageUrl.length) {
+          const tmp_now = Date.now();
           await firebase
             .firestore()
             .collection("posts")
-            .add({
+            // Edit Later...
+            .doc(127174897414000 - tmp_now + "," + userInfo.uid)
+            .set({
               caption: caption,
               comments: [],
-              dateCreated: Date.now(),
+              dateCreated: tmp_now,
               imageSrc: aaa,
               postId: postId,
               likes: [],
@@ -144,7 +147,9 @@ export async function uploadImage(
                 .collection("users")
                 .doc(userInfo.email)
                 .update({
-                  postDocId: FieldValue.arrayUnion(res.id),
+                  postDocId: FieldValue.arrayUnion(
+                    tmp_now + "," + userInfo.uid
+                  ),
                 })
                 .then(() => {
                   setAlert([true, "Upload", "success"]);
@@ -186,25 +191,14 @@ export async function getUserByUserId(userId) {
 }
 
 export async function getPhotos(userId, following) {
-  const result1 =
-    following.length > 0
-      ? await firebase
-          .firestore()
-          .collection("posts")
-          .where("userId", "in", following)
-          .get()
-      : null;
-
-  const result2 = await firebase
+  const result = await firebase
     .firestore()
     .collection("posts")
-    .where("userId", "==", userId)
+    .where("userId", "in", following.concat(userId))
+    .limit(3)
     .get();
 
-  const result =
-    following.length > 0 ? result1.docs.concat(result2.docs) : result2.docs;
-
-  const userFollowedPhotos = result.map((photo) => ({
+  const userFollowedPhotos = result.docs.map((photo) => ({
     ...photo.data(),
     docId: photo.id,
   }));
@@ -220,7 +214,36 @@ export async function getPhotos(userId, following) {
       return { username, ...photo, userLikedPhoto };
     })
   );
-  return photosWithUserDetails.sort((a, b) => b.dateCreated - a.dateCreated);
+  return photosWithUserDetails;
+}
+
+export async function getPhotosInfiniteScroll(userId, following, key) {
+  const result = await firebase
+    .firestore()
+    .collection("posts")
+    .startAfter(key)
+    .limit(2)
+    .get();
+
+  console.log(result);
+
+  const userFollowedPhotos = result.docs.map((photo) => ({
+    ...photo.data(),
+    docId: photo.id,
+  }));
+
+  const photosWithUserDetails = await Promise.all(
+    userFollowedPhotos.map(async (photo) => {
+      let userLikedPhoto = false;
+      if (photo.likes.includes(userId)) {
+        userLikedPhoto = true;
+      }
+      const user = await getUserByUserId(photo.userId);
+      const { username } = user;
+      return { username, ...photo, userLikedPhoto };
+    })
+  );
+  return photosWithUserDetails;
 }
 
 export async function deletePost(

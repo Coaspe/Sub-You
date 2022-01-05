@@ -3,7 +3,6 @@ import Footer from "./Footer"
 import Imagesw from "./Imagesw"
 import PostHeader from "./PostHeader"
 import { AnimatePresence, LazyMotion, m, domAnimation } from "framer-motion"
-import { useEffect } from "react"
 
 interface postProps {
     postContentProps: postContent
@@ -31,7 +30,7 @@ const Post: React.FC<postProps> = (
                         initial={{ opacity: 0, }}
                         animate={{ opacity: 1, }}
                         exit={{opacity : 0, height : 0}}
-                        transition={{ type: "spring", bounce: 0.25}}
+                        // transition={{ type: "spring", bounce: 0.25}}
                         className="mb-10 flex flex-col w-full max-w-md border-2 border-main border-opacity-30 bg-white sm:col-span-3 ">
                         <PostHeader
                             postContentProps={postContentProps}

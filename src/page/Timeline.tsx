@@ -14,6 +14,8 @@ interface timelineProps {
   posts: postContent[]
   postsVisible: (number | boolean)[][]
   setPostsVisible: React.Dispatch<React.SetStateAction<(number | boolean)[][]>>
+  subLoading: boolean
+  setSubLoading: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const Timeline: React.FC<timelineProps> = (
@@ -26,6 +28,8 @@ const Timeline: React.FC<timelineProps> = (
     posts,
     postsVisible,
     setPostsVisible,
+    subLoading,
+    setSubLoading
   }) => {
   
     const [load, setLoad] = useState(false)
@@ -49,16 +53,16 @@ const Timeline: React.FC<timelineProps> = (
 
     if (posts.length > 0) {
         setLoad(false)
-      Promise.all(posts.map(async (post) => (await cacheImages(post.imageSrc)))).then(() => {
+        Promise.all(posts.map(async (post) => (await cacheImages(post.imageSrc)))).then(() => {
         setLoad(true)
-        })
+          })
         }
     }, [posts])
 
   return (
     <>
-      <motion.div layout className={`${load ? "h-full": "h-screen" } flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-7 sm:mx-5 sm:col-start-1`}>
-            {load ? (
+      <motion.div className={`h-full flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-7 sm:mx-5 sm:col-start-1`}>
+            {load && subLoading ?  (
               posts.map((data, index) => (
                 <Post
                   postContentProps={data}
@@ -75,7 +79,7 @@ const Timeline: React.FC<timelineProps> = (
                     <Postskeleton />
                     <Postskeleton />
                   </>)
-           }
+          }
       </motion.div>
     </>
   )

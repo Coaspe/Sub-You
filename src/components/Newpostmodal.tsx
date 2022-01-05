@@ -182,8 +182,8 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                         )
                             handleClose()
                         }}
-                        className={`${previewURL[0] === "/images/logo.png" ? "hidden" : "visible"} cursor-pointer`}
-                        sx={{ color: `#008000` }}
+                        className={`${previewURL[0] === "/images/logo.png" && "pointer-events-none"} cursor-pointer`}
+                        sx={{ color: previewURL[0] !== "/images/logo.png" ? "#008000" : "#8e9598" }}
                     />
                 </Box>
             </Modal>
