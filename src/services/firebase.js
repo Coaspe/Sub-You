@@ -1,5 +1,4 @@
 import { firebase, storageRef, FieldValue } from "../lib/firebase";
-import FastAverageColor from "fast-average-color";
 
 export const singInWithGoogleInfoToFB = async (info) => {
   const CryptoJS = require("crypto-js");
@@ -87,87 +86,6 @@ export const getUserByEmail = async (email) => {
 
   return result.docs.map((item) => ({ ...item.data() }))[0];
 };
-
-export async function uploadImage(
-  caption,
-  ImageUrl,
-  userInfo,
-  category,
-  setPostSetChanged,
-  setIsLoading,
-  setAlert
-) {
-  setIsLoading(true);
-
-  const postId = ImageUrl.map((image) => image.name);
-  const fac = new FastAverageColor();
-  const aaa = [];
-  const averageColor = [];
-  ImageUrl.map(async (imUrl) => {
-    await storageRef.child(`${userInfo.email}/${imUrl.name}`).put(imUrl);
-    await storageRef
-      .child(`${userInfo.email}/${imUrl.name}`)
-      .getDownloadURL()
-      .then(async (res) => {
-        await fac
-          .getColorAsync(res)
-          .then((color) => {
-            averageColor.push(color.hex);
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-
-        aaa.push(res);
-
-        if (aaa.length === ImageUrl.length) {
-          await firebase
-            .firestore()
-            .collection("posts")
-            // Edit Later...
-            .add({
-              caption: caption,
-              comments: [],
-              dateCreated: Date.now(),
-              imageSrc: aaa,
-              postId: postId,
-              likes: [],
-              userId: userInfo.uid,
-              category: category,
-              averageColor: averageColor,
-              avatarImgSrc: userInfo.photoURL,
-            })
-            .then(async (res) => {
-              await firebase
-                .firestore()
-                .collection("users")
-                .doc(userInfo.email)
-                .update({
-                  postDocId: FieldValue.arrayUnion(res.id),
-                })
-                .then(() => {
-                  setAlert([true, "Upload", "success"]);
-                  setTimeout(() => {
-                    setAlert([false, "", ""]);
-                  }, 3000);
-                  setIsLoading(false);
-                  setPostSetChanged((ch) => {
-                    return ["upload", !ch[0]];
-                  });
-                })
-                .catch((error) => {
-                  setAlert([true, "Upload", "error"]);
-                  setTimeout(() => {
-                    setAlert([false, "", ""]);
-                  }, 3000);
-                  console.log(error);
-                  setIsLoading(false);
-                });
-            });
-        }
-      });
-  });
-}
 
 export async function getUserByUserId(userId) {
   const result = await firebase

@@ -51,6 +51,7 @@ const Dashboard = () => {
     const [page, setPage] = useState(0)
     const [key, setKey] = useState(0)
     const dispatch = useDispatch()
+    
     const alert: [boolean, string, string] = useSelector((state: RootState) => state.setAlert.alert)
     const userInfo: getUserType = useSelector((state: RootState) => state.setUserInfo.userInfo)
     const postSetChanged: (string | boolean)[] = useSelector((state: RootState) => state.setPostSetChanged.postSetChanged)
@@ -123,6 +124,8 @@ const Dashboard = () => {
             return getPhotos(contextUser.uid, following)
         }
 
+        console.log("postSetChanged", postSetChanged);
+        
         if (postSetChanged[0] !== "delete") {
             doSetPosts([])
             getTimelinePhotos().then((res: any) => {

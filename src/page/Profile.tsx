@@ -56,10 +56,10 @@ const Profile = () => {
                 if (re === undefined) {
                     return;
                 }
-                
+
                 const x : firstImageInfo[] = re.map((data : any) => ({
                     src : data.data().imageSrc[0],
-                    color: data.data().averageColor[0],
+                    color: "#fff",
                     docId : data.id
                 }))
 
@@ -101,7 +101,7 @@ const Profile = () => {
                                 animate={{ opacity : 1 }}
                                 className="flex col-span-5 col-start-2 items-start mt-6 ">
                                 {/* Profile Image Div */}
-                                <div className="flex w-1/3 items-start">
+                                <div className="flex w-1/3 items-start mr-3">
                                     <img className="w-full max-h-full max-w-full object-cover rounded-md shadow-xl" src="/images/applecircle.png" alt="profile" />
                                 </div>
                                 

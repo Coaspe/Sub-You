@@ -7,7 +7,6 @@ import CheckCircleTwoToneIcon from '@mui/icons-material/CheckCircleTwoTone';
 
 import UserContext from '../context/user';
 import { useContext, useEffect, useState} from "react";
-import { uploadImage } from '../services/firebase';
 import Compressor from "compressorjs";
 import { useDispatch, useSelector } from 'react-redux';
 import { alertAction, postSetChangedAction } from '../redux';
@@ -75,7 +74,6 @@ const Newpostmodal: React.FC<newPostModalProps> = (
             new Compressor(element, {
             quality: qual,
                 success(result: any) {
-                    console.log(result);
                     
                     files.push(result)
                     images.push(URL.createObjectURL(result))
@@ -164,52 +162,58 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                     >
                         Find
                     </label>
-                    <form encType='multipart/form-data' name="file">
-                        <input
-                            type="file"
-                            id="input-file"
-                            multiple
-                            name="input-file"
-                            style={{ display: "none" }}
-                            onChange={(event : any) => {
-                                handleFileOnChange(event);
+                    <form encType='multipart/form-data' name="files">
+                     <input
+                        type="file"
+                        name="files"
+                        id="input-file"
+                        multiple
+                        style={{ display: "none" }}
+                        onChange={(event : any) => {
+                            handleFileOnChange(event);
                         }}
                         />
-                    </form>
+                        </form>
                     <TextField
                         id="outlined-comment"
                         label="comment"
                         value={comment}
                         onChange={handleCommentChange}
-                    />
+                        />
                     <CheckCircleTwoToneIcon
                     onClick={async () => {
-                        let param = new window.FormData()
-                        param.append('file', file[0])
 
-                        // await axios({ method: "POST", url:"http://localhost:3001/uploadpost", data : formData, headers: formData.getHeaders() }).then((res) => {
-                        //     // setIsLoading(false)
-                        //     console.log(res);
-                        // })
-                        await axios.post("http://localhost:3001/uploadpost", param,{
-                                headers: {
-                                    'Content-Type': 'multipart/form-data'
-                                }
+                            let param = new window.FormData()
+                            for (let i = 0; i < file.length; i++) {
+                                param.append(`file${i}`, file[i]);   
+                            }
+                            param.append("userEmail", user.email as string)
+                        
+                            setIsLoading(true)
+                            await axios.post("http://localhost:3001/uploadpost", param).then(async (res) => {
+                                const storageImageNames = res.data
+                                await axios.post("http://localhost:3001/uploadpostFinish", {
+                                    caption: comment,
+                                    ImageUrl: storageImageNames,
+                                    userInfo: user,
+                                    category: "SNS",
+                                    postSetChanged: postSetChanged
+                                }).then((res) => {
+                                    doSetAlert(res.data.alert)
+                                    setIsLoading(res.data.loading)
+                                    setPostSetChanged(res.data.postSetChanged)
+                                    setTimeout(() => {
+                                        doSetAlert([false,"",""])
+                                    }, 3000);
+                                }).catch((err) => {
+                                    console.log(err);
                                 })
-                        // uploadImage(
-                        //     comment,
-                        //     file,
-                        //     user,
-                        //     "SNS",
-                        //     setPostSetChanged,
-                        //     setIsLoading,
-                        //     doSetAlert
-                        // )
-                        // handleClose()
+                            })
+                            handleClose()
                         }}
                         className={`${previewURL[0] === "/images/logo.png" && "pointer-events-none"} cursor-pointer`}
                         sx={{ color: previewURL[0] !== "/images/logo.png" ? "#008000" : "#8e9598" }}
-                    />
+                        />
                 </Box>
             </Modal>
     )

@@ -25,6 +25,7 @@ const Timeline: React.FC<timelineProps> = (
   }) => {
 
   const posts: postContent[] = useSelector((state: RootState) => state.setPosts.posts)
+
   return (
     <>
       <motion.div className={`h-full flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-7 sm:mx-5 sm:col-start-1`}>
@@ -48,4 +49,4 @@ const Timeline: React.FC<timelineProps> = (
     </>
   )
 }
-export default memo(Timeline);
+export default Timeline;

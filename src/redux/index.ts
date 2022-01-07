@@ -69,7 +69,7 @@ export const postSetChangedAction = {
 }
 
 const postSetChangedInitialState: postSetChangedState = {
-    postSetChanged: [] as (string | boolean)[],
+    postSetChanged: ["", false] as (string | boolean)[],
 }
 
 export const postSetChangedReducer = {

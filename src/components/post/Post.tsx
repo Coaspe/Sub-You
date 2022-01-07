@@ -47,7 +47,7 @@ const Post: React.FC<postProps> = (
         <AnimatePresence>
             {load ? 
             <LazyMotion features={domAnimation}>
-                {(postVisible && postVisible[1]) &&
+                {postVisible[1] &&
                     <m.div
                         layout
                         initial={{ opacity: 0, }}

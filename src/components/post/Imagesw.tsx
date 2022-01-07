@@ -56,6 +56,7 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
           className="flex flex-col items-center justify-center w-full h-bgpost sm:h-smpost">
           <AnimatePresence custom={direction} exitBeforeEnter>
             <motion.img
+              layout
               whileTap="tap"
               key={page}
               custom={direction}

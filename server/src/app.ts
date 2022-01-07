@@ -1,14 +1,18 @@
 import express from "express"
-import { firebase, storageRef, FieldValue } from "./lib/firebase"
-import Firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import {
+  deletePost,
   uploadImage
 } from "./service/firebase";
 
-
 const app: express.Express = express()
-const router = express.Router()
+
+var admin = require("firebase-admin");
+var serviceAccount = require("C:/sub-you-firebase-adminsdk-3lyxd-78e61d6399.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -20,49 +24,115 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
     next();
 })
 const { Storage } = require('@google-cloud/storage');
-const Multer = require('multer');
-const multer = Multer({
-  storage: Multer.memoryStorage()
+const multer = require('multer');
+const upload = multer({
+  storage: multer.memoryStorage()
+});
+
+const storage = new Storage({
+  projectId: "sub-you",
+  keyFilename: "C:/sub-you-firebase-adminsdk-3lyxd-fde6dbd60c.json"
 });
 
 const bucket = storage.bucket("gs://sub-you.appspot.com/");
 
-app.post("/uploadpost",multer.single('file'), (req: any, res: express.Response) => {
-  console.log(req.file);
-  
-  uploadImageToStorage(req.file)
+app.post("/uploadpost", upload.any(), (req: any, res: express.Response) => {
+
+  if (req.body.userEmail === undefined) {
+    res.sendStatus(404)
+    res.send("User Email Error!")
+    res.end()
+  }
+
+  uploadImageToStorage(req.files, req.body.userEmail).then((resArr) => {
+    res.send(JSON.stringify(resArr))
+    res.end()
+  })
 })
-const uploadImageToStorage = (file:any) => {
-  return new Promise((resolve, reject) => {
-    if (!file) {
-      reject('No image file');
+
+app.post("/uploadpostFinish", (req: any, res: express.Response) => {
+  
+  if (req.body === {}) {
+    res.sendStatus(404)
+    res.send("User Email Error!")
+    res.end()
+  }
+  
+  uploadImage(req.body.caption, req.body.ImageUrl, req.body.userInfo, req.body.category)
+    .then((re) => {
+    const Response = {
+      alert: [true, "Upload", "success"],
+      loading: false,
+      postSetChanged: ["upload", !req.body.postSetChanged[1]]
     }
-    let newFileName = `${file.originalname}_${Date.now()}`;
-
-    let fileUpload = bucket.file(newFileName);
-
-    console.log(fileUpload);
+    res.send(JSON.stringify(Response))
+    res.end()
+      
+    }).catch((error: any) => {
+    console.log(error);
     
-    const blobStream = fileUpload.createWriteStream({
-      metadata: {
-        contentType: file.mimetype
+    const Response = {
+      alert: [true, "Upload", "error"],
+      loading: false,
+      error: error
+    }
+    res.send(JSON.stringify(Response))
+    res.end()
+  })
+
+})
+app.post("/deletepost", (req: any, res: express.Response) => {
+  deletePost(req.body.docId, req.body.email, req.body.storageImageNameArr).then(() => {
+    const Response = {
+      alert: [true, "Delete", "success"],
+      postSetChanged: ["delete", !req.body.postSetChanged[1]],
+      loading: false
+    }
+    res.send(JSON.stringify(Response))
+    res.end()
+
+  }).catch((err) => {
+    console.log(err.message);
+    const Response = {
+      alert: [true, "Delete", "error"],
+      loading: false
+    }
+    res.send(JSON.stringify(Response))
+    res.end()
+  })
+} )
+const uploadImageToStorage = (file: any, userEmail: string) => {
+
+  let fileNameArr = file.map((data: any) => (
+    new Promise((resolve, reject) => {
+      if (!data) {
+        reject('No image file');
       }
-    });
+      let newFileName = `${Date.now()}_${userEmail}`;
+  
+      let fileUpload = bucket.file(`${userEmail}/${newFileName}`);
+      
+      const blobStream = fileUpload.createWriteStream({
+        metadata: {
+          contentType: data.mimetype,
+        }
+      });
+  
+      blobStream.on('error', (error:any) => {
+        reject(error);
+      });
+  
+      blobStream.on('finish', () => {
+        resolve(newFileName);
+      });
+  
+      blobStream.end(data.buffer);
+    })));
+  
+  return Promise.all(fileNameArr)
 
-    blobStream.on('error', (error:any) => {
-      reject('Something is wrong! Unable to upload at the moment.');
-    });
-
-    // blobStream.on('finish', () => {
-    //   // The public URL can be used to directly access the file via HTTP.
-    //   const url = format(`https://storage.googleapis.com/${bucket.name}/${fileUpload.name}`);
-    //   resolve(url);
-    // });
-
-    blobStream.end(file.buffer);
-  });
 }
-// 3010 포트로 서버 실행
-app.listen(3001, () => {
-  console.log('실행중');
+
+app.listen(3001,() => {
+  console.log('Server Operated!');
 });

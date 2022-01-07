@@ -8,13 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPostByDocId = exports.getUserByEmailEncrypted = exports.updateFollowedUserFollowers = exports.updateLoggedInUserFollowing = exports.getDocFirstImage = exports.getAllUser = exports.deletePost = exports.getPhotosInfiniteScroll = exports.getPhotos = exports.getUserByUserId = exports.uploadImage = exports.getUserByEmail = exports.signupWithEmail = exports.doesEmailExist = exports.signInWithFacebookInfoToFB = exports.singInWithGoogleInfoToFB = void 0;
 const firebase_1 = require("../lib/firebase");
-const fast_average_color_1 = __importDefault(require("fast-average-color"));
 const singInWithGoogleInfoToFB = (info) => __awaiter(void 0, void 0, void 0, function* () {
     const CryptoJS = require("crypto-js");
     const secretKey = info.user.uid;
@@ -98,72 +94,36 @@ const getUserByEmail = (email) => __awaiter(void 0, void 0, void 0, function* ()
 exports.getUserByEmail = getUserByEmail;
 function uploadImage(caption, ImageUrl, userInfo, category) {
     return __awaiter(this, void 0, void 0, function* () {
-        const postId = ImageUrl.map((image) => image.name);
-        let aaa = [];
+        const postId = ImageUrl;
         let averageColor = [];
-        const fac = new fast_average_color_1.default();
-        ImageUrl.map((imUrl) => __awaiter(this, void 0, void 0, function* () {
-            yield firebase_1.storageRef.child(`${userInfo.email}/${imUrl.name}`).put(imUrl);
-            yield firebase_1.storageRef
-                .child(`${userInfo.email}/${imUrl.name}`)
-                .getDownloadURL()
-                .then((res) => __awaiter(this, void 0, void 0, function* () {
-                yield fac
-                    .getColorAsync(res)
-                    .then((color) => {
-                    averageColor.push(color.hex);
-                })
-                    .catch((e) => {
-                    console.log(e);
-                });
-                aaa.push(res);
-                if (aaa.length === ImageUrl.length) {
-                    return yield firebase_1.firebase
-                        .firestore()
-                        .collection("posts")
-                        // Edit Later...
-                        .add({
-                        caption: caption,
-                        comments: [],
-                        dateCreated: Date.now(),
-                        imageSrc: aaa,
-                        postId: postId,
-                        likes: [],
-                        userId: userInfo.uid,
-                        category: category,
-                        averageColor: averageColor,
-                        avatarImgSrc: userInfo.photoURL,
-                    })
-                        .then((res) => __awaiter(this, void 0, void 0, function* () {
-                        yield firebase_1.firebase
-                            .firestore()
-                            .collection("users")
-                            .doc(userInfo.email)
-                            .update({
-                            postDocId: firebase_1.FieldValue.arrayUnion(res.id),
-                        });
-                        // .then(() => {
-                        //   setAlert([true, "Upload", "success"]);
-                        //   setTimeout(() => {
-                        //     setAlert([false, "", ""]);
-                        //   }, 3000);
-                        //   setIsLoading(false);
-                        //   setPostSetChanged((ch: any) => {
-                        //     return ["upload", !ch[0]];
-                        //   });
-                        // })
-                        // .catch((error: any) => {
-                        //   setAlert([true, "Upload", "error"]);
-                        //   setTimeout(() => {
-                        //     setAlert([false, "", ""]);
-                        //   }, 3000);
-                        //   console.log(error);
-                        //   setIsLoading(false);
-                        // });
-                    }));
-                }
-            }));
-        }));
+        let tmp = yield Promise.all(ImageUrl.map((imUrl) => __awaiter(this, void 0, void 0, function* () {
+            return yield firebase_1.storageRef
+                .child(`${userInfo.email}/${imUrl}`)
+                .getDownloadURL();
+        })));
+        const res = yield firebase_1.firebase
+            .firestore()
+            .collection("posts")
+            // Edit Later...
+            .add({
+            caption: caption,
+            comments: [],
+            dateCreated: Date.now(),
+            imageSrc: tmp,
+            postId: postId,
+            likes: [],
+            userId: userInfo.uid,
+            category: category,
+            averageColor: averageColor,
+            avatarImgSrc: userInfo.photoURL,
+        });
+        return firebase_1.firebase
+            .firestore()
+            .collection("users")
+            .doc(userInfo.email)
+            .update({
+            postDocId: firebase_1.FieldValue.arrayUnion(res.id),
+        });
     });
 }
 exports.uploadImage = uploadImage;
@@ -204,7 +164,6 @@ function getPhotos(userId, following) {
 exports.getPhotos = getPhotos;
 function getPhotosInfiniteScroll(userId, following, key) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log(userId, following, key);
         const result = yield firebase_1.firebase
             .firestore()
             .collection("posts")
@@ -227,9 +186,9 @@ function getPhotosInfiniteScroll(userId, following, key) {
     });
 }
 exports.getPhotosInfiniteScroll = getPhotosInfiniteScroll;
-function deletePost(docId, userEmail, storageImageNameArr, setPostSetChanged, setIsLoading, setAlert) {
+function deletePost(docId, userEmail, storageImageNameArr) {
     return __awaiter(this, void 0, void 0, function* () {
-        setIsLoading(true);
+        // setIsLoading(true);
         yield firebase_1.firebase.firestore().collection("posts").doc(docId).delete();
         yield firebase_1.firebase
             .firestore()
@@ -238,29 +197,10 @@ function deletePost(docId, userEmail, storageImageNameArr, setPostSetChanged, se
             .update({
             postDocId: firebase_1.FieldValue.arrayRemove(docId),
         });
-        yield Promise.all(storageImageNameArr.map((imageName) => {
+        return Promise.all(storageImageNameArr.map((imageName) => {
             let desertRef = firebase_1.storageRef.child(`${userEmail}/${imageName}`);
             return desertRef.delete();
-        }))
-            .then(function () {
-            setPostSetChanged((ch) => {
-                return ["delete", !ch[0]];
-            });
-            setAlert([true, "Delete", "success"]);
-            setTimeout(() => {
-                setAlert([false, "", ""]);
-            }, 3000);
-            setIsLoading(false);
-        })
-            .catch(function (error) {
-            console.log(error);
-            setIsLoading(false);
-            setAlert([true, "Delete", "error"]);
-            setTimeout(() => {
-                setAlert([false, "", ""]);
-            }, 3000);
-            return;
-        });
+        }));
     });
 }
 exports.deletePost = deletePost;

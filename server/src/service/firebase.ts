@@ -1,5 +1,5 @@
 import { firebase, storageRef, FieldValue } from "../lib/firebase";
-import FastAverageColor from "fast-average-color";
+import { getAverageColor } from 'fast-average-color-node';
 
 export const singInWithGoogleInfoToFB = async (info: any) => {
   const CryptoJS = require("crypto-js");
@@ -90,80 +90,44 @@ export const getUserByEmail = async (email: string) => {
 
 export async function uploadImage(
   caption: string,
-  ImageUrl: Blob[],
+  ImageUrl: string[],
   userInfo: any,
   category: any,
 ) {
-  const postId = ImageUrl.map((image: any) => image.name);
-  let aaa: any[] = [];
+  const postId = ImageUrl;
+
   let averageColor: any[] = [];
 
-  const fac = new FastAverageColor();
-
-  ImageUrl.map(async (imUrl: any) => {
-    await storageRef.child(`${userInfo.email}/${imUrl.name}`).put(imUrl);
-    await storageRef
-      .child(`${userInfo.email}/${imUrl.name}`)
+  let tmp = await Promise.all(ImageUrl.map(async (imUrl: any) => {
+    return await storageRef
+      .child(`${userInfo.email}/${imUrl}`)
       .getDownloadURL()
-      .then(async (res: any) => {
-        await fac
-          .getColorAsync(res)
-          .then((color) => {
-            averageColor.push(color.hex);
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-
-        aaa.push(res);
-
-        if (aaa.length === ImageUrl.length) {
-          return await firebase
-            .firestore()
-            .collection("posts")
-            // Edit Later...
-            .add({
-              caption: caption,
-              comments: [],
-              dateCreated: Date.now(),
-              imageSrc: aaa,
-              postId: postId,
-              likes: [],
-              userId: userInfo.uid,
-              category: category,
-              averageColor: averageColor,
-              avatarImgSrc: userInfo.photoURL,
-            })
-            .then(async (res: any) => {
-              await firebase
-                .firestore()
-                .collection("users")
-                .doc(userInfo.email)
-                .update({
-                  postDocId: FieldValue.arrayUnion(res.id),
-                })
-                // .then(() => {
-                //   setAlert([true, "Upload", "success"]);
-                //   setTimeout(() => {
-                //     setAlert([false, "", ""]);
-                //   }, 3000);
-                //   setIsLoading(false);
-                //   setPostSetChanged((ch: any) => {
-                //     return ["upload", !ch[0]];
-                //   });
-                // })
-                // .catch((error: any) => {
-                //   setAlert([true, "Upload", "error"]);
-                //   setTimeout(() => {
-                //     setAlert([false, "", ""]);
-                //   }, 3000);
-                //   console.log(error);
-                //   setIsLoading(false);
-                // });
-            });
-        }
-      });
-  });
+  }))
+  
+    const res = await firebase
+      .firestore()
+      .collection("posts")
+      // Edit Later...
+      .add({
+        caption: caption,
+        comments: [],
+        dateCreated: Date.now(),
+        imageSrc: tmp,
+        postId: postId,
+        likes: [],
+        userId: userInfo.uid,
+        category: category,
+        averageColor: averageColor,
+        avatarImgSrc: userInfo.photoURL,
+      })
+    
+  return firebase
+        .firestore()
+        .collection("users")
+        .doc(userInfo.email)
+        .update({
+          postDocId: FieldValue.arrayUnion(res.id),
+        })
 }
 
 export async function getUserByUserId(userId: any) {
@@ -210,7 +174,6 @@ export async function getPhotos(userId: any, following: any) {
 }
 
 export async function getPhotosInfiniteScroll(userId:string, following:string, key:string) {
-  console.log(userId, following, key);
   const result = await firebase
     .firestore()
     .collection("posts")
@@ -243,11 +206,8 @@ export async function deletePost(
   docId: any,
   userEmail: any,
   storageImageNameArr: any,
-  setPostSetChanged: any,
-  setIsLoading: any,
-  setAlert: any
 ) {
-  setIsLoading(true);
+  // setIsLoading(true);
 
   await firebase.firestore().collection("posts").doc(docId).delete();
   await firebase
@@ -258,31 +218,11 @@ export async function deletePost(
       postDocId: FieldValue.arrayRemove(docId),
     });
 
-  await Promise.all(
+  return Promise.all(
     storageImageNameArr.map((imageName: any) => {
       let desertRef = storageRef.child(`${userEmail}/${imageName}`);
       return desertRef.delete();
-    })
-  )
-    .then(function () {
-      setPostSetChanged((ch: any) => {
-        return ["delete", !ch[0]];
-      });
-      setAlert([true, "Delete", "success"]);
-      setTimeout(() => {
-        setAlert([false, "", ""]);
-      }, 3000);
-      setIsLoading(false);
-    })
-    .catch(function (error) {
-      console.log(error);
-      setIsLoading(false);
-      setAlert([true, "Delete", "error"]);
-      setTimeout(() => {
-        setAlert([false, "", ""]);
-      }, 3000);
-      return;
-    });
+    }))
 }
 
 export async function getAllUser() {

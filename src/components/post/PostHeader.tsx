@@ -6,11 +6,11 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import UserContext from "../../context/user";
-import { deletePost } from "../../services/firebase";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from 'react-redux';
 import { alertAction, postSetChangedAction } from "../../redux";
 import { RootState } from '../../redux/store';
+import axios from "axios";
 
 interface postHeaderProps {
   postContentProps: postContent
@@ -30,11 +30,11 @@ const PostHeader: React.FC<postHeaderProps> = (
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const dispatch = useDispatch()
-
+  const postSetChanged: (string | boolean)[] = useSelector((state: RootState) => state.setPostSetChanged.postSetChanged)
+  
   const setPostSetChanged = (postSetChanged: (string | boolean)[]) => {
     dispatch(postSetChangedAction.setPostSetChanged({postSetChanged : postSetChanged}))
   }
-
   const doSetAlert = (alert: [boolean, string, string]) => {
       dispatch(alertAction.setAlert({alert: alert}))
   }
@@ -90,21 +90,30 @@ const PostHeader: React.FC<postHeaderProps> = (
                 <MenuItem onClick={handleClose}>Auction</MenuItem>
                 <MenuItem onClick={handleClose}>Report</MenuItem>
                 
-                {whetherMyPost ? (<MenuItem onClick={() => {
-              deletePost(
-                postContentProps.docId,
-                user.email,
-                postContentProps.postId,
-                setPostSetChanged,
-                setIsLoading,
-                doSetAlert
-              )
-              setPostsVisible((origin) => {
-                
-                let tmp = origin
-                tmp[postVisible[0] as number] = [postVisible[0] as number, false]
-                console.log(tmp);
-                return tmp
+          {whetherMyPost ? (<MenuItem onClick={async () => {
+            setIsLoading(true)
+            await axios.post("http://localhost:3001/deletepost", {
+                docId: postContentProps.docId,
+                email: user.email,
+                storageImageNameArr: postContentProps.postId,
+                postSetChanged: postSetChanged
+            }).then((res) => {
+              if (res.data.alert[2] === 'success') {
+                setPostSetChanged(res.data.postSetChanged)
+                doSetAlert(res.data.alert)
+                setPostsVisible((origin) => {
+                  let tmp = origin
+                  tmp[postVisible[0] as number] = [postVisible[0] as number, false]
+                  console.log(tmp);
+                  return tmp
+                })
+              } else {
+                setPostSetChanged(res.data.postSetChanged)
+                doSetAlert(res.data.alert)
+              }
+              setIsLoading(res.data.loading)
+            }).catch((err) => {
+              console.log(err.message);
               })
                   handleClose()
                 }}>Delete</MenuItem>) : null}
