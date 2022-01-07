@@ -100,11 +100,9 @@ export async function uploadImage(
   setIsLoading(true);
 
   const postId = ImageUrl.map((image) => image.name);
-  let aaa = [];
-  let averageColor = [];
-
   const fac = new FastAverageColor();
-
+  const aaa = [];
+  const averageColor = [];
   ImageUrl.map(async (imUrl) => {
     await storageRef.child(`${userInfo.email}/${imUrl.name}`).put(imUrl);
     await storageRef
@@ -123,16 +121,14 @@ export async function uploadImage(
         aaa.push(res);
 
         if (aaa.length === ImageUrl.length) {
-          const tmp_now = Date.now();
           await firebase
             .firestore()
             .collection("posts")
             // Edit Later...
-            .doc(127174897414000 - tmp_now + "," + userInfo.uid)
-            .set({
+            .add({
               caption: caption,
               comments: [],
-              dateCreated: tmp_now,
+              dateCreated: Date.now(),
               imageSrc: aaa,
               postId: postId,
               likes: [],
@@ -147,9 +143,7 @@ export async function uploadImage(
                 .collection("users")
                 .doc(userInfo.email)
                 .update({
-                  postDocId: FieldValue.arrayUnion(
-                    tmp_now + "," + userInfo.uid
-                  ),
+                  postDocId: FieldValue.arrayUnion(res.id),
                 })
                 .then(() => {
                   setAlert([true, "Upload", "success"]);
@@ -195,6 +189,7 @@ export async function getPhotos(userId, following) {
     .firestore()
     .collection("posts")
     .where("userId", "in", following.concat(userId))
+    .orderBy("dateCreated", "desc")
     .limit(3)
     .get();
 
@@ -218,11 +213,14 @@ export async function getPhotos(userId, following) {
 }
 
 export async function getPhotosInfiniteScroll(userId, following, key) {
+  console.log(userId, following, key);
   const result = await firebase
     .firestore()
     .collection("posts")
+    .where("userId", "in", following.concat(userId))
+    .orderBy("dateCreated", "desc")
     .startAfter(key)
-    .limit(2)
+    .limit(1)
     .get();
 
   console.log(result);

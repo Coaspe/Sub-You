@@ -1,11 +1,12 @@
 import { motion, AnimateSharedLayout, AnimatePresence } from "framer-motion"
 import { memo, useEffect, useState } from "react"
-import { getUserType } from "../types"
+import { getUserType, postContent } from "../types"
 import '../style/sidebar.css'
 import { sidebarData } from "../data/sidebarData"
 import { useNavigate } from 'react-router';
 import Newpostmodal from "../components/Newpostmodal"
 import { CircularProgress } from "@mui/material"
+import { RootState } from "../redux/store"
 
 interface sidebarProps {
     userInfo: getUserType
@@ -15,10 +16,6 @@ interface sidebarProps {
     
     isLoading: boolean
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-
-    setPostSetChanged: React.Dispatch<React.SetStateAction<(string | boolean)[]>>
-    
-    setAlert: React.Dispatch<React.SetStateAction<[boolean, string, string]>>
 
     selectedPage: string
     setSelectedPage: React.Dispatch<React.SetStateAction<string>>
@@ -31,8 +28,6 @@ const Sidebar: React.FC<sidebarProps> = (
         setSideExpanded,
         isLoading,
         setIsLoading,
-        setPostSetChanged,
-        setAlert,
         selectedPage,
         setSelectedPage
     }) => {
@@ -40,7 +35,7 @@ const Sidebar: React.FC<sidebarProps> = (
     const [modalOpen, setModalOpen] = useState(false)
     const [windowInfo, setWindowInfo] = useState(0)
     const navigate = useNavigate()
-    
+
     const handleExpand = () => {
         setSideExpanded(!sideExpanded)
     }
@@ -92,7 +87,7 @@ const Sidebar: React.FC<sidebarProps> = (
     return (
       <>
         <AnimatePresence initial={false}>
-            <motion.div 
+                <motion.div 
                     key="main div"
                     variants={divVariants}
                     initial="initial"
@@ -211,8 +206,6 @@ const Sidebar: React.FC<sidebarProps> = (
                 open={modalOpen}
                 setSelectedPage={setSelectedPage}
                 setIsLoading={setIsLoading}
-                setPostSetChanged={setPostSetChanged}
-                setAlert={setAlert}
             />}
     </>
     )

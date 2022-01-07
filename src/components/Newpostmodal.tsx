@@ -9,6 +9,11 @@ import UserContext from '../context/user';
 import { useContext, useEffect, useState} from "react";
 import { uploadImage } from '../services/firebase';
 import Compressor from "compressorjs";
+import { useDispatch, useSelector } from 'react-redux';
+import { alertAction, postSetChangedAction } from '../redux';
+import { RootState } from '../redux/store';
+
+import axios from 'axios';
 
 interface newPostModalProps { 
     open: boolean;
@@ -16,8 +21,6 @@ interface newPostModalProps {
     
     setSelectedPage: React.Dispatch<React.SetStateAction<string>>;
     setIsLoading :React.Dispatch<React.SetStateAction<boolean>>;
-    setPostSetChanged: React.Dispatch<React.SetStateAction<(string | boolean)[]>>
-    setAlert: React.Dispatch<React.SetStateAction<[boolean, string, string]>>
 }
 
 const Newpostmodal: React.FC<newPostModalProps> = (
@@ -26,15 +29,23 @@ const Newpostmodal: React.FC<newPostModalProps> = (
         open,
         setSelectedPage,
         setIsLoading,
-        setPostSetChanged,
-        setAlert
     }) => {
     
     const { user } = useContext(UserContext);
     const [comment, setComment] = useState("");
     const [previewURL, setPriviewURL] = useState(["/images/logo.png"]);
     const [file, setFile] = useState<Blob[]>([]);
+    const [fileBlob, setFileBolb] = useState<string[]>([]);
     const [page, setPage] = useState(1);
+    const dispatch = useDispatch()
+    const postSetChanged : (string|boolean)[] = useSelector((state: RootState) => state.setPostSetChanged.postSetChanged)
+
+    const setPostSetChanged = (postSetChanged: (string | boolean)[]) => {
+        dispatch(postSetChangedAction.setPostSetChanged({postSetChanged : postSetChanged}))
+    }
+    const doSetAlert = (alert: [boolean, string, string]) => {
+        dispatch(alertAction.setAlert({alert: alert}))
+    }
 
     const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);
@@ -45,7 +56,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     const handleFileOnChange = (event: any) => {
 
         event.preventDefault();
-        let files: Array<File> | Array<Blob> = []
+        let files: Array<Blob> = []
         let images : string[]= [];
 
         for (let i = 0; i < event.target.files.length; i++) {
@@ -63,7 +74,9 @@ const Newpostmodal: React.FC<newPostModalProps> = (
 
             new Compressor(element, {
             quality: qual,
-                success(result: File) {
+                success(result: any) {
+                    console.log(result);
+                    
                     files.push(result)
                     images.push(URL.createObjectURL(result))
                     if (i === event.target.files.length - 1)
@@ -151,7 +164,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                     >
                         Find
                     </label>
-                    <form>
+                    <form encType='multipart/form-data' name="file">
                         <input
                             type="file"
                             id="input-file"
@@ -170,17 +183,29 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                         onChange={handleCommentChange}
                     />
                     <CheckCircleTwoToneIcon
-                        onClick={() => {
-                        uploadImage(
-                            comment,
-                            file,
-                            user,
-                            "SNS",
-                            setPostSetChanged,
-                            setIsLoading,
-                            setAlert
-                        )
-                            handleClose()
+                    onClick={async () => {
+                        let param = new window.FormData()
+                        param.append('file', file[0])
+
+                        // await axios({ method: "POST", url:"http://localhost:3001/uploadpost", data : formData, headers: formData.getHeaders() }).then((res) => {
+                        //     // setIsLoading(false)
+                        //     console.log(res);
+                        // })
+                        await axios.post("http://localhost:3001/uploadpost", param,{
+                                headers: {
+                                    'Content-Type': 'multipart/form-data'
+                                }
+                                })
+                        // uploadImage(
+                        //     comment,
+                        //     file,
+                        //     user,
+                        //     "SNS",
+                        //     setPostSetChanged,
+                        //     setIsLoading,
+                        //     doSetAlert
+                        // )
+                        // handleClose()
                         }}
                         className={`${previewURL[0] === "/images/logo.png" && "pointer-events-none"} cursor-pointer`}
                         sx={{ color: previewURL[0] !== "/images/logo.png" ? "#008000" : "#8e9598" }}

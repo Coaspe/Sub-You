@@ -5,6 +5,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import Alert from '@mui/material/Alert';
 
+import { useDispatch, useSelector } from 'react-redux';
 import Header from "../components/Header";
 import Timeline from "./Timeline";
 import Sidebar from "./Sidebar";
@@ -16,6 +17,8 @@ import { getUserType, postContent, userInfoFromFirestore } from "../types";
 import ProfileSetting from '../components/Profile/ProfileSetting';
 import firebase from 'firebase/compat';
 import Artists from '../page/Artists';
+import { alertAction, postsAction, userInfoAction } from '../redux';
+import { RootState } from '../redux/store';
 
 const variants = {
   enter: {
@@ -36,54 +39,72 @@ const variants = {
 
 const Dashboard = () => {
     
-    const [alert, setAlert] = useState<[boolean, string, string]>([false, "", ""])
     const [value, setValue] = useState(0);
     const [direction, setDirection] = useState(1);
     const { user: contextUser } = useContext(UserContext);
-    const [userInfo, setUserInfo] = useState<getUserType>({} as getUserType)
     const [sideExpanded, setSideExpanded] = useState(true)
     const [isLoading, setIsLoading] = useState(false)
-    const [postSetChanged, setPostSetChanged] = useState<(string | boolean)[]>(["", false]);
     const [selectedPage, setSelectedPage] = useState("Timeline")
-    const [posts, setPosts] = useState<postContent[]>([]);
     const [postsVisible, setPostsVisible] = useState<(number | boolean)[][]>([])
-    // Due to load variable issue from Timeline.tsx
-    const [subLoading, setSubLoading] = useState<boolean>(false)
-    const [key, setKey] = useState(0)
-    const [page, setPage] = useState(0)
-    const options = {
-        root: null, //기본 null, 관찰대상의 부모요소를 지정 
-        rootMargin: "20px", // 관찰하는 뷰포트의 마진 지정 
-        threshold: 1.0, // 관찰요소와 얼만큼 겹쳤을 때 콜백을 수행하도록 지정하는 요소 
-    };
 
-    const handleObserver = useCallback(async (entries) => {
+    // Due to load variable issue from Timeline.tsx
+    const [page, setPage] = useState(0)
+    const [key, setKey] = useState(0)
+    const dispatch = useDispatch()
+    const alert: [boolean, string, string] = useSelector((state: RootState) => state.setAlert.alert)
+    const userInfo: getUserType = useSelector((state: RootState) => state.setUserInfo.userInfo)
+    const postSetChanged: (string | boolean)[] = useSelector((state: RootState) => state.setPostSetChanged.postSetChanged)
+    
+    const doSetUserInfo = useCallback((userInfo: getUserType) => {
+        dispatch(userInfoAction.setUserInfo({userInfo: userInfo}))
+    }, [contextUser])
+
+    const doSetPosts = useCallback((posts: postContent[]) => {
+        dispatch(postsAction.setPosts({posts: posts}))
+    }, [postSetChanged])
+
+    const concatPosts = useCallback((posts: postContent[]) => {
+        dispatch(postsAction.concatPosts({posts: posts}))
+    }, [page])
+
+    const doSetAlert = (alert: [boolean, string, string]) => {
+        dispatch(alertAction.setAlert({alert: alert}))
+    }
+
+    const handleObserver = useCallback((entries) => {
         const target = entries[0];
         if (target.isIntersecting) {
-            console.log("is InterSecting");
-            setPage((prev) => prev + 1);
-            console.log(page);
-            
+            setPage((prev) => {return prev + 1});
         }
     }, []);
-    
-    useEffect(() => {
-        const observer = new IntersectionObserver(handleObserver, options);
-        if (divRef.current) observer.observe(divRef.current);
-        return () => observer.disconnect();
-    }, [handleObserver]);
+
+    const sendQuery = useCallback(async () => {
+        try {
+            const res: any = await getPhotosInfiniteScroll(
+                contextUser.uid,
+                userInfo.following,
+                key
+            );
+            console.log(res);
+            concatPosts(res)
+            setKey(res[res.length - 1].dateCreated)
+            setPostsVisible((prev) => { return [...prev, [prev.length, true]]})
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }, [contextUser.uid, key, userInfo.following, concatPosts]);
 
     useEffect(() => {
         const dashboardInit = async () => {
             await getUserByUserId(contextUser.uid).then((res: any) => {
-                setUserInfo(res)
+                doSetUserInfo(res)
             })
         }
         dashboardInit()
-    }, [contextUser.uid])
+    }, [contextUser.uid, doSetUserInfo, postSetChanged])
 
     useEffect(() => {
-
         async function getTimelinePhotos() {
             const result = await firebase
                 .firestore()
@@ -103,49 +124,37 @@ const Dashboard = () => {
         }
 
         if (postSetChanged[0] !== "delete") {
-            setPosts([])
-            setSubLoading(false)
+            doSetPosts([])
             getTimelinePhotos().then((res: any) => {
-                setPosts(res)
+                doSetPosts(res)
                 const tmp = []
                 for (let i = 0; i < res.length; i++) {
                     tmp.push([i, true])
                 }
-                setKey(res.length)
+                setKey(res[res.length - 1].dateCreated)
                 setPostsVisible(tmp)
-                setSubLoading(true)
             })
         }
         
-    }, [contextUser, postSetChanged])
+    }, [contextUser, postSetChanged, doSetPosts])
 
-    const fetchData = useCallback(
-        async (key: number) => {
-            try {
-                await getPhotosInfiniteScroll(contextUser.uid, userInfo.following, key).then((res: any) => {
-                    console.log(res);
-                    setPosts(posts.concat(res))
-                })
-            } catch (err) {
-                console.log(err);
-            }
-        }
-        , [posts, contextUser.uid, userInfo.following])
-    
+    useEffect(() => {
+        const option = {
+            root: null,
+            rootMargin: "20px",
+            threshold: 0
+            };
+        const observer = new IntersectionObserver(handleObserver, option);
+        if (divRef.current) observer.observe(divRef.current);
+    }, [handleObserver]);
+
     useEffect(() => {
         if (key !== 0) {
-            fetchData(key)
+            sendQuery();
         }
-    }, [page])
+    }, [page]);
 
-    useEffect(() => {
-        console.log(posts);
-    }, [posts])
-    useEffect(() => {
-        console.log("key", key);
-    }, [key])
     const divRef = useRef(null)
-
     const alertVariants = {
         initial: {
             opacity: 0,
@@ -160,7 +169,7 @@ const Dashboard = () => {
             y:-10
         }
     }
-
+    
     return (
         <div className="w-full h-full relative bg-opacity-10 bg-main">
             <AnimatePresence>
@@ -172,13 +181,13 @@ const Dashboard = () => {
                         exit="exit"
                         className="top-10 translate-x-2/4 left-1/4 w-1/2 z-50 fixed">
                         {alert[2] === 'success' ? (
-                            <Alert severity="success" color="success" onClose={() => { setAlert([false, "", ""]) }}>{`${alert[1]} is complete!!!`}</Alert>
+                            <Alert severity="success" color="success" onClose={() => { doSetAlert([false, "", ""]) }}>{`${alert[1]} is complete!!!`}</Alert>
                         ) : (alert[2] === 'error' ? (
-                                <Alert severity="error" color="error" onClose={() => { setAlert([false, "", ""]) }}>{`${alert[1]} is failed!!!`}</Alert>
+                                <Alert severity="error" color="error" onClose={() => { doSetAlert([false, "", ""]) }}>{`${alert[1]} is failed!!!`}</Alert>
                             ) : (alert[2] === 'warning' ? (
-                                    <Alert severity="warning" color="warning" onClose={() => { setAlert([false, "", ""]) }}>This is a warning alert — check it out!</Alert>
+                                    <Alert severity="warning" color="warning" onClose={() => { doSetAlert([false, "", ""]) }}>This is a warning alert — check it out!</Alert>
                                 ) : (
-                                        <Alert severity="info" color="info" onClose={() => { setAlert([false, "", ""]) }}>This is a info alert — check it out!</Alert>
+                                        <Alert severity="info" color="info" onClose={() => { doSetAlert([false, "", ""]) }}>This is a info alert — check it out!</Alert>
                         )))}
                     </motion.div>
                 }
@@ -191,8 +200,6 @@ const Dashboard = () => {
                     setSideExpanded={setSideExpanded}
                     isLoading={isLoading}
                     setIsLoading={setIsLoading}
-                    setPostSetChanged={setPostSetChanged}
-                    setAlert={setAlert}
                     selectedPage={selectedPage}
                     setSelectedPage={setSelectedPage}
                 />
@@ -200,14 +207,9 @@ const Dashboard = () => {
                     <Timeline
                         sideExpanded={sideExpanded}
                         setIsLoading={setIsLoading}
-                        posts={posts}
+                        postSetChanged={postSetChanged}
                         postsVisible={postsVisible}
                         setPostsVisible={setPostsVisible}
-                        postSetChanged={postSetChanged}
-                        setPostSetChanged={setPostSetChanged}
-                        setAlert={setAlert}
-                        subLoading={subLoading}
-                        setSubLoading={setSubLoading}
                     />
                 }
                 {selectedPage === "Setting" &&
@@ -244,7 +246,7 @@ const Dashboard = () => {
                     </BottomNavigation>
                 </motion.div> : null}
             </AnimatePresence>
-            <div ref={divRef} className='h-1 w-full absolute bottom-0'></div>
+            <div ref={divRef} className={`h-0 w-full absolute bottom-0`}></div>
         </div>
     );
 }
