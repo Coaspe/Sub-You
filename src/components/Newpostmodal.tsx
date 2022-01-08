@@ -9,7 +9,7 @@ import Compressor from "compressorjs";
 import { useDispatch, useSelector } from 'react-redux';
 import { alertAction, postSetChangedAction, previewURLAction, imageLocationInModalAction } from '../redux';
 import { RootState } from '../redux/store';
-import { AnimatePresence, AnimateSharedLayout, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import axios from 'axios';
 import { Skeleton } from '@mui/material';
 import Newpostmodalimage from './Newpostmodalimage';
@@ -37,6 +37,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     const dispatch = useDispatch()
     const postSetChanged : (string|boolean)[] = useSelector((state: RootState) => state.setPostSetChanged.postSetChanged)
     const previewURL: string[] = useSelector((state: RootState) => state.setPreviewURL.previewURL)
+    const myLocation : Array<number> = useSelector((state: RootState) => state.setImageLocationInModal.myLocation)
     
     const setMyLocation = (location: Array<number>) => {
         dispatch(imageLocationInModalAction.setMyLocation({myLocation: location}))
@@ -66,7 +67,9 @@ const Newpostmodal: React.FC<newPostModalProps> = (
         let images : string[]= [];
 
         for (let i = 0; i < event.target.files.length; i++) {
-            let element = event.target.files[i]
+            console.log(event.target.files);
+            
+            const element = event.target.files[i]
             
             let qual = 0.45;
 
@@ -81,6 +84,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
             new Compressor(element, {
             quality: qual,
                 success(result: any) {
+                    console.log("result", result);
                     
                     files.push(result)
                     images.push(URL.createObjectURL(result))
@@ -105,6 +109,17 @@ const Newpostmodal: React.FC<newPostModalProps> = (
         setComment("")
     };
 
+    const arrangeArray = (arr: string[]) => {
+        let tmp = Array.from({ length: previewURL.length }, () => "")
+        console.log("tmp", tmp);
+        
+        for (let i = 0; i < file.length; i++) {
+            const element = myLocation[i];
+            tmp[i] = arr[element]
+        }
+
+        return tmp
+    }
 
     const style = {
         position: 'absolute' as 'absolute',
@@ -193,7 +208,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                                     style={{ width: 500, height: 500 }}
                                     >
                                     <img
-                                        className='max-w-full max-h-full'
+                                        className='animate-pingmax-w-full max-h-full'
                                         src="./images/logo.png"
                                         alt="New Post default"
                                     />
@@ -226,16 +241,20 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                         />
                     <CheckCircleTwoToneIcon
                     onClick={async () => {
-
+                        
                             let param = new window.FormData()
                             for (let i = 0; i < file.length; i++) {
-                                param.append(`file${i}`, file[i]);   
+                                param.append(`file${i}`, file[i]); 
+                                console.log(`file${i}`, file[i]);
                             }
-                            param.append("userEmail", user.email as string)
+                            param.append("caption", comment as string)
+                            param.append("userInfo", JSON.stringify(user))
+                            param.append("category", "SNS")
+                            param.append("postSetChanged", JSON.stringify(postSetChanged))
                         
                             setIsLoading(true)
                             await axios.post("http://localhost:3001/uploadpost", param).then(async (res) => {
-                                const storageImageNames = res.data
+                                let storageImageNames = arrangeArray(res.data)
                                 await axios.post("http://localhost:3001/uploadpostFinish", {
                                     caption: comment,
                                     ImageUrl: storageImageNames,

@@ -19,15 +19,7 @@ const upload = multer({
 });
 
 app.post("/uploadpost", upload.any(), (req: any, res: express.Response) => {
-  
-  
-  if (req.body.userEmail === undefined) {
-    res.sendStatus(404)
-    res.send("User Email Error!")
-    res.end()
-  }
-
-  uploadImageToStorage(req.files, req.body.userEmail).then((resArr) => {
+  uploadImageToStorage(req.files, JSON.parse(req.body.userInfo).email).then((resArr) => {
     res.send(JSON.stringify(resArr))
     res.end()
   })

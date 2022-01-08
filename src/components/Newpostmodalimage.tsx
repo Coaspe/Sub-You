@@ -1,6 +1,5 @@
 import { Skeleton } from '@mui/material'
 import { motion } from 'framer-motion'
-import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { imageLocationInModalAction } from '../redux'
 import { RootState } from '../redux/store'
@@ -15,15 +14,14 @@ const Newpostmodalimage: React.FC<NewpostmodalimageProps> = ({ src, imagesNum, m
     const previewURL : string[] = useSelector((state: RootState) => state.setPreviewURL.previewURL)
 
     const location : Array<[number, number]> = useSelector((state: RootState) => state.setImageLocationInModal.imageLocationInModal)
-    const myLocation : Array<number> = useSelector((state: RootState) => state.setImageLocationInModal.myLocation)
-
-    const setLocation = (location: Array<[number, number]>) => {
-        dispatch(imageLocationInModalAction.setImageLocationInModal({imageLocationInModal: location}))
-    }
+    const myLocation: Array<number> = useSelector((state: RootState) => state.setImageLocationInModal.myLocation)
+    
     const setMyLocation = (location: Array<number>) => {
         dispatch(imageLocationInModalAction.setMyLocation({myLocation: location}))
     }
+    
     const tmp = []
+
     for (let i = 0; i < imagesNum; i++) {
         tmp.push(i)
     }
