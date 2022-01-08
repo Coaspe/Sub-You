@@ -7,7 +7,7 @@ import UserContext from '../context/user';
 import { useContext, useEffect, useState} from "react";
 import Compressor from "compressorjs";
 import { useDispatch, useSelector } from 'react-redux';
-import { alertAction, postSetChangedAction, previewURLAction } from '../redux';
+import { alertAction, postSetChangedAction, previewURLAction, imageLocationInModalAction } from '../redux';
 import { RootState } from '../redux/store';
 import { AnimatePresence, AnimateSharedLayout, motion } from 'framer-motion';
 import axios from 'axios';
@@ -36,8 +36,11 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     const [load, setLoad] = useState(false)
     const dispatch = useDispatch()
     const postSetChanged : (string|boolean)[] = useSelector((state: RootState) => state.setPostSetChanged.postSetChanged)
-    const previewURL : string[] = useSelector((state: RootState) => state.setPreviewURL.previewURL)
-
+    const previewURL: string[] = useSelector((state: RootState) => state.setPreviewURL.previewURL)
+    
+    const setMyLocation = (location: Array<number>) => {
+        dispatch(imageLocationInModalAction.setMyLocation({myLocation: location}))
+    }
     const setPreviewURL = (previewURL: string[]) => {
         dispatch(previewURLAction.setPreviewURL({previewURL: previewURL}))
     }
@@ -47,6 +50,10 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     }
     const doSetAlert = (alert: [boolean, string, string]) => {
         dispatch(alertAction.setAlert({alert: alert}))
+    }
+
+    const setLocation = (location: Array<[number, number]>) => {
+        dispatch(imageLocationInModalAction.setImageLocationInModal({imageLocationInModal: location}))
     }
 
     const handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,7 +141,16 @@ const Newpostmodal: React.FC<newPostModalProps> = (
         }
 
         cacheImages(previewURL).then(() => {
-                setLoad(true)
+            let tmp: Array<[number, number]> = []
+            let tmp2: Array<number> = []
+            for (let i = 0; i < previewURL.length; i++) {
+                tmp.push([Math.floor(i / 3) + 1, Math.floor(i % 3) + 1]);
+                tmp2.push(i)
+            }
+            
+            setLocation(tmp)
+            setMyLocation(tmp2)
+            setLoad(true)
         })
 
     }, [previewURL])
@@ -148,19 +164,20 @@ const Newpostmodal: React.FC<newPostModalProps> = (
             className="w-full sm:hidden"
         >
                 <Box sx={style} className="flex flex-col items-center justify-between w-1/2">
-                    <span className="font-noto text-2xl font-bold">
+                    <span className="font-noto text-2xl font-bold mb-7">
                         New Post
                     </span>
                     <AnimatePresence>
                         {previewURL[0] !== "/images/logo.png" ? 
                             (<motion.div animate={{opacity: 1}} className="w-full h-full grid grid-cols-3 gap-2 justify-center items-center">
-                            {load  ?
+                            {load ?
                                 (<>
-                                    {previewURL.map((url, urlIndex) => (
-                                            <Newpostmodalimage
-                                                src={url}
-                                                imagesNum={previewURL.length}
-                                                myIndex={urlIndex}/>
+                                    {previewURL.map((url, i) => (
+                                        <Newpostmodalimage
+                                            src={url}
+                                            imagesNum={previewURL.length}
+                                            myIndex={i}
+                                            />
 
                                     ))}
                                 </>)

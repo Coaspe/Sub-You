@@ -1,6 +1,6 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
 import { getUserType } from "../types";
-import { alertState, concatPostsAction, concatPostsPayload, postSetChangedState, postsState, previewURLState, setAlertAction, setAlertPayload, setPostsAction, setPostSetChangedAction, setPostSetChangedPayload, setPostsPayload, setPreviewURLAction, setPreviewURLPayload, setUserInfoAction, setUserInfoPayload, userInfoState } from "./type";
+import { alertState, concatPostsAction, concatPostsPayload, imageLocationInModalState, postSetChangedState, postsState, previewURLState, setAlertAction, setAlertPayload, setImageLocationInModalAction, setImageLocationInModalPayload, setMyLocationAction, setMyLocationPayload, setPostsAction, setPostSetChangedAction, setPostSetChangedPayload, setPostsPayload, setPreviewURLAction, setPreviewURLPayload, setUserInfoAction, setUserInfoPayload, userInfoState } from "./type";
 
 export const postsAction = {
     setPosts: createAction<setPostsPayload>("SETPOSTS"),
@@ -101,4 +101,29 @@ export const previewURLReducer = {
 export const setPreviewURLReducer = createReducer(previewURLInitialState, builder => {
     builder
         .addCase(previewURLAction.setPreviewURL, previewURLReducer.setPreviewURL)
+})
+
+export const imageLocationInModalAction = {
+    setImageLocationInModal: createAction<setImageLocationInModalPayload>("SETIMAGELOCATIONINMODAL"),
+    setMyLocation: createAction<setMyLocationPayload>("SETMYLOCATION")
+}
+
+const imageLocationInModalInitialState: imageLocationInModalState = {
+    imageLocationInModal: [] as Array<[number, number]>,
+    myLocation: [] as Array<number>
+}
+
+export const imageLocationInModalReducer = {
+    setImageLocationInModal: (state: imageLocationInModalState, action: setImageLocationInModalAction) => {
+        state.imageLocationInModal = action.payload.imageLocationInModal
+    },
+    setMyLocation: (state: imageLocationInModalState, action: setMyLocationAction) => {
+        state.myLocation = action.payload.myLocation
+    },
+}
+
+export const setImageLocationInModalReducer = createReducer(imageLocationInModalInitialState, builder => {
+    builder
+        .addCase(imageLocationInModalAction.setImageLocationInModal, imageLocationInModalReducer.setImageLocationInModal)
+        .addCase(imageLocationInModalAction.setMyLocation, imageLocationInModalReducer.setMyLocation)
 })

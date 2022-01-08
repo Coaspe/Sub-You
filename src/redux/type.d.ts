@@ -71,3 +71,24 @@ interface setPreviewURLPayload {
 interface setPreviewURLAction {
     payload: setPreviewURLPayload
 }
+
+interface imageLocationInModalState {
+    imageLocationInModal: Array<[number, number]>;
+    myLocation: Array<number>
+}
+
+interface setImageLocationInModalPayload {
+    imageLocationInModal: Array<[number, number]>;
+}
+
+interface setMyLocationPayload {
+    myLocation: Array<number>
+}
+
+interface setImageLocationInModalAction {
+    payload: setImageLocationInModalPayload
+}
+
+interface setMyLocationAction {
+    payload: setMyLocationPayload
+}
