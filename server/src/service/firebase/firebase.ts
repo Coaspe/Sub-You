@@ -1,4 +1,4 @@
-import { firebase, storageRef, FieldValue } from "../lib/firebase";
+import { firebase, FieldValue } from "../../lib/firebase";
 import { getAverageColor } from 'fast-average-color-node';
 
 export const singInWithGoogleInfoToFB = async (info: any) => {
@@ -88,48 +88,6 @@ export const getUserByEmail = async (email: string) => {
   return result.docs.map((item: any) => ({ ...item.data() }))[0];
 };
 
-export async function uploadImage(
-  caption: string,
-  ImageUrl: string[],
-  userInfo: any,
-  category: any,
-) {
-  const postId = ImageUrl;
-
-  let averageColor: any[] = [];
-
-  let tmp = await Promise.all(ImageUrl.map(async (imUrl: any) => {
-    return await storageRef
-      .child(`${userInfo.email}/${imUrl}`)
-      .getDownloadURL()
-  }))
-  
-    const res = await firebase
-      .firestore()
-      .collection("posts")
-      // Edit Later...
-      .add({
-        caption: caption,
-        comments: [],
-        dateCreated: Date.now(),
-        imageSrc: tmp,
-        postId: postId,
-        likes: [],
-        userId: userInfo.uid,
-        category: category,
-        averageColor: averageColor,
-        avatarImgSrc: userInfo.photoURL,
-      })
-    
-  return firebase
-        .firestore()
-        .collection("users")
-        .doc(userInfo.email)
-        .update({
-          postDocId: FieldValue.arrayUnion(res.id),
-        })
-}
-
 export async function getUserByUserId(userId: any) {
   const result = await firebase
     .firestore()
@@ -201,30 +159,6 @@ export async function getPhotosInfiniteScroll(userId:string, following:string, k
   );
   return photosWithUserDetails;
 }
-
-export async function deletePost(
-  docId: any,
-  userEmail: any,
-  storageImageNameArr: any,
-) {
-  // setIsLoading(true);
-
-  await firebase.firestore().collection("posts").doc(docId).delete();
-  await firebase
-    .firestore()
-    .collection("users")
-    .doc(userEmail)
-    .update({
-      postDocId: FieldValue.arrayRemove(docId),
-    });
-
-  return Promise.all(
-    storageImageNameArr.map((imageName: any) => {
-      let desertRef = storageRef.child(`${userEmail}/${imageName}`);
-      return desertRef.delete();
-    }))
-}
-
 export async function getAllUser() {
   let result: any = (await firebase.firestore().collection("users").get()).docs;
   result = result.map((doc: any) => doc.data());

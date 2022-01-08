@@ -1,12 +1,11 @@
 import { motion, AnimateSharedLayout, AnimatePresence } from "framer-motion"
 import { memo, useEffect, useState } from "react"
-import { getUserType, postContent } from "../types"
+import { getUserType } from "../types"
 import '../style/sidebar.css'
 import { sidebarData } from "../data/sidebarData"
 import { useNavigate } from 'react-router';
 import Newpostmodal from "../components/Newpostmodal"
 import { CircularProgress } from "@mui/material"
-import { RootState } from "../redux/store"
 
 interface sidebarProps {
     userInfo: getUserType

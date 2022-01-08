@@ -58,15 +58,15 @@ const Dashboard = () => {
     
     const doSetUserInfo = useCallback((userInfo: getUserType) => {
         dispatch(userInfoAction.setUserInfo({userInfo: userInfo}))
-    }, [contextUser])
+    }, [dispatch])
 
     const doSetPosts = useCallback((posts: postContent[]) => {
         dispatch(postsAction.setPosts({posts: posts}))
-    }, [postSetChanged])
+    }, [dispatch])
 
     const concatPosts = useCallback((posts: postContent[]) => {
         dispatch(postsAction.concatPosts({posts: posts}))
-    }, [page])
+    }, [dispatch])
 
     const doSetAlert = (alert: [boolean, string, string]) => {
         dispatch(alertAction.setAlert({alert: alert}))
@@ -86,7 +86,6 @@ const Dashboard = () => {
                 userInfo.following,
                 key
             );
-            console.log(res);
             concatPosts(res)
             setKey(res[res.length - 1].dateCreated)
             setPostsVisible((prev) => { return [...prev, [prev.length, true]]})
@@ -129,13 +128,15 @@ const Dashboard = () => {
         if (postSetChanged[0] !== "delete") {
             doSetPosts([])
             getTimelinePhotos().then((res: any) => {
-                doSetPosts(res)
-                const tmp = []
-                for (let i = 0; i < res.length; i++) {
-                    tmp.push([i, true])
+                if (res.length > 0) {
+                    doSetPosts(res)
+                    const tmp = []
+                    for (let i = 0; i < res.length; i++) {
+                        tmp.push([i, true])
+                    }
+                    setKey(res[res.length - 1].dateCreated)
+                    setPostsVisible(tmp)
                 }
-                setKey(res[res.length - 1].dateCreated)
-                setPostsVisible(tmp)
             })
         }
         

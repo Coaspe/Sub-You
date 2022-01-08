@@ -111,6 +111,9 @@ const PostHeader: React.FC<postHeaderProps> = (
                 setPostSetChanged(res.data.postSetChanged)
                 doSetAlert(res.data.alert)
               }
+              setTimeout(() => {
+                doSetAlert([false,"",""])
+              }, 3000);
               setIsLoading(res.data.loading)
             }).catch((err) => {
               console.log(err.message);

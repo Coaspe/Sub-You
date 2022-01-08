@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import {motion} from "framer-motion"
-interface Props {
+interface artistImageProps {
   src: Promise<string>;
 }
 
-const ArtistImage: React.FC<Props> = ({ src }) => {
+const ArtistImage: React.FC<artistImageProps> = ({ src }) => {
     const variant = {
         hover: {
             scale: 1.8,

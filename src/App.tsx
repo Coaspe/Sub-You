@@ -9,7 +9,6 @@ import Profile from "./page/Profile";
 const Login = lazy(() => import("./page/Login"))
 const Dashboard = lazy(() => import("./page/Dashboard"))
 const Signup = lazy(() => import("./page/Signup"))
-const Artists = lazy(() => import("./page/Artists"))
 
 const App = () => {
   const { user } = useAuthListner()

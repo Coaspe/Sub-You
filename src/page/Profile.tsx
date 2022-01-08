@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import Header from "../components/Header";
 import { getUserByEmailEncrypted, getDocFirstImage } from "../services/firebase";
 import { getUserType } from "../types";

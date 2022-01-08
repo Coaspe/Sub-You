@@ -41,6 +41,10 @@ const ProfileDetailImage: React.FC<profileDetailImageProps> = ({ docId, setDocId
             setDocId("")
         }
     }, [])
+    
+    window.onresize = function () {
+        setWindowInfo(window.innerWidth / window.innerHeight);
+    }
 
     useEffect(() => {
         // Request Post's information related to the thumbnail photo. 
@@ -52,9 +56,6 @@ const ProfileDetailImage: React.FC<profileDetailImageProps> = ({ docId, setDocId
         })
     }, [docId])
 
-    window.onresize = function () {
-        setWindowInfo(window.innerWidth / window.innerHeight);
-    }
 
     const svgVariants = {
         initial: {

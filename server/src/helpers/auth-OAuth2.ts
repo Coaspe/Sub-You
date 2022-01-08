@@ -4,7 +4,7 @@ import {
   singInWithGoogleInfoToFB,
   signInWithFacebookInfoToFB,
   doesEmailExist,
-} from "../service/firebase";
+} from "../service/firebase/firebase";
 
 export const signInWithGoogle = (navi: any) => {
   const provider = new firebase.auth.GoogleAuthProvider();

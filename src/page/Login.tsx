@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { useEffect, useState, useContext } from 'react';
 import axios from 'axios'
-import { errorInitial, errorType, locationType, locationTypeInitial } from '../types';
+import { locationType } from '../types';
 import FirebaseContext from "../context/firebase";
 import { useNavigate } from 'react-router-dom';
 import { ReactCountryFlag } from "react-country-flag"
@@ -11,43 +11,38 @@ import { signInWithFacebook, signInWithGoogle } from '../helpers/auth-OAuth2';
 import { styled } from '@mui/system';
 import ColoredLine from '../components/ColoredLine';
 import '../style/Login.css'
-import { getUserType } from "../types";
-import { getUserByEmail } from "../services/firebase";
 
 const Login = () => {
-    const [location, setLocation] = useState<locationType>(locationTypeInitial);
+    const [location, setLocation] = useState<locationType>({} as locationType);
     const navigate = useNavigate()
 
     const [emailAddress, setEmailAddress] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState<errorType>(errorInitial);
     const { firebase } = useContext(FirebaseContext);
+    const SignupBtn = styled(Button)`
+        background: linear-gradient(45deg, #736578 30%, #b2a8b5 90%);
+        margin-top: 1rem;
+        font-family: "STIX";
+    `
+
+    // Get User Country
     useEffect(() => {
-        const getTimeline = async () => {
-            const { following } = await getUserByEmail("aspalt85@gmail.com") as getUserType
-        }
-        getTimeline()
         axios.get('https://ipapi.co/json/')
             .then((response: any) => {
                 let data = response.data;
                 setLocation(data)
             });
     }, [])
-    const SignupBtn = styled(Button)`
-        background: linear-gradient(45deg, #736578 30%, #b2a8b5 90%);
-        margin-top: 1rem;
-        font-family: "STIX";
-    `
+
   const handleLogin = async (event:React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
-
     try {
-      await firebase.auth().signInWithEmailAndPassword(emailAddress, password);
-      navigate("/");
-    } catch (error: any) {
-      setEmailAddress("");
-      setPassword("");
-        setError(error);
+        await firebase.auth().signInWithEmailAndPassword(emailAddress, password);
+        navigate("/");
+    }
+    catch (error: any) {
+        setEmailAddress("");
+        setPassword("");
         console.log(error.message);
     }
     };

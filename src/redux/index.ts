@@ -1,6 +1,6 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
 import { getUserType } from "../types";
-import { alertState, concatPostsAction, concatPostsPayload, postSetChangedState, postsState, setAlertAction, setAlertPayload, setPostsAction, setPostSetChangedAction, setPostSetChangedPayload, setPostsPayload, setUserInfoAction, setUserInfoPayload, userInfoState } from "./type";
+import { alertState, concatPostsAction, concatPostsPayload, postSetChangedState, postsState, previewURLState, setAlertAction, setAlertPayload, setPostsAction, setPostSetChangedAction, setPostSetChangedPayload, setPostsPayload, setPreviewURLAction, setPreviewURLPayload, setUserInfoAction, setUserInfoPayload, userInfoState } from "./type";
 
 export const postsAction = {
     setPosts: createAction<setPostsPayload>("SETPOSTS"),
@@ -81,4 +81,24 @@ export const postSetChangedReducer = {
 export const setPostSetChangedReducer = createReducer(postSetChangedInitialState, builder => {
     builder
         .addCase(postSetChangedAction.setPostSetChanged, postSetChangedReducer.setPostSetChanged)
+})
+
+
+export const previewURLAction = {
+    setPreviewURL: createAction<setPreviewURLPayload>("SETPREVIEWURL"),
+}
+
+const previewURLInitialState: previewURLState = {
+    previewURL: ["/images/logo.png"] as string[]
+}
+
+export const previewURLReducer = {
+    setPreviewURL: (state: previewURLState, action: setPreviewURLAction) => {
+        state.previewURL = action.payload.previewURL
+    },
+}
+
+export const setPreviewURLReducer = createReducer(previewURLInitialState, builder => {
+    builder
+        .addCase(previewURLAction.setPreviewURL, previewURLReducer.setPreviewURL)
 })

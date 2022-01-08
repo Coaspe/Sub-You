@@ -2,8 +2,8 @@ import { postContent } from "../../types"
 import Footer from "./Footer"
 import Imagesw from "./Imagesw"
 import PostHeader from "./PostHeader"
-import { AnimatePresence, LazyMotion, motion, m, domAnimation } from "framer-motion"
-import { memo, useEffect, useState } from "react"
+import { AnimatePresence, LazyMotion, m, domAnimation } from "framer-motion"
+import { useEffect, useState } from "react"
 import Postskeleton from "../Postskeleton"
 
 interface postProps {
@@ -34,6 +34,7 @@ const Post: React.FC<postProps> = (
 
         return Promise.all(promise)
     }  
+
     useEffect(() => {
         const awaitCache = async (srcArray: string[]) => {
             await cacheImages(srcArray).then(() => {
@@ -41,7 +42,7 @@ const Post: React.FC<postProps> = (
             })
         }
         awaitCache(postContentProps.imageSrc)
-    }, [])
+    }, [postContentProps.imageSrc])
     
     return (
         <AnimatePresence>

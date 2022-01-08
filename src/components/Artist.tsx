@@ -1,11 +1,14 @@
-import { getUserPropType, postContent2} from "../types"
+import { getUserType, postContent} from "../types"
 import Avatar from '@mui/material/Avatar';
 import { getDocFirstImage, getUserByEmail, updateLoggedInUserFollowing, updateFollowedUserFollowers } from "../services/firebase";
 import { useContext, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion"
 import UserContext from "../context/user";
 
-const Artist = ({ user }: getUserPropType) => {
+interface artistProps {
+    user : getUserType
+}
+const Artist: React.FC<artistProps> = ({ user }: artistProps) => {
 
     interface firstImageInfo {
         src: string;
@@ -56,8 +59,8 @@ const Artist = ({ user }: getUserPropType) => {
                 if (res.postDocId.length === 0) {
                     return;
                 }
-                getDocFirstImage(res.postDocId).then((re: postContent2[] | undefined) => {
-                    const x: Array<firstImageInfo> = (re as postContent2[]).map((data) => ({
+                getDocFirstImage(res.postDocId).then((re: postContent[] | undefined) => {
+                    const x: Array<firstImageInfo> = (re as postContent[]).map((data) => ({
                         src: data.imageSrc[0],
                         color: data.averageColor[0]
                     }))

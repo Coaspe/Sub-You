@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.signInWithFacebook = exports.signOut = exports.signInWithGoogle = void 0;
 const app_1 = __importDefault(require("firebase/compat/app"));
 require("firebase/compat/auth");
-const firebase_1 = require("../service/firebase");
+const firebase_1 = require("../service/firebase/firebase");
 const signInWithGoogle = (navi) => {
     const provider = new app_1.default.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });

@@ -1,4 +1,3 @@
-import { memo } from "react";
 import Post from "../components/post/Post";
 import { postContent } from "../types";
 import Postskeleton from "../components/Postskeleton";

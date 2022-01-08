@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
 import { useState, useEffect } from 'react';
-import { locationType, locationTypeInitial } from '../types';
+import { locationType } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { ReactCountryFlag } from "react-country-flag"
 import { doesEmailExist, signupWithEmail } from '../services/firebase';
@@ -11,7 +11,7 @@ import axios from 'axios'
 import { styled } from '@mui/system';
 
 const Signup = () => {
-    const [location, setLocation] = useState<locationType>(locationTypeInitial);
+    const [location, setLocation] = useState<locationType>({} as locationType);
     const navigate = useNavigate()
 
     const [emailAddress, setEmailAddress] = useState("");
@@ -30,17 +30,18 @@ const Signup = () => {
         event.preventDefault();
         const usernameExists = await doesEmailExist(emailAddress);
         if (!usernameExists) {
-        try {
-            signupWithEmail(emailAddress, password, username)
-            navigate("/");
-        } catch (error: any) {
-            setEmailAddress("");
-            setUsername("");
-            setPassword("");
-            setError(error.message)
+            try {
+                signupWithEmail(emailAddress, password, username)
+                navigate("/");
+            } catch (error: any) {
+                setEmailAddress("");
+                setUsername("");
+                setPassword("");
+                setError(error.message)
+            }
         }
-        } else {
-        setError("That email is already taken, please try another.");
+        else {
+            setError("That email is already taken, please try another.");
         }
     };
     const SignupBtn = styled(Button)`

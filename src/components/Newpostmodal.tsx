@@ -1,18 +1,18 @@
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import TextField from '@mui/material/TextField';
-import Pagination from '@mui/material/Pagination';
 import CheckCircleTwoToneIcon from '@mui/icons-material/CheckCircleTwoTone';
 
 import UserContext from '../context/user';
 import { useContext, useEffect, useState} from "react";
 import Compressor from "compressorjs";
 import { useDispatch, useSelector } from 'react-redux';
-import { alertAction, postSetChangedAction } from '../redux';
+import { alertAction, postSetChangedAction, previewURLAction } from '../redux';
 import { RootState } from '../redux/store';
-
+import { AnimatePresence, AnimateSharedLayout, motion } from 'framer-motion';
 import axios from 'axios';
+import { Skeleton } from '@mui/material';
+import Newpostmodalimage from './Newpostmodalimage';
 
 interface newPostModalProps { 
     open: boolean;
@@ -32,12 +32,15 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     
     const { user } = useContext(UserContext);
     const [comment, setComment] = useState("");
-    const [previewURL, setPriviewURL] = useState(["/images/logo.png"]);
     const [file, setFile] = useState<Blob[]>([]);
-    const [fileBlob, setFileBolb] = useState<string[]>([]);
-    const [page, setPage] = useState(1);
+    const [load, setLoad] = useState(false)
     const dispatch = useDispatch()
     const postSetChanged : (string|boolean)[] = useSelector((state: RootState) => state.setPostSetChanged.postSetChanged)
+    const previewURL : string[] = useSelector((state: RootState) => state.setPreviewURL.previewURL)
+
+    const setPreviewURL = (previewURL: string[]) => {
+        dispatch(previewURLAction.setPreviewURL({previewURL: previewURL}))
+    }
 
     const setPostSetChanged = (postSetChanged: (string | boolean)[]) => {
         dispatch(postSetChangedAction.setPostSetChanged({postSetChanged : postSetChanged}))
@@ -46,9 +49,6 @@ const Newpostmodal: React.FC<newPostModalProps> = (
         dispatch(alertAction.setAlert({alert: alert}))
     }
 
-    const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
-        setPage(value);
-    };
     const handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setComment(event.target.value);
     };
@@ -79,7 +79,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                     images.push(URL.createObjectURL(result))
                     if (i === event.target.files.length - 1)
                     {
-                        setPriviewURL(images)
+                        setPreviewURL(images)
                         setFile(files)
                     }
                 },
@@ -94,20 +94,20 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     const handleClose = () => {
         setOpen(false)
         setFile([])
-        setPriviewURL(["/images/logo.png"])
+        setPreviewURL(["/images/logo.png"])
         setComment("")
     };
 
 
     const style = {
-    position: 'absolute' as 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    bgcolor: 'background.paper',
-    border: '1px solid #000',
-    boxShadow: 24,
-    p: 4,
+        position: 'absolute' as 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        bgcolor: 'background.paper',
+        border: '1px solid #000',
+        boxShadow: 24,
+        p: 4,
     };
 
     useEffect(() => {
@@ -116,46 +116,73 @@ const Newpostmodal: React.FC<newPostModalProps> = (
         }
     }, [])
 
+    useEffect(() => {   
+        setLoad(false)
+        const cacheImages = (srcArray: string[]) => {
+            const promise = srcArray.map((src: string) => {
+                
+                return new Promise(function (resolve, reject) {
+                const img = new Image();
+
+                img.src = src;
+                img.onload = () => resolve(src);
+                img.onerror = () => reject();
+                })
+            })
+
+            return Promise.all(promise)
+        }
+
+        cacheImages(previewURL).then(() => {
+                setLoad(true)
+        })
+
+    }, [previewURL])
+
     return (
         <Modal
             open={open}
             onClose={handleClose}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
-            className="sm:hidden"
-            >
-                <Box sx={style} className="flex flex-col items-center justify-between">
-                    <Typography id="modal-modal-title" variant="h6" component="h2">
+            className="w-full sm:hidden"
+        >
+                <Box sx={style} className="flex flex-col items-center justify-between w-1/2">
+                    <span className="font-noto text-2xl font-bold">
                         New Post
-                    </Typography>
-                    {previewURL[0] !== "/images/logo.png" ? 
-                        (
-                            <div className="flex flex-col items-center">
-                                <div style={{ width: 500, height: 500 }} className="flex flex-col justify-center items-center">
+                    </span>
+                    <AnimatePresence>
+                        {previewURL[0] !== "/images/logo.png" ? 
+                            (<motion.div animate={{opacity: 1}} className="w-full h-full grid grid-cols-3 gap-2 justify-center items-center">
+                            {load  ?
+                                (<>
+                                    {previewURL.map((url, urlIndex) => (
+                                            <Newpostmodalimage
+                                                src={url}
+                                                imagesNum={previewURL.length}
+                                                myIndex={urlIndex}/>
+
+                                    ))}
+                                </>)
+                                :
+                                (<>
+                                    {previewURL.map(() => <Skeleton variant="rectangular" width={118} height={200} />)}
+                                </>)}
+                            </motion.div>)
+                            : 
+                            (
+                                <div 
+                                    className="flex flex-col justify-center items-center h-5/6"
+                                    style={{ width: 500, height: 500 }}
+                                    >
                                     <img
-                                        className='max-h-full max-w-full'
-                                        src={previewURL[page-1]}
-                                        alt={`Page : ${page-1}`}
-                                        />
+                                        className='max-w-full max-h-full'
+                                        src="./images/logo.png"
+                                        alt="New Post default"
+                                    />
                                 </div>
-                                <Pagination count={file.length} page={page} onChange={handlePageChange} />
-                            </div>
-                            )          
-                        : 
-                        (
-                    <div 
-                        className="flex flex-col justify-between items-center h-5/6"
-                        style={{ width: 500, height: 500 }}
-                        >
-                        
-                        <div></div>
-                        <img
-                            className='max-w-full max-h-full'
-                            src="./images/logo.png"
-                            alt="asef"
-                        />
-                        <div></div>
-                    </div>)}
+                        )}
+                    </AnimatePresence>
                     <label
                         className="font-noto pt-1 pb-1 pl-3 pr-3 mr-2 mt-2 w-1/6 text-center bg-main rounded-md cursor-pointer"
                         htmlFor="input-file"

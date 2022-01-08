@@ -11,7 +11,6 @@ interface artistsProps {
 
 const Artists: React.FC<artistsProps> = ({ sideExpanded }) => {
     const [users, setUsers] = useState<getUserType[]>([])
-    const [me, setMe] = useState<getUserType>({} as getUserType)
     const { user: contextUser } = useContext(UserContext)
 
     useEffect(() => {
@@ -24,7 +23,6 @@ const Artists: React.FC<artistsProps> = ({ sideExpanded }) => {
                 let tmp : getUserType[] = res[1].filter((user: any) =>
                 !res[0].following.includes(user.uid) && res[0].uid !== user.uid)
                 
-                setMe(res[1].find(((element: getUserType) => element.uid === contextUser.uid)))
                 setUsers(tmp)
             })
         }

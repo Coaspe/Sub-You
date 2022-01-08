@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPostByDocId = exports.getUserByEmailEncrypted = exports.updateFollowedUserFollowers = exports.updateLoggedInUserFollowing = exports.getDocFirstImage = exports.getAllUser = exports.deletePost = exports.getPhotosInfiniteScroll = exports.getPhotos = exports.getUserByUserId = exports.uploadImage = exports.getUserByEmail = exports.signupWithEmail = exports.doesEmailExist = exports.signInWithFacebookInfoToFB = exports.singInWithGoogleInfoToFB = void 0;
-const firebase_1 = require("../lib/firebase");
+exports.getPostByDocId = exports.getUserByEmailEncrypted = exports.updateFollowedUserFollowers = exports.updateLoggedInUserFollowing = exports.getDocFirstImage = exports.getAllUser = exports.getPhotosInfiniteScroll = exports.getPhotos = exports.getUserByUserId = exports.getUserByEmail = exports.signupWithEmail = exports.doesEmailExist = exports.signInWithFacebookInfoToFB = exports.singInWithGoogleInfoToFB = void 0;
+const firebase_1 = require("../../lib/firebase");
 const singInWithGoogleInfoToFB = (info) => __awaiter(void 0, void 0, void 0, function* () {
     const CryptoJS = require("crypto-js");
     const secretKey = info.user.uid;
@@ -92,41 +92,6 @@ const getUserByEmail = (email) => __awaiter(void 0, void 0, void 0, function* ()
     return result.docs.map((item) => (Object.assign({}, item.data())))[0];
 });
 exports.getUserByEmail = getUserByEmail;
-function uploadImage(caption, ImageUrl, userInfo, category) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const postId = ImageUrl;
-        let averageColor = [];
-        let tmp = yield Promise.all(ImageUrl.map((imUrl) => __awaiter(this, void 0, void 0, function* () {
-            return yield firebase_1.storageRef
-                .child(`${userInfo.email}/${imUrl}`)
-                .getDownloadURL();
-        })));
-        const res = yield firebase_1.firebase
-            .firestore()
-            .collection("posts")
-            // Edit Later...
-            .add({
-            caption: caption,
-            comments: [],
-            dateCreated: Date.now(),
-            imageSrc: tmp,
-            postId: postId,
-            likes: [],
-            userId: userInfo.uid,
-            category: category,
-            averageColor: averageColor,
-            avatarImgSrc: userInfo.photoURL,
-        });
-        return firebase_1.firebase
-            .firestore()
-            .collection("users")
-            .doc(userInfo.email)
-            .update({
-            postDocId: firebase_1.FieldValue.arrayUnion(res.id),
-        });
-    });
-}
-exports.uploadImage = uploadImage;
 function getUserByUserId(userId) {
     return __awaiter(this, void 0, void 0, function* () {
         const result = yield firebase_1.firebase
@@ -186,24 +151,6 @@ function getPhotosInfiniteScroll(userId, following, key) {
     });
 }
 exports.getPhotosInfiniteScroll = getPhotosInfiniteScroll;
-function deletePost(docId, userEmail, storageImageNameArr) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // setIsLoading(true);
-        yield firebase_1.firebase.firestore().collection("posts").doc(docId).delete();
-        yield firebase_1.firebase
-            .firestore()
-            .collection("users")
-            .doc(userEmail)
-            .update({
-            postDocId: firebase_1.FieldValue.arrayRemove(docId),
-        });
-        return Promise.all(storageImageNameArr.map((imageName) => {
-            let desertRef = firebase_1.storageRef.child(`${userEmail}/${imageName}`);
-            return desertRef.delete();
-        }));
-    });
-}
-exports.deletePost = deletePost;
 function getAllUser() {
     return __awaiter(this, void 0, void 0, function* () {
         let result = (yield firebase_1.firebase.firestore().collection("users").get()).docs;

@@ -58,3 +58,16 @@ interface setPostSetChangedPayload {
 interface setPostSetChangedAction {
     payload: setPostSetChangedPayload
 }
+
+
+interface previewURLState {
+    previewURL: string[];
+}
+
+interface setPreviewURLPayload {
+    previewURL: string[];
+}
+
+interface setPreviewURLAction {
+    payload: setPreviewURLPayload
+}
