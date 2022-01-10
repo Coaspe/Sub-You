@@ -11,7 +11,7 @@ interface sidebarProps {
     userInfo: getUserType
 
     sideExpanded: boolean
-    setSideExpanded: React.Dispatch<React.SetStateAction<boolean>>
+    setSideExpanded: (sideBarExpanded: boolean) => void
     
     isLoading: boolean
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
@@ -34,10 +34,11 @@ const Sidebar: React.FC<sidebarProps> = (
     const [modalOpen, setModalOpen] = useState(false)
     const [windowInfo, setWindowInfo] = useState(0)
     const navigate = useNavigate()
-
+    
     const handleExpand = () => {
         setSideExpanded(!sideExpanded)
     }
+
     const handleClickProfile = () => {
         navigate(`/p/${userInfo?.userEmailEncrypted}`)
     }
@@ -162,7 +163,7 @@ const Sidebar: React.FC<sidebarProps> = (
                                     <ol className="w-3/5 flex flex-col items-center mt-14">
                                         {sidebarData.map(({svg, title}) => (
                                             <motion.li 
-                                                onClick={() => {
+                                                onClick={(event) => {
                                                     setSelectedPage(title)
                                                     if (title === "New Post") {
                                                         setModalOpen(true)

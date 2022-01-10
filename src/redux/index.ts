@@ -1,6 +1,6 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
 import { getUserType } from "../types";
-import { alertState, concatPostsAction, concatPostsPayload, imageLocationInModalState, postSetChangedState, postsState, previewURLState, setAlertAction, setAlertPayload, setImageLocationInModalAction, setImageLocationInModalPayload, setMyLocationAction, setMyLocationPayload, setPostsAction, setPostSetChangedAction, setPostSetChangedPayload, setPostsPayload, setPreviewURLAction, setPreviewURLPayload, setUserInfoAction, setUserInfoPayload, userInfoState } from "./type";
+import { alertState, concatPostsAction, concatPostsPayload, imageLocationInModalState, postSetChangedState, postsState, previewURLState, setAlertAction, setAlertPayload, setImageLocationInModalAction, setImageLocationInModalPayload, setMyLocationAction, setMyLocationPayload, setPostsAction, setPostSetChangedAction, setPostSetChangedPayload, setPostsPayload, setPreviewURLAction, setPreviewURLPayload, setSideBarExpandedAction, setSideBarExpandedPayload, setUserInfoAction, setUserInfoPayload, sideBarExpandedState, userInfoState } from "./type";
 
 export const postsAction = {
     setPosts: createAction<setPostsPayload>("SETPOSTS"),
@@ -63,7 +63,7 @@ export const setUserInfoReducer = createReducer(userInfoInitialState, builder =>
         .addCase(userInfoAction.setUserInfo, userInfoReducer.setUserInfo)
 })
 
-
+/////////////////////////////////////////////////////////////////////////////////////
 export const postSetChangedAction = {
     setPostSetChanged: createAction<setPostSetChangedPayload>("SETPOSTSETCHANGED"),
 }
@@ -83,7 +83,7 @@ export const setPostSetChangedReducer = createReducer(postSetChangedInitialState
         .addCase(postSetChangedAction.setPostSetChanged, postSetChangedReducer.setPostSetChanged)
 })
 
-
+/////////////////////////////////////////////////////////////////////////////////////
 export const previewURLAction = {
     setPreviewURL: createAction<setPreviewURLPayload>("SETPREVIEWURL"),
 }
@@ -102,7 +102,7 @@ export const setPreviewURLReducer = createReducer(previewURLInitialState, builde
     builder
         .addCase(previewURLAction.setPreviewURL, previewURLReducer.setPreviewURL)
 })
-
+/////////////////////////////////////////////////////////////////////////////////////
 export const imageLocationInModalAction = {
     setImageLocationInModal: createAction<setImageLocationInModalPayload>("SETIMAGELOCATIONINMODAL"),
     setMyLocation: createAction<setMyLocationPayload>("SETMYLOCATION")
@@ -126,4 +126,23 @@ export const setImageLocationInModalReducer = createReducer(imageLocationInModal
     builder
         .addCase(imageLocationInModalAction.setImageLocationInModal, imageLocationInModalReducer.setImageLocationInModal)
         .addCase(imageLocationInModalAction.setMyLocation, imageLocationInModalReducer.setMyLocation)
+})
+/////////////////////////////////////////////////////////////////////////////////////
+export const sideBarExpandedAction = {
+    setSideBarExpanded: createAction<setSideBarExpandedPayload>("SETSIDEBAREXPANDED"),
+}
+
+const sideBarInitialState: sideBarExpandedState = {
+    sideBarExpanded: true
+}
+
+export const sideBarExpandedReducer = {
+    setSideBarExpanded: (state: sideBarExpandedState, action: setSideBarExpandedAction) => {
+        state.sideBarExpanded = action.payload.sideBarExpanded
+    },
+}
+
+export const setSideBarExpandedReducer = createReducer(sideBarInitialState, builder => {
+    builder
+        .addCase(sideBarExpandedAction.setSideBarExpanded, sideBarExpandedReducer.setSideBarExpanded)
 })

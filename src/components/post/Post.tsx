@@ -20,6 +20,7 @@ const Post: React.FC<postProps> = (
         setPostsVisible }) => {
             
     const [load, setLoad] = useState(false)
+    
     const cacheImages = (srcArray: string[]) => {
         const promise = srcArray.map((src: string) => {
             

@@ -9,7 +9,7 @@ const ProfileSetting: React.FC<profileSettingProps> = ({ sideExpanded }) => {
     return (
         <AnimatePresence>
             <motion.div layout className={`h-screen flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-3 sm:mx-5`}>
-                <motion.div className="w-full bg-red-50">
+                <motion.div className="w-full">
                     asdawda
                 </motion.div>
             </motion.div>

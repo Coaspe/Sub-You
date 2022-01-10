@@ -1,4 +1,26 @@
-import { firebase, storageRef, FieldValue } from "../lib/firebase";
+import { firebase, storageRef, FieldValue, rtDBRef } from "../lib/firebase";
+
+export const makeMessageRoom = (users) => {
+  const key = rtDBRef.child("chatRooms").push().key;
+
+  let messageRoom = {
+    users: users,
+  };
+
+  let updates = {};
+
+  updates["/chatRooms/" + key] = messageRoom;
+
+  return rtDBRef.update(updates);
+};
+
+export const sendMessage = (key, message, user) => {
+  const address = rtDBRef.child(`chatRooms/${key}/messages/${Date.now()}`);
+  return address.update({
+    user: user,
+    message: message,
+  });
+};
 
 export const singInWithGoogleInfoToFB = async (info) => {
   const CryptoJS = require("crypto-js");
@@ -131,7 +153,6 @@ export async function getPhotos(userId, following) {
 }
 
 export async function getPhotosInfiniteScroll(userId, following, key) {
-  console.log(userId, following, key);
   const result = await firebase
     .firestore()
     .collection("posts")
@@ -140,8 +161,6 @@ export async function getPhotosInfiniteScroll(userId, following, key) {
     .startAfter(key)
     .limit(1)
     .get();
-
-  console.log(result);
 
   const userFollowedPhotos = result.docs.map((photo) => ({
     ...photo.data(),

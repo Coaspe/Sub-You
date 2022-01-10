@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import {setAlertReducer, setImageLocationInModalReducer, setPostSetChangedReducer, setPostsReducer, setPreviewURLReducer, setUserInfoReducer} from ".";
+import {setAlertReducer, setImageLocationInModalReducer, setPostSetChangedReducer, setPostsReducer, setPreviewURLReducer, setSideBarExpandedReducer, setUserInfoReducer} from ".";
 
 export const store = configureStore({
   reducer: {
@@ -8,7 +8,8 @@ export const store = configureStore({
     setUserInfo: setUserInfoReducer,
     setPostSetChanged: setPostSetChangedReducer,
     setPreviewURL: setPreviewURLReducer,
-    setImageLocationInModal: setImageLocationInModalReducer
+    setImageLocationInModal: setImageLocationInModalReducer,
+    setSidebarExpanded: setSideBarExpandedReducer
   },
 });
 

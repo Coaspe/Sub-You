@@ -55,7 +55,7 @@ const PostHeader: React.FC<postHeaderProps> = (
   }, [postContentProps.userId, user.uid])
   
   return (
-    <motion.div layout className="flex items-center justify-between bg-white px-2 py-2 font-stix sm:h-12">
+    <motion.div layout className="flex items-center justify-between bg-white px-2 py-2 font-noto sm:h-12">
           <motion.div className="flex items-center justify-center ml-2">
             <Avatar sx={{width : 35, height : 35}} className="mr-2" alt="user avatar" src={postContentProps.avatarImgSrc} />
             <span className="font-noto font-semibold text-sm">{postContentProps.username}</span>
@@ -82,16 +82,25 @@ const PostHeader: React.FC<postHeaderProps> = (
               PaperProps={{
                 style: {
                   maxHeight: ITEM_HEIGHT * 4.5,
-                  width: '20ch',
+                  width: '15ch',
                 },
             }}>
-                <MenuItem onClick={handleClose}>Save</MenuItem>
-                <MenuItem onClick={handleClose}>Purchase</MenuItem>
-                <MenuItem onClick={handleClose}>Auction</MenuItem>
-                <MenuItem onClick={handleClose}>Report</MenuItem>
+          <MenuItem className="font-noto" onClick={handleClose}>
+              <img className="w-4 mr-3" src="/images/diskette.png" alt="Save" />
+              <span className="font-noto text-sm">Save</span>
+          </MenuItem>
+          <MenuItem onClick={handleClose}>
+              <img className="w-4 mr-3" src="/images/hammer.png" alt="Auction" />
+              <span className="font-noto text-sm">Auction</span>
+          </MenuItem>
+          <MenuItem onClick={handleClose}>
+              <img className="w-4 mr-3" src="/images/caution-triangle.png" alt="Report" />
+              <span className="font-noto text-sm">Report</span>
+          </MenuItem>
                 
           {whetherMyPost ? (<MenuItem onClick={async () => {
             setIsLoading(true)
+            handleClose()
             await axios.post("http://localhost:3001/deletepost", {
                 docId: postContentProps.docId,
                 email: user.email,
@@ -118,8 +127,10 @@ const PostHeader: React.FC<postHeaderProps> = (
             }).catch((err) => {
               console.log(err.message);
               })
-                  handleClose()
-                }}>Delete</MenuItem>) : null}
+          }}>
+              <img className="w-4 mr-3" src="/images/delete.png" alt="Delete" />
+              <span className="font-noto text-sm">Delete</span>
+          </MenuItem>) : null}
             </Menu>
           </motion.div>
     </motion.div>

@@ -22,7 +22,7 @@ const Timeline: React.FC<timelineProps> = (
     postsVisible,
     setPostsVisible,
   }) => {
-
+  
   const posts: postContent[] = useSelector((state: RootState) => state.setPosts.posts)
 
   return (

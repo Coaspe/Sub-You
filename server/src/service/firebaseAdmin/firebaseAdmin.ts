@@ -68,7 +68,6 @@ export async function uploadImageAdmin(
         .child(`${userInfo.email}/${imUrl}`)
         .getDownloadURL()
    })).then((res) => {
-      
       // firebase SDK Admin
        firestore
        .collection("posts")
@@ -99,8 +98,6 @@ export async function deletePostAdmin(
   userEmail: any,
   storageImageNameArr: any,
 ) {
-  // setIsLoading(true);
-
   await firestore.collection("posts").doc(docId).delete();
   await firestore
     .collection("users")

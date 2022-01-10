@@ -20,40 +20,36 @@ const upload = multer({
     storage: multer.memoryStorage()
 });
 app.post("/uploadpost", upload.any(), (req, res) => {
-    if (req.body.userEmail === undefined) {
-        res.sendStatus(404);
-        res.send("User Email Error!");
-        res.end();
+    const parsedUserInfo = JSON.parse(req.body.userInfo);
+    const paredPostSetChanged = JSON.parse(req.body.postSetChanged);
+    const location = JSON.parse(req.body.location);
+    const tmp = [];
+    for (let i = 0; i < location.length; i++) {
+        const element = location[i];
+        tmp.push(req.files[element]);
     }
-    (0, firebaseAdmin_1.uploadImageToStorage)(req.files, req.body.userEmail).then((resArr) => {
-        res.send(JSON.stringify(resArr));
-        res.end();
-    });
-});
-app.post("/uploadpostFinish", (req, res) => {
-    if (req.body === {}) {
-        res.sendStatus(404);
-        res.send("User Email Error!");
-        res.end();
-    }
-    (0, firebaseAdmin_1.uploadImageAdmin)(req.body.caption, req.body.ImageUrl, req.body.userInfo, req.body.category)
-        .then(() => {
-        const Response = {
-            alert: [true, "Upload", "success"],
-            loading: false,
-            postSetChanged: ["upload", !req.body.postSetChanged[1]]
-        };
-        res.send(JSON.stringify(Response));
-        res.end();
-    }).catch((error) => {
-        console.log(error);
-        const Response = {
-            alert: [true, "Upload", "error"],
-            loading: false,
-            error: error
-        };
-        res.send(JSON.stringify(Response));
-        res.end();
+    console.log("parsedUserInfo", parsedUserInfo);
+    console.log("paredPostSetChanged", paredPostSetChanged);
+    (0, firebaseAdmin_1.uploadImageToStorage)(tmp, parsedUserInfo.email).then((resArr) => {
+        (0, firebaseAdmin_1.uploadImageAdmin)(req.body.caption, resArr, parsedUserInfo, req.body.category)
+            .then(() => {
+            const Response = {
+                alert: [true, "Upload", "success"],
+                loading: false,
+                postSetChanged: ["upload", !paredPostSetChanged[1]]
+            };
+            res.send(JSON.stringify(Response));
+            res.end();
+        }).catch((error) => {
+            console.log(error);
+            const Response = {
+                alert: [true, "Upload", "error"],
+                loading: false,
+                error: error
+            };
+            res.send(JSON.stringify(Response));
+            res.end();
+        });
     });
 });
 app.post("/deletepost", (req, res) => {

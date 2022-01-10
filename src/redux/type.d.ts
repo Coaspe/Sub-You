@@ -81,6 +81,7 @@ interface setImageLocationInModalPayload {
     imageLocationInModal: Array<[number, number]>;
 }
 
+
 interface setMyLocationPayload {
     myLocation: Array<number>
 }
@@ -92,3 +93,16 @@ interface setImageLocationInModalAction {
 interface setMyLocationAction {
     payload: setMyLocationPayload
 }
+
+
+interface sideBarExpandedState {
+    sideBarExpanded: boolean
+}
+
+interface setSideBarExpandedPayload {
+    sideBarExpanded: boolean
+}
+interface setSideBarExpandedAction {
+    payload: setSideBarExpandedPayload
+}
+

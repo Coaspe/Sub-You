@@ -11,7 +11,6 @@ import { alertAction, postSetChangedAction, previewURLAction, imageLocationInMod
 import { RootState } from '../redux/store';
 import { AnimatePresence, motion } from 'framer-motion';
 import axios from 'axios';
-import { Skeleton } from '@mui/material';
 import Newpostmodalimage from './Newpostmodalimage';
 
 interface newPostModalProps { 
@@ -37,6 +36,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     const dispatch = useDispatch()
     const postSetChanged : (string|boolean)[] = useSelector((state: RootState) => state.setPostSetChanged.postSetChanged)
     const previewURL: string[] = useSelector((state: RootState) => state.setPreviewURL.previewURL)
+    const [revokePreviewURL, setRevokePreviewURL] = useState<string[]>([])
     const myLocation : Array<number> = useSelector((state: RootState) => state.setImageLocationInModal.myLocation)
     
     const setMyLocation = (location: Array<number>) => {
@@ -62,7 +62,6 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     };
     const handleFileOnChange = (event: any) => {
 
-        event.preventDefault();
         let files: Array<Blob> = []
         let images : string[]= [];
 
@@ -83,22 +82,24 @@ const Newpostmodal: React.FC<newPostModalProps> = (
 
             new Compressor(element, {
             quality: qual,
-                success(result: any) {
-                    console.log("result", result);
-                    
-                    files.push(result)
-                    images.push(URL.createObjectURL(result))
-                    if (i === event.target.files.length - 1)
-                    {
-                        setPreviewURL(images)
-                        setFile(files)
-                    }
-                },
-                error(err) {
-                    console.log(err.message);
-                    return;
-                },
-        });
+            success(result: any) {
+                files.push(result)
+                images.push(URL.createObjectURL(result))
+                if (images.length === event.target.files.length)
+                {
+                    if (previewURL[0] !== "/images/logo.png") {
+                        previewURL.map((data)=>(URL.revokeObjectURL(data)))
+                     }           
+                    setPreviewURL(images)
+                    setFile(files)
+                }
+            },
+            error(err) {
+                console.log(err.message);
+                return;
+            },
+            });
+            
         }
     };
 
@@ -107,19 +108,10 @@ const Newpostmodal: React.FC<newPostModalProps> = (
         setFile([])
         setPreviewURL(["/images/logo.png"])
         setComment("")
-    };
-
-    const arrangeArray = (arr: string[]) => {
-        let tmp = Array.from({ length: previewURL.length }, () => "")
-        console.log("tmp", tmp);
-        
-        for (let i = 0; i < file.length; i++) {
-            const element = myLocation[i];
-            tmp[i] = arr[element]
+        if (previewURL[0] !== "/images/logo.png") {
+            previewURL.map((data)=>(URL.revokeObjectURL(data)))
         }
-
-        return tmp
-    }
+    };
 
     const style = {
         position: 'absolute' as 'absolute',
@@ -139,6 +131,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     }, [])
 
     useEffect(() => {   
+
         setLoad(false)
         const cacheImages = (srcArray: string[]) => {
             const promise = srcArray.map((src: string) => {
@@ -184,21 +177,36 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                     </span>
                     <AnimatePresence>
                         {previewURL[0] !== "/images/logo.png" ? 
-                            (<motion.div animate={{opacity: 1}} className="w-full h-full grid grid-cols-3 gap-2 justify-center items-center">
+                            (<motion.div animate={{opacity: 1}} className="w-full h-full grid grid-cols-3 gap-2 justify-items-center items-center">
                             {load ?
                                 (<>
                                     {previewURL.map((url, i) => (
                                         <Newpostmodalimage
                                             src={url}
                                             imagesNum={previewURL.length}
-                                            myIndex={i}
-                                            />
+                                        myIndex={i}
+                                        />
 
                                     ))}
                                 </>)
                                 :
                                 (<>
-                                    {previewURL.map(() => <Skeleton variant="rectangular" width={118} height={200} />)}
+                                    {previewURL.map(() => <div className="animate-pulse w-full h-full bg-black bg-opacity-80 rounded-md">
+                                        <br />
+                                        <br />
+                                        <br />
+                                        <br />
+                                        <br />
+                                        <br />
+                                        <br />
+                                        <br />
+                                        <br />
+                                        <br />
+                                        <br />
+                                        <br />
+                                        <br />
+                                        <br />
+                                    </div>)}
                                 </>)}
                             </motion.div>)
                             : 
@@ -222,17 +230,17 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                         Find
                     </label>
                     <form encType='multipart/form-data' name="files">
-                     <input
-                        type="file"
-                        name="files"
-                        id="input-file"
-                        multiple
-                        style={{ display: "none" }}
-                        onChange={(event : any) => {
-                            handleFileOnChange(event);
-                        }}
-                        />
-                        </form>
+                        <input
+                            type="file"
+                            name="files"
+                            id="input-file"
+                            multiple
+                            style={{ display: "none" }}
+                            onChange={(event : any) => {
+                                handleFileOnChange(event);
+                            }}
+                            />
+                    </form>
                     <TextField
                         id="outlined-comment"
                         label="comment"
@@ -241,38 +249,33 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                         />
                     <CheckCircleTwoToneIcon
                     onClick={async () => {
+
+                        let param = new window.FormData()
+
+                        for (let i = 0; i < file.length; i++) {
+                            param.append(`file${i}`, file[i]); 
+                            console.log(`file${i}`, file[i]);
+                        }
+
+                        param.append("caption", comment as string)
+                        param.append("userInfo",  JSON.stringify({ uid: user.uid, email: user.email, photoURL: user.photoURL }))
+                        param.append("category", "SNS")
+                        param.append("postSetChanged", JSON.stringify(postSetChanged))
+                        param.append("location", JSON.stringify(myLocation))
                         
-                            let param = new window.FormData()
-                            for (let i = 0; i < file.length; i++) {
-                                param.append(`file${i}`, file[i]); 
-                                console.log(`file${i}`, file[i]);
-                            }
-                            param.append("caption", comment as string)
-                            param.append("userInfo", JSON.stringify(user))
-                            param.append("category", "SNS")
-                            param.append("postSetChanged", JSON.stringify(postSetChanged))
+                        setIsLoading(true)
                         
-                            setIsLoading(true)
-                            await axios.post("http://localhost:3001/uploadpost", param).then(async (res) => {
-                                let storageImageNames = arrangeArray(res.data)
-                                await axios.post("http://localhost:3001/uploadpostFinish", {
-                                    caption: comment,
-                                    ImageUrl: storageImageNames,
-                                    userInfo: user,
-                                    category: "SNS",
-                                    postSetChanged: postSetChanged
-                                }).then((res) => {
-                                    doSetAlert(res.data.alert)
-                                    setIsLoading(res.data.loading)
-                                    setPostSetChanged(res.data.postSetChanged)
-                                    setTimeout(() => {
-                                        doSetAlert([false,"",""])
-                                    }, 3000);
-                                }).catch((err) => {
-                                    console.log(err);
-                                })
+                        await axios.post("http://localhost:3001/uploadpost", param).then((res) => {
+                                doSetAlert(res.data.alert)
+                                setIsLoading(res.data.loading)
+                                setPostSetChanged(res.data.postSetChanged)
+                                setTimeout(() => {
+                                    doSetAlert([false,"",""])
+                                }, 3000);
+                            }).catch((err) => {
+                                console.log(err);
                             })
-                            handleClose()
+                        handleClose()
                         }}
                         className={`${previewURL[0] === "/images/logo.png" && "pointer-events-none"} cursor-pointer`}
                         sx={{ color: previewURL[0] !== "/images/logo.png" ? "#008000" : "#8e9598" }}

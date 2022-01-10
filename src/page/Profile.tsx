@@ -166,7 +166,7 @@ const Profile = () => {
                             
                             {/* Recent Auctions list */}
                                 <div className="flex justify-center w-2/3 col-span-3 col-start-3 py-12 border-b-2">
-                                    <span className="text-4xl font-noto">Recent Auctions</span>
+                                    <span className="text-4xl font-noto">Auctions</span>
                                 </div>
                                 {/* Posts list */}
                                 <div className="flex justify-center w-2/3 col-span-3 col-start-3 py-12 border-b-2">

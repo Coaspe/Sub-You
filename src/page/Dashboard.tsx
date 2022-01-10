@@ -17,8 +17,9 @@ import { getUserType, postContent, userInfoFromFirestore } from "../types";
 import ProfileSetting from '../components/Profile/ProfileSetting';
 import firebase from 'firebase/compat';
 import Artists from '../page/Artists';
-import { alertAction, postsAction, userInfoAction } from '../redux';
+import { alertAction, postsAction, sideBarExpandedAction, userInfoAction } from '../redux';
 import { RootState } from '../redux/store';
+import Message from '../components/Message/Message';
 
 const variants = {
   enter: {
@@ -42,7 +43,6 @@ const Dashboard = () => {
     const [value, setValue] = useState(0);
     const [direction, setDirection] = useState(1);
     const { user: contextUser } = useContext(UserContext);
-    const [sideExpanded, setSideExpanded] = useState(true)
     const [isLoading, setIsLoading] = useState(false)
     const [selectedPage, setSelectedPage] = useState("Timeline")
     const [postsVisible, setPostsVisible] = useState<(number | boolean)[][]>([])
@@ -55,7 +55,12 @@ const Dashboard = () => {
     const alert: [boolean, string, string] = useSelector((state: RootState) => state.setAlert.alert)
     const userInfo: getUserType = useSelector((state: RootState) => state.setUserInfo.userInfo)
     const postSetChanged: (string | boolean)[] = useSelector((state: RootState) => state.setPostSetChanged.postSetChanged)
+    const sideExpanded: boolean = useSelector((state: RootState) => state.setSidebarExpanded.sideBarExpanded)
     
+    const setSideExpanded = useCallback((sideBarExpanded: boolean) => {
+        dispatch(sideBarExpandedAction.setSideBarExpanded({sideBarExpanded: sideBarExpanded}))
+    }, [dispatch])
+
     const doSetUserInfo = useCallback((userInfo: getUserType) => {
         dispatch(userInfoAction.setUserInfo({userInfo: userInfo}))
     }, [dispatch])
@@ -123,8 +128,6 @@ const Dashboard = () => {
             return getPhotos(contextUser.uid, following)
         }
 
-        console.log("postSetChanged", postSetChanged);
-        
         if (postSetChanged[0] !== "delete") {
             doSetPosts([])
             getTimelinePhotos().then((res: any) => {
@@ -208,19 +211,22 @@ const Dashboard = () => {
                     setSelectedPage={setSelectedPage}
                 />
                 {(selectedPage === "Timeline" || selectedPage === "New Post") &&
-                    <Timeline
-                        sideExpanded={sideExpanded}
-                        setIsLoading={setIsLoading}
-                        postSetChanged={postSetChanged}
-                        postsVisible={postsVisible}
-                        setPostsVisible={setPostsVisible}
-                    />
+                <Timeline
+                    sideExpanded={sideExpanded}
+                    setIsLoading={setIsLoading}
+                    postSetChanged={postSetChanged}
+                    postsVisible={postsVisible}
+                    setPostsVisible={setPostsVisible}
+                />
                 }
                 {selectedPage === "Setting" &&
                     <ProfileSetting sideExpanded={sideExpanded}  />
                 }
                 {selectedPage === "Explore" &&
                     <Artists sideExpanded={sideExpanded} />
+                }
+                {selectedPage === "Message" &&
+                    <Message />
                 }
             </motion.div>
             <AnimatePresence initial={false}>
@@ -250,7 +256,7 @@ const Dashboard = () => {
                     </BottomNavigation>
                 </motion.div> : null}
             </AnimatePresence>
-            <div ref={divRef} className={`h-0 w-full absolute bottom-0`}></div>
+            <div ref={divRef} className={`h-20 w-full absolute bottom-0`}></div>
         </div>
     );
 }

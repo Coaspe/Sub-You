@@ -91,3 +91,8 @@ export type userInfoFromFirestore = {
     userEmail: string
     username: string
 }
+
+export type chatRoomInfoType = {
+    messages: [string, { dateCreated: number, message: string, user: string }],
+    users: string[]
+}

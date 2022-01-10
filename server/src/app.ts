@@ -19,41 +19,40 @@ const upload = multer({
 });
 
 app.post("/uploadpost", upload.any(), (req: any, res: express.Response) => {
-  uploadImageToStorage(req.files, JSON.parse(req.body.userInfo).email).then((resArr) => {
-    res.send(JSON.stringify(resArr))
-    res.end()
-  })
-})
-app.post("/uploadpostFinish", (req: any, res: express.Response) => {
-  
-  if (req.body === {}) {
-    res.sendStatus(404)
-    res.send("User Email Error!")
-    res.end()
-  }
-  
-  uploadImageAdmin(req.body.caption, req.body.ImageUrl, req.body.userInfo, req.body.category)
-    .then(() => {
-    const Response = {
-      alert: [true, "Upload", "success"],
-      loading: false,
-      postSetChanged: ["upload", !req.body.postSetChanged[1]]
-    }
-    res.send(JSON.stringify(Response))
-    res.end()
-      
-    }).catch((error: any) => {
-    console.log(error);
-    
-    const Response = {
-      alert: [true, "Upload", "error"],
-      loading: false,
-      error: error
-    }
-    res.send(JSON.stringify(Response))
-    res.end()
-  })
 
+  const parsedUserInfo = JSON.parse(req.body.userInfo)
+  const paredPostSetChanged = JSON.parse(req.body.postSetChanged);
+  const location = JSON.parse(req.body.location)
+
+  const tmp = []
+
+  for (let i = 0; i < location.length; i++) {
+    const element = location[i];
+    tmp.push(req.files[element])
+  }
+  uploadImageToStorage(tmp, parsedUserInfo.email).then((resArr: any) => {
+    uploadImageAdmin(req.body.caption, resArr, parsedUserInfo, req.body.category)
+      .then(() => {
+      const Response = {
+        alert: [true, "Upload", "success"],
+        loading: false,
+        postSetChanged: ["upload", !paredPostSetChanged[1]]
+      }
+      res.send(JSON.stringify(Response))
+      res.end()
+        
+      }).catch((error: any) => {
+      console.log(error);
+      
+      const Response = {
+        alert: [true, "Upload", "error"],
+        loading: false,
+        error: error
+      }
+      res.send(JSON.stringify(Response))
+      res.end()
+    })
+  })
 })
 
 app.post("/deletepost", (req: any, res: express.Response) => {
