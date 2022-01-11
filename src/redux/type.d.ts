@@ -106,3 +106,15 @@ interface setSideBarExpandedAction {
     payload: setSideBarExpandedPayload
 }
 
+
+interface lastCheckedTimeState {
+    lastCheckedTime: number[]
+}
+
+interface setLastCheckedTimePayload {
+    lastCheckedTime: number[]
+}
+interface setLastCheckedTimeAction {
+    payload: setLastCheckedTimePayload
+}
+

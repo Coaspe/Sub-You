@@ -1,6 +1,6 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
 import { getUserType } from "../types";
-import { alertState, concatPostsAction, concatPostsPayload, imageLocationInModalState, postSetChangedState, postsState, previewURLState, setAlertAction, setAlertPayload, setImageLocationInModalAction, setImageLocationInModalPayload, setMyLocationAction, setMyLocationPayload, setPostsAction, setPostSetChangedAction, setPostSetChangedPayload, setPostsPayload, setPreviewURLAction, setPreviewURLPayload, setSideBarExpandedAction, setSideBarExpandedPayload, setUserInfoAction, setUserInfoPayload, sideBarExpandedState, userInfoState } from "./type";
+import { alertState, concatPostsAction, concatPostsPayload, imageLocationInModalState, lastCheckedTimeState, postSetChangedState, postsState, previewURLState, setAlertAction, setAlertPayload, setImageLocationInModalAction, setImageLocationInModalPayload, setLastCheckedTimeAction, setLastCheckedTimePayload, setMyLocationAction, setMyLocationPayload, setPostsAction, setPostSetChangedAction, setPostSetChangedPayload, setPostsPayload, setPreviewURLAction, setPreviewURLPayload, setSideBarExpandedAction, setSideBarExpandedPayload, setUserInfoAction, setUserInfoPayload, sideBarExpandedState, userInfoState } from "./type";
 
 export const postsAction = {
     setPosts: createAction<setPostsPayload>("SETPOSTS"),
@@ -145,4 +145,21 @@ export const sideBarExpandedReducer = {
 export const setSideBarExpandedReducer = createReducer(sideBarInitialState, builder => {
     builder
         .addCase(sideBarExpandedAction.setSideBarExpanded, sideBarExpandedReducer.setSideBarExpanded)
+})
+
+/////////////////////////////////////////////////////////////////////////////////////
+export const  lastCheckedTimeAction = {
+    setLastCheckedTime: createAction<setLastCheckedTimePayload>("SETLASTCHECKEDTIME"),
+}
+const lastCheckedTimeInitialState: lastCheckedTimeState = {
+    lastCheckedTime: []
+}
+export const lastCheckedTimeReducer = {
+    setLastCheckedTime: (state: lastCheckedTimeState, action: setLastCheckedTimeAction) => {
+        state.lastCheckedTime = action.payload.lastCheckedTime
+    },
+}
+export const setLastCheckedTimeReducer = createReducer(lastCheckedTimeInitialState, builder => {
+    builder
+        .addCase(lastCheckedTimeAction.setLastCheckedTime, lastCheckedTimeReducer.setLastCheckedTime)
 })

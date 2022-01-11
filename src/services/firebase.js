@@ -15,10 +15,12 @@ export const makeMessageRoom = (users) => {
 };
 
 export const sendMessage = (key, message, user) => {
-  const address = rtDBRef.child(`chatRooms/${key}/messages/${Date.now()}`);
+  const date = Date.now();
+  const address = rtDBRef.child(`chatRooms/${key}/messages/${date}`);
   return address.update({
     user: user,
     message: message,
+    dateCreated: date,
   });
 };
 
