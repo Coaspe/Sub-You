@@ -8,11 +8,13 @@ interface MessageListRowProps {
     info: chatRoomInfoType
     chatRoomKey: string
     users: string[]
+    unCheckedMessage: number
 }
 
-const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKey }) => {
+const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKey, unCheckedMessage }) => {
     const [userInfo, setUserInfo] = useState<{ [key: string]: getUserType}>({})
     const [expanded, setExpanded] = useState(false)
+    const [time, setTime] = useState("")
     
     useEffect(() => {
         const tmp: { [chatRoomKey: string]: getUserType } = {}
@@ -21,18 +23,22 @@ const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKe
         )
         ))
         .then((res: any) => {
-            res.forEach((user: getUserType) => {
-                console.log("user", user);
-                tmp[user.uid] = user
+            res.forEach((userTmp: getUserType) => {
+                tmp[userTmp.uid] = userTmp
             })
             setUserInfo((origin: any) => {
-                console.log({...origin, ...tmp});
-                
                 return {...origin, ...tmp}
             })
         })
+
+        
     }, [users])
-    
+
+    useEffect(() => {
+        const date = new Date(info.dateCreated)
+        setTime(`${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}`)
+    }, [info])
+
     return (
         <>
             <AnimateSharedLayout type="crossfade">
@@ -43,12 +49,17 @@ const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKe
                         <div className="flex justify-between w-full items-center">
                         <div className="flex items-center">
                             <img className="rounded-full w-10 h-10" src={userInfo[info.user].profileImg} alt="profile" />
-                            <div className="flex flex-col ml-6">
-                                <span className="font-black mb-1">{userInfo[info.user].username}</span>
+                                <div className="flex flex-col ml-6">
+                                    <div className="flex items-center">
+                                        <span className="font-black mb-1 text-sm">{userInfo[info.user].username}</span>
+                                        <div className={`flex rounded-full items-centers justify-center w-5 h-5 bg-red-600 ${!expanded && unCheckedMessage !== 0 ? "visible" : "hidden"}`}>
+                                            <span className="text-sm text-white font-black">{unCheckedMessage}</span>
+                                        </div>
+                                    </div>
                                 <span className="text-xs text-gray-400">{info.message}</span>
                             </div>
                         </div>
-                        <span className="text-xs">{info.dateCreated}</span>
+                        <span className="text-xs text-gray-400">{time}</span>
                         </div>
                     </motion.div>
                 

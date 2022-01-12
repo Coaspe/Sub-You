@@ -108,11 +108,11 @@ interface setSideBarExpandedAction {
 
 
 interface lastCheckedTimeState {
-    lastCheckedTime: number[]
+    lastCheckedTime: {[key: string]: number}
 }
 
 interface setLastCheckedTimePayload {
-    lastCheckedTime: number[]
+    lastCheckedTime: {[key: string]: number}
 }
 interface setLastCheckedTimeAction {
     payload: setLastCheckedTimePayload

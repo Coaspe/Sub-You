@@ -87,15 +87,15 @@ const PostHeader: React.FC<postHeaderProps> = (
             }}>
           <MenuItem className="font-noto" onClick={handleClose}>
               <img className="w-4 mr-3" src="/images/diskette.png" alt="Save" />
-              <span className="font-noto text-sm">Save</span>
+              <span className="font-noto text-xs">Save</span>
           </MenuItem>
           <MenuItem onClick={handleClose}>
               <img className="w-4 mr-3" src="/images/hammer.png" alt="Auction" />
-              <span className="font-noto text-sm">Auction</span>
+              <span className="font-noto text-xs">Auction</span>
           </MenuItem>
           <MenuItem onClick={handleClose}>
               <img className="w-4 mr-3" src="/images/caution-triangle.png" alt="Report" />
-              <span className="font-noto text-sm">Report</span>
+              <span className="font-noto text-xs">Report</span>
           </MenuItem>
                 
           {whetherMyPost ? (<MenuItem onClick={async () => {
@@ -129,7 +129,7 @@ const PostHeader: React.FC<postHeaderProps> = (
               })
           }}>
               <img className="w-4 mr-3" src="/images/delete.png" alt="Delete" />
-              <span className="font-noto text-sm">Delete</span>
+              <span className="font-noto text-xs">Delete</span>
           </MenuItem>) : null}
             </Menu>
           </motion.div>

@@ -1,7 +1,10 @@
 import { useContext, useEffect, useState } from "react"
+import { useSelector, useDispatch } from "react-redux";
 import UserContext from "../../context/user";
 import { rtDBRef } from "../../lib/firebase";
-import { sendMessage } from "../../services/firebase";
+import { lastCheckedTimeAction } from "../../redux";
+import { RootState } from "../../redux/store";
+import { sendMessage, updateLastCheckedTime } from "../../services/firebase";
 import { chatRoomInfoType, getUserType } from "../../types"
 import MessageRow from "./MessageRow";
 
@@ -17,7 +20,7 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ info, chatRoomKey, user, 
     const [messages, setMessages] = useState<any>([])
     const [text, setText] = useState("")
     const { user: contextUser } = useContext(UserContext)
-    
+
     useEffect(() => {
         const getMessages = (key: string) => {
         rtDBRef
@@ -48,6 +51,7 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ info, chatRoomKey, user, 
                         <span></span>
                         <span className="place-self-center">우람이뭐하니</span>
                         <img onClick={() => {
+                            updateLastCheckedTime(chatRoomKey, info.dateCreated)
                             setExpanded((origin) => !origin)
                         }} className="w-5 place-self-end cursor-pointer" src="/images/close.png" alt="close chatroom" />
                         {messages.map((msg: any) => (

@@ -1,5 +1,12 @@
 import { firebase, storageRef, FieldValue, rtDBRef } from "../lib/firebase";
 
+export const updateLastCheckedTime = (key, time) => {
+  const path = rtDBRef.child(`lastCheckedTime/${key}`);
+  let tmp = {};
+  tmp[key] = time;
+  return path.update(tmp);
+};
+
 export const makeMessageRoom = (users) => {
   const key = rtDBRef.child("chatRooms").push().key;
 
@@ -17,6 +24,7 @@ export const makeMessageRoom = (users) => {
 export const sendMessage = (key, message, user) => {
   const date = Date.now();
   const address = rtDBRef.child(`chatRooms/${key}/messages/${date}`);
+
   return address.update({
     user: user,
     message: message,

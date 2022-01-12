@@ -148,11 +148,11 @@ export const setSideBarExpandedReducer = createReducer(sideBarInitialState, buil
 })
 
 /////////////////////////////////////////////////////////////////////////////////////
-export const  lastCheckedTimeAction = {
+export const lastCheckedTimeAction = {
     setLastCheckedTime: createAction<setLastCheckedTimePayload>("SETLASTCHECKEDTIME"),
 }
 const lastCheckedTimeInitialState: lastCheckedTimeState = {
-    lastCheckedTime: []
+    lastCheckedTime: {}
 }
 export const lastCheckedTimeReducer = {
     setLastCheckedTime: (state: lastCheckedTimeState, action: setLastCheckedTimeAction) => {
