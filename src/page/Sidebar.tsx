@@ -163,7 +163,7 @@ const Sidebar: React.FC<sidebarProps> = (
                                     <ol className="w-3/5 flex flex-col items-center mt-14">
                                         {sidebarData.map(({svg, title}) => (
                                             <motion.li 
-                                                onClick={(event) => {
+                                                onClick={() => {
                                                     setSelectedPage(title)
                                                     if (title === "New Post") {
                                                         setModalOpen(true)

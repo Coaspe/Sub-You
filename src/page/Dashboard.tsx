@@ -20,6 +20,7 @@ import Artists from '../page/Artists';
 import { alertAction, postsAction, sideBarExpandedAction, userInfoAction } from '../redux';
 import { RootState } from '../redux/store';
 import Message from '../components/Message/Message';
+import Auction from '../components/Auction/Auction';
 
 const variants = {
   enter: {
@@ -227,6 +228,9 @@ const Dashboard = () => {
                 }
                 {selectedPage === "Message" &&
                     <Message />
+                }
+                {selectedPage === "Auction" &&
+                    <Auction />
                 }
             </motion.div>
             <AnimatePresence initial={false}>

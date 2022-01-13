@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router';
 import UserContext from '../context/user';
 import { memo, useContext} from "react";
 import { getUserType } from '../types';
-import { makeMessageRoom, sendMessage } from '../services/firebase';
 
 interface headerProps {
     userInfo : getUserType

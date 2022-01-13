@@ -1,4 +1,5 @@
-import { useContext, useEffect, useState } from "react"
+import { AnimatePresence } from "framer-motion";
+import { useContext, useEffect, useRef, useState } from "react"
 import UserContext from "../../context/user";
 import { rtDBRef } from "../../lib/firebase";
 import { sendMessage, updateLastCheckedTime } from "../../services/firebase";
@@ -17,7 +18,7 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ info, chatRoomKey, user, 
     const [messages, setMessages] = useState<any>([])
     const [text, setText] = useState("")
     const { user: contextUser } = useContext(UserContext)
-
+    const enterRef = useRef<HTMLButtonElement | null>(null)
     useEffect(() => {
         const getMessages = (key: string) => {
         rtDBRef
@@ -35,34 +36,51 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ info, chatRoomKey, user, 
 
     useEffect(() => {
         setMessages((origin: any) => {
-            return [...origin, info]
+            if (origin[origin.length - 1].dateCreated !== info.dateCreated)
+            {
+                return [...origin, info]
+            } else {
+                return origin
+            }
         })
-        return ()=>{console.log(info)}
     }, [info])
+
+    const handleKeypress = (e: any) => {
+        if (e.key === 'Enter') {
+            enterRef.current?.click()
+        }
+    };
 
     return (
         <>
             {messages !== [] ?
-                <div className="w-full h-full flex flex-col justify-between">
+                <div className="w-full h-full flex flex-col justify-between items-center">
                     <div className="grid grid-cols-3 overflow-y-scroll gap-2">
                         <span></span>
                         <span className="place-self-center">우람이뭐하니</span>
                         <img onClick={() => {
                             updateLastCheckedTime(chatRoomKey, info.dateCreated)
                             setExpanded((origin) => !origin)
-                        }} className="w-5 place-self-end cursor-pointer" src="/images/close.png" alt="close chatroom" />
-                        {messages.map((msg: any) => (
-                            <MessageRow src={user[msg.user].profileImg} message={msg.message} user={user[msg.user]} />
-                        ))}
+                        }} className="w-5 place-self-end cursor-pointer mr-3" src="/images/close.png" alt="close chatroom" />
+                        <AnimatePresence>
+                            {messages.map((msg: any) => (
+                                <MessageRow key={`${msg.dateCreated}+${msg.user}`} src={user[msg.user].profileImg} message={msg.message} user={user[msg.user]} />
+                            ))}
+                        </AnimatePresence>
                     </div>
                     <div className="flex">
-                        <input onChange={(e:any) => {
+                        <input
+                            value={text}
+                            onKeyPress={handleKeypress}
+                            onChange={(e: any) => {
                             setText(e.target.value)
                         }} type="text" className="border-2"/>
-                        <button onClick={() => {
-                            sendMessage(chatRoomKey, text, contextUser.uid)
-                            setText("")
-                        }}>submit</button>
+                        <button
+                            ref={enterRef}
+                            onClick={() => {
+                                sendMessage(chatRoomKey, text, contextUser.uid)
+                                setText("")
+                            }}>submit</button>
                     </div>    
                 </div>
           : null}  

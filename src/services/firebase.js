@@ -1,5 +1,28 @@
 import { firebase, storageRef, FieldValue, rtDBRef } from "../lib/firebase";
 
+export const makeAuction = (sellerUid, photoURL) => {
+  const key = rtDBRef.child("auctions").push().key;
+  rtDBRef.child(`auctions/users/${sellerUid}/sell`).push(key);
+
+  let tmp = {};
+  tmp["seller"] = sellerUid;
+  tmp["photoURL"] = photoURL;
+  rtDBRef.child(`auctions/${key}`).update(tmp);
+};
+
+export const participateInAuction = (buyerUid, price, auctionKey) => {
+  rtDBRef.child(`auctions/${auctionKey}/buyers`).push(buyerUid);
+  rtDBRef.child(`auctions/users/${buyerUid}/buy`).push(auctionKey);
+  makeTransaction(buyerUid, price, auctionKey);
+};
+
+export const makeTransaction = (buyerUid, price, auctionKey) => {
+  let tmp = {};
+  tmp[new Date().getTime()] = { price: price, userUid: buyerUid };
+
+  rtDBRef.child(`auctions/${auctionKey}/transactions`).update(tmp);
+};
+
 export const updateLastCheckedTime = (key, time) => {
   const path = rtDBRef.child(`lastCheckedTime`);
   let tmp = {};

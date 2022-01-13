@@ -12,7 +12,7 @@ interface MessageListRowProps {
 }
 
 const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKey, unCheckedMessage }) => {
-    
+
     const [userInfo, setUserInfo] = useState<{ [key: string]: getUserType}>({})
     const [expanded, setExpanded] = useState(false)
     const [time, setTime] = useState("")
@@ -65,7 +65,7 @@ const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKe
                     </motion.div>
                 
                     {expanded &&
-                    <motion.div layoutId="gg" className="absolute w-1/2 h-1/2 bg-white rounded-lg z-50">
+                    <motion.div layoutId="gg" className="absolute w-1/2 h-1/2 bg-main bg-opacity-30 rounded-lg z-50">
                             <MessageDetail info={info} chatRoomKey={chatRoomKey} user={userInfo} setExpanded={setExpanded}/>
                     </motion.div>
                     }
