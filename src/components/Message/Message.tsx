@@ -22,7 +22,15 @@ const Message = () => {
     const setLastCheckedTime = (lastCheckedTime: { [key: string]: number }) => {
         dispatch(lastCheckedTimeAction.setLastCheckedTime({ lastCheckedTime: lastCheckedTime }))
     }
+    useEffect(() => {
+        console.log("Effect LastCheckedTime", lastCheckedTime);
+        
+    }, [lastCheckedTime])
 
+    useEffect(() => {
+        console.log("Effect LastCheckedTime", unCheckedMessage);
+        
+    },[unCheckedMessage])
     // Get user's chat room and listen changes.
     useEffect(() => {
         const UID = "lX8fJDnfFkO1Z6WjqicdVG6QJps1"
@@ -38,11 +46,6 @@ const Message = () => {
 
     useEffect(() => {
         if (chatRoomsKeys.length > 0) {
-
-            // For alarm
-            rtDBRef.child(`lastCheckedTime`).once('value', (snap) => { 
-                setLastCheckedTime(snap.val())
-            })
             
             chatRoomsKeys.forEach((chatRoomKey) => {
                 let tm2p: any = {}
@@ -70,73 +73,75 @@ const Message = () => {
 
 
     //Off 처리 해야함
-    // useEffect(() => {
-    //     if (Object.keys(lastCheckedTime).length > 0 && changed !== "") {
-    //         rtDBRef.child(`chatRooms/${changed}/messages`).on('value', (snap) => {
-    //         console.log(changed);
-    //         let tmp = Object.keys(snap.val()).map((date) => (parseInt(date)))
-    //         let tmp2 = []
-    //         for (let i = 0; i < tmp.length; i++) {
-    //             if (tmp[tmp.length - (i + 1)] > lastCheckedTime[changed]) {
-    //                 tmp2.push(0)
-    //             }
-    //         }
-    //         setUnCheckedMessage((origin) => {
-    //             let tmp = Object.assign({}, origin)
-    //             tmp[changed] = tmp2.length
-    //             return tmp
-    //         })
-    //     })
-    // }
-    // }, [changed])
+    useEffect(() => {
+        if (Object.keys(lastCheckedTime).length > 0 && changed !== "" && changed !== '1') {
+            rtDBRef.child(`chatRooms/${changed}/messages`).on('value', (snap) => {
+            console.log(lastCheckedTime);
+            let tmp = Object.keys(snap.val()).map((date) => (parseInt(date)))
+            let tmp2 = []
+            for (let i = 0; i < tmp.length; i++) {
+                if (tmp[tmp.length - (i + 1)] > lastCheckedTime[changed]) {
+                    tmp2.push(0)
+                }
+            }
+                setChanged('1')
+                console.log(tmp2);
+                
+            setUnCheckedMessage((origin) => {
+                let tmp = Object.assign({}, origin)
+                tmp[changed] = tmp2.length
+                return tmp
+            })
+        })
+    }
+    }, [lastCheckedTime])
     
     useEffect(() => {
-
-        if (Object.keys(lastCheckedTime).length > 0) {
+        console.log("lastCheckedTime", lastCheckedTime);
+        
+        // LastCheckedTime이 바뀐 Chat Room만 on을 실행하도록 바꿔야한다.
+        if (Object.keys(lastCheckedTime).length > 0 && changed === "") {
+            console.log("Execute");
+            console.log(changed);
+            
             Object.keys(lastCheckedTime).forEach((key) => {
                 rtDBRef.child(`chatRooms/${key}/messages`).on('value', (snap) => {
                     let tmp = Object.keys(snap.val()).map((date) => (parseInt(date)))
-                    console.log(tmp);
-                    console.log(lastCheckedTime[key]);
                     
                     let tmp2 = []
                     for (let i = 0; i < tmp.length; i++) {
-                        if (tmp[tmp.length - (i + 1)] > Object.values(lastCheckedTime[key])[0]) {
+                        if (tmp[tmp.length - (i + 1)] > lastCheckedTime[key]) {
                             tmp2.push(0)
+                        } else {
+                            break
                         }
                     }
                     setUnCheckedMessage((origin) => {
                         let tmp = Object.assign({}, origin)
                         tmp[key] = tmp2.length
-                        console.log(tmp);
-                        
                         return {...unCheckedMessage, ...tmp}
                     })
                     
                 })
             })
         }
-            rtDBRef.child(`lastCheckedTime`).on('child_added', (snap) => {
-                const key: string = snap.key as string
-                
-                if (!lastCheckedTime[key]) {
-                    let tmp: any = {}
-                    const val: number = snap.val() as number
-                    tmp[key] = val
-                    setLastCheckedTime({...lastCheckedTime, ...tmp} )
-                }
-                
-            })
-            
-            rtDBRef.child(`lastCheckedTime`).on('child_changed', (snap) => { 
-                const key: string = snap.key as string
-                const val: number = snap.val() as number
-                let tmp: any = {}
-                tmp[key] = val
-                setLastCheckedTime({ ...lastCheckedTime, ...tmp })
-            })
         
         }, [lastCheckedTime])
+    
+    
+    useEffect(()=> {
+
+        rtDBRef.child(`lastCheckedTime`).on('value', (snap) => {
+            setLastCheckedTime(snap.val())
+            console.log("136line ",snap.val());
+        })
+        rtDBRef.child(`lastCheckedTime`).on('child_changed', (snap) => { 
+            const key: string = snap.key as string
+            setChanged(key)
+        })
+        
+
+    }, [])
     
     return (
     <motion.div layout className={`h-screen flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-7 sm:mx-5 sm:col-start-1`}>

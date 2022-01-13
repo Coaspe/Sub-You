@@ -12,6 +12,7 @@ interface MessageListRowProps {
 }
 
 const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKey, unCheckedMessage }) => {
+    
     const [userInfo, setUserInfo] = useState<{ [key: string]: getUserType}>({})
     const [expanded, setExpanded] = useState(false)
     const [time, setTime] = useState("")

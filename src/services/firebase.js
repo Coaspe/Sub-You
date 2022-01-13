@@ -1,7 +1,7 @@
 import { firebase, storageRef, FieldValue, rtDBRef } from "../lib/firebase";
 
 export const updateLastCheckedTime = (key, time) => {
-  const path = rtDBRef.child(`lastCheckedTime/${key}`);
+  const path = rtDBRef.child(`lastCheckedTime`);
   let tmp = {};
   tmp[key] = time;
   return path.update(tmp);

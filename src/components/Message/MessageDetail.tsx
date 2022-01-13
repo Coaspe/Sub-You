@@ -1,9 +1,6 @@
 import { useContext, useEffect, useState } from "react"
-import { useSelector, useDispatch } from "react-redux";
 import UserContext from "../../context/user";
 import { rtDBRef } from "../../lib/firebase";
-import { lastCheckedTimeAction } from "../../redux";
-import { RootState } from "../../redux/store";
 import { sendMessage, updateLastCheckedTime } from "../../services/firebase";
 import { chatRoomInfoType, getUserType } from "../../types"
 import MessageRow from "./MessageRow";
