@@ -7,7 +7,11 @@ export const makeAuction = (sellerUid, photoURL) => {
   let tmp = {};
   tmp["seller"] = sellerUid;
   tmp["photoURL"] = photoURL;
+  tmp["time"] = "30 : 00";
+  tmp["done"] = false;
   rtDBRef.child(`auctions/${key}`).update(tmp);
+
+  return key;
 };
 
 export const participateInAuction = (buyerUid, price, auctionKey) => {
@@ -18,7 +22,8 @@ export const participateInAuction = (buyerUid, price, auctionKey) => {
 
 export const makeTransaction = (buyerUid, price, auctionKey) => {
   let tmp = {};
-  tmp[new Date().getTime()] = { price: price, userUid: buyerUid };
+  let time = new Date().getTime();
+  tmp[time] = { price: price, userUid: buyerUid, desc: -price };
 
   rtDBRef.child(`auctions/${auctionKey}/transactions`).update(tmp);
 };

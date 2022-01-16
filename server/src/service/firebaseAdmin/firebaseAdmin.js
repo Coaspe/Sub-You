@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletePostAdmin = exports.uploadImageAdmin = exports.uploadImageToStorage = void 0;
+exports.deletePostAdmin = exports.uploadImageAdmin = exports.uploadImageToStorage = exports.updateTime = exports.endAuction = void 0;
 const firebase_1 = require("../../lib/firebase");
 // NodeJS can not use getDownloadURL
 // Make read permission public and write permission needs auth.
@@ -24,9 +24,19 @@ var admin = require("firebase-admin");
 var serviceAccount = require("C:/sub-you-firebase-adminsdk-3lyxd-78e61d6399.json");
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    storageBucket: 'gs://sub-you.appspot.com'
+    storageBucket: 'gs://sub-you.appspot.com',
+    databaseURL: "https://sub-you-default-rtdb.firebaseio.com/"
 });
+var db = admin.database();
 const firestore = getFirestore();
+const endAuction = (auctionKey) => {
+    db.ref(`auctions/${auctionKey}/done`).update(true);
+};
+exports.endAuction = endAuction;
+const updateTime = (auctionKey, time) => {
+    db.ref(`auctions/${auctionKey}`).update({ time: time });
+};
+exports.updateTime = updateTime;
 const uploadImageToStorage = (file, userEmail) => {
     let fileNameArr = file.map((data) => (new Promise((resolve, reject) => {
         if (!data) {
@@ -87,7 +97,6 @@ function uploadImageAdmin(caption, ImageUrl, userInfo, category) {
 exports.uploadImageAdmin = uploadImageAdmin;
 function deletePostAdmin(docId, userEmail, storageImageNameArr) {
     return __awaiter(this, void 0, void 0, function* () {
-        // setIsLoading(true);
         yield firestore.collection("posts").doc(docId).delete();
         yield firestore
             .collection("users")

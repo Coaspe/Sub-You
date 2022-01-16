@@ -93,3 +93,11 @@ export type userInfoFromFirestore = {
 }
 
 export type chatRoomInfoType = { dateCreated: number, message: string, user: string, dummy: number };
+
+export type auctionInfoType = {
+    buyers: { [key: string]: string }
+    done: boolean
+    photoURL: string
+    seller: string
+    transaction: {[dateCreated: number] : { price: number, userUid: string }}
+}

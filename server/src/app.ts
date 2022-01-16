@@ -1,6 +1,7 @@
 import express from "express"
 import "firebase/compat/auth";
-import { deletePostAdmin, uploadImageAdmin, uploadImageToStorage } from "./service/firebaseAdmin/firebaseAdmin";
+import { clearInterval } from "timers";
+import { deletePostAdmin, uploadImageAdmin, uploadImageToStorage, updateTime, endAuction } from "./service/firebaseAdmin/firebaseAdmin";
 
 const app: express.Express = express()
 app.use(express.json())
@@ -75,6 +76,27 @@ app.post("/deletepost", (req: any, res: express.Response) => {
     res.end()
   })
 } )
+
+app.post("/makeauction", (req: any, res: express.Response) => {
+  let minute = 30
+  let second = 0
+  console.log(req.body.auctionKey);
+
+  function tik () {
+    second = second - 1 < 0 ? 59 : second - 1
+    minute = second === 59 ? minute - 1 : minute
+    updateTime(req.body.auctionKey, `${minute.toString()} : ${second.toString()}`)
+  }
+
+  let timer = setInterval(tik, 1000)
+
+  setTimeout(function() {
+    clearInterval(timer)
+    endAuction(req.body.auctionKey)
+    res.end()
+  }, 1800000)
+
+})
 
 app.listen(3001,() => {
   console.log('Server Operated!');

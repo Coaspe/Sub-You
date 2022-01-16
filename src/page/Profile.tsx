@@ -56,7 +56,7 @@ const Profile = () => {
                 if (re === undefined) {
                     return;
                 }
-
+                
                 const x : firstImageInfo[] = re.map((data : any) => ({
                     src : data.data().imageSrc[0],
                     color: "#fff",

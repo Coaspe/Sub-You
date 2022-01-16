@@ -16,10 +16,20 @@ var admin = require("firebase-admin");
 var serviceAccount = require("C:/sub-you-firebase-adminsdk-3lyxd-78e61d6399.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: 'gs://sub-you.appspot.com'
+  storageBucket: 'gs://sub-you.appspot.com',
+  databaseURL: "https://sub-you-default-rtdb.firebaseio.com/"
 });
 
+var db = admin.database();
+
 const firestore = getFirestore()
+
+export const endAuction = (auctionKey: string) => {
+  db.ref(`auctions/${auctionKey}/done`).update(true)
+}
+export const updateTime = (auctionKey: string, time: string) => {
+  db.ref(`auctions/${auctionKey}`).update({time: time})
+}
 
 export const uploadImageToStorage = (file: any, userEmail: string) => {
 

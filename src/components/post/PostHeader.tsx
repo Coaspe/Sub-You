@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { alertAction, postSetChangedAction } from "../../redux";
 import { RootState } from '../../redux/store';
 import axios from "axios";
+import { makeAuction } from "../../services/firebase";
 
 interface postHeaderProps {
   postContentProps: postContent
@@ -89,7 +90,15 @@ const PostHeader: React.FC<postHeaderProps> = (
               <img className="w-4 mr-3" src="/images/diskette.png" alt="Save" />
               <span className="font-noto text-xs">Save</span>
           </MenuItem>
-          <MenuItem onClick={handleClose}>
+          <MenuItem onClick={() => {
+            const auctionKey = makeAuction(user.uid, postContentProps.imageSrc[0])
+            handleClose()
+            axios.post("http://localhost:3001/makeauction", {
+              auctionKey: auctionKey
+            }).then((res) => {
+              console.log(res);
+            })
+          }}>
               <img className="w-4 mr-3" src="/images/hammer.png" alt="Auction" />
               <span className="font-noto text-xs">Auction</span>
           </MenuItem>

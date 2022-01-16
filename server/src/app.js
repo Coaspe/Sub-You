@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 require("firebase/compat/auth");
+const timers_1 = require("timers");
 const firebaseAdmin_1 = require("./service/firebaseAdmin/firebaseAdmin");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -28,8 +29,6 @@ app.post("/uploadpost", upload.any(), (req, res) => {
         const element = location[i];
         tmp.push(req.files[element]);
     }
-    console.log("parsedUserInfo", parsedUserInfo);
-    console.log("paredPostSetChanged", paredPostSetChanged);
     (0, firebaseAdmin_1.uploadImageToStorage)(tmp, parsedUserInfo.email).then((resArr) => {
         (0, firebaseAdmin_1.uploadImageAdmin)(req.body.caption, resArr, parsedUserInfo, req.body.category)
             .then(() => {
@@ -70,6 +69,23 @@ app.post("/deletepost", (req, res) => {
         res.send(JSON.stringify(Response));
         res.end();
     });
+});
+app.post("/makeauction", (req, res) => {
+    let minute = 30;
+    let second = 0;
+    console.log(req.body.auctionKey);
+    function tik() {
+        second = second - 1 < 0 ? 59 : second - 1;
+        minute = second === 59 ? minute - 1 : minute;
+        (0, firebaseAdmin_1.updateTime)(req.body.auctionKey, `${minute.toString()} : ${second.toString()}`);
+        res.send(`${minute.toString()} : ${second.toString()}`);
+    }
+    let timer = setInterval(tik, 1000);
+    setTimeout(function () {
+        (0, timers_1.clearInterval)(timer);
+        (0, firebaseAdmin_1.endAuction)(req.body.auctionKey);
+        res.end();
+    }, 1800000);
 });
 app.listen(3001, () => {
     console.log('Server Operated!');
