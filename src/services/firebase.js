@@ -1,6 +1,6 @@
 import { firebase, storageRef, FieldValue, rtDBRef } from "../lib/firebase";
 
-export const makeAuction = (sellerUid, photoURL) => {
+export const makeAuction = (sellerUid, photoURL, firstPrice) => {
   const key = rtDBRef.child("auctions").push().key;
   rtDBRef.child(`auctions/users/${sellerUid}/sell`).push(key);
 
@@ -10,6 +10,9 @@ export const makeAuction = (sellerUid, photoURL) => {
   tmp["time"] = "30 : 00";
   tmp["done"] = false;
   rtDBRef.child(`auctions/${key}`).update(tmp);
+
+  rtDBRef.child(`auctions/${key}/buyers`).push(sellerUid);
+  makeTransaction(sellerUid, firstPrice, key);
 
   return key;
 };
@@ -23,7 +26,7 @@ export const participateInAuction = (buyerUid, price, auctionKey) => {
 export const makeTransaction = (buyerUid, price, auctionKey) => {
   let tmp = {};
   let time = new Date().getTime();
-  tmp[time] = { price: price, userUid: buyerUid, desc: -price };
+  tmp[time] = { price: price, userUid: buyerUid };
 
   rtDBRef.child(`auctions/${auctionKey}/transactions`).update(tmp);
 };

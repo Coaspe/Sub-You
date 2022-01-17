@@ -30,7 +30,7 @@ admin.initializeApp({
 var db = admin.database();
 const firestore = getFirestore();
 const endAuction = (auctionKey) => {
-    db.ref(`auctions/${auctionKey}/done`).update(true);
+    db.ref(`auctions/${auctionKey}`).update({ done: false });
 };
 exports.endAuction = endAuction;
 const updateTime = (auctionKey, time) => {

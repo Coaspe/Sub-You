@@ -1,7 +1,6 @@
 import { postContent } from "../../types"
-import Pagination from '@mui/material/Pagination';
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, AnimateSharedLayout } from "framer-motion";
  
 
 const variants = {
@@ -40,7 +39,7 @@ interface imageswProps {
 const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
     
   const [direction, setDirection] = useState(0);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     (value - page > 0) ? setDirection(1) : setDirection(-1)
@@ -52,7 +51,7 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
     <motion.div layout className="flex flex-col items-center border-t-2 border-b-2 border-main border-opacity-30">
         <motion.div
           layout
-          animate={{ backgroundColor: postContentProps.averageColor[page-1] }}
+          animate={{ backgroundColor: postContentProps.averageColor[page] }}
           className="flex flex-col items-center justify-center w-full h-bgpost sm:h-smpost">
           <AnimatePresence custom={direction} exitBeforeEnter>
             <motion.img
@@ -81,12 +80,21 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
 
               }}
               className="max-h-full max-w-full"
-              src={postContentProps.imageSrc[page - 1]}
+              src={postContentProps.imageSrc[page]}
               alt={`Page : ${page - 1}`}
             />
         </AnimatePresence>
         </motion.div>
-      <Pagination className="text-white" count={postContentProps.imageSrc.length} page={page} onChange={handlePageChange} />
+      <div className="flex items-center mb-3">
+        <img  className="w-5 mr-1 cursor-pointer" src="images/left.png" alt="left"  onClick={()=>{setPage((page)=>(page - 1 === -1 ? page : page - 1))}} />
+        <AnimateSharedLayout>
+          {postContentProps.imageSrc.map((data, index) => (
+            <motion.div layout className={`w-1 h-1 rounded-full bg-main bg-opacity-40 mr-1 ${index === page && "w-2 h-2 bg-opacity-100"}`}></motion.div>
+          ))}
+        </AnimateSharedLayout>
+        <img className="w-5 cursor-pointer" src="images/right.png" alt="right" onClick={() => { setPage((page) => (page + 1 ===  postContentProps.imageSrc.length ? page : page + 1))}} />
+
+      </div>
     </motion.div>
     )
 }

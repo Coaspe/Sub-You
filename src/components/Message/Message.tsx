@@ -24,6 +24,7 @@ const Message = () => {
 
     // Get user's chat room and listen changes.
     useEffect(() => {
+        window.scrollTo(0,0)
         const UID = "lX8fJDnfFkO1Z6WjqicdVG6QJps1"
         rtDBRef.child(`users/${UID}`).on("value", (snap) => {
             if (snap.exists()) {

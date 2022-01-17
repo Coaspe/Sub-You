@@ -91,7 +91,7 @@ const PostHeader: React.FC<postHeaderProps> = (
               <span className="font-noto text-xs">Save</span>
           </MenuItem>
           <MenuItem onClick={() => {
-            const auctionKey = makeAuction(user.uid, postContentProps.imageSrc[0])
+            const auctionKey = makeAuction(user.uid, postContentProps.imageSrc[0], 0.1)
             handleClose()
             axios.post("http://localhost:3001/makeauction", {
               auctionKey: auctionKey

@@ -78,7 +78,6 @@ app.post("/makeauction", (req, res) => {
         second = second - 1 < 0 ? 59 : second - 1;
         minute = second === 59 ? minute - 1 : minute;
         (0, firebaseAdmin_1.updateTime)(req.body.auctionKey, `${minute.toString()} : ${second.toString()}`);
-        res.send(`${minute.toString()} : ${second.toString()}`);
     }
     let timer = setInterval(tik, 1000);
     setTimeout(function () {

@@ -25,6 +25,7 @@ const Newpostmodalimage: React.FC<NewpostmodalimageProps> = ({ src, imagesNum, m
     for (let i = 0; i < imagesNum; i++) {
         tmp.push(i)
     }
+
     return (
     <>
         {location[myLocation[myIndex]] !== undefined ?
@@ -81,10 +82,3 @@ const Newpostmodalimage: React.FC<NewpostmodalimageProps> = ({ src, imagesNum, m
 }
 
 export default Newpostmodalimage
-// 1(myIndexLocation) [1,1] (location)
-// 2 1,2
-// 3 1,3
-// 4 2,1
-// location mylocation myIndex
-// 안 바뀜               안 바뀜
-// 231345

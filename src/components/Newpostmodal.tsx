@@ -36,7 +36,6 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     const dispatch = useDispatch()
     const postSetChanged : (string|boolean)[] = useSelector((state: RootState) => state.setPostSetChanged.postSetChanged)
     const previewURL: string[] = useSelector((state: RootState) => state.setPreviewURL.previewURL)
-    const [revokePreviewURL, setRevokePreviewURL] = useState<string[]>([])
     const myLocation : Array<number> = useSelector((state: RootState) => state.setImageLocationInModal.myLocation)
     
     const setMyLocation = (location: Array<number>) => {
@@ -184,7 +183,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                                         <Newpostmodalimage
                                             src={url}
                                             imagesNum={previewURL.length}
-                                        myIndex={i}
+                                            myIndex={i}
                                         />
 
                                     ))}

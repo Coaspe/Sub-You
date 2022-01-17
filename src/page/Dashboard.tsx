@@ -162,7 +162,7 @@ const Dashboard = () => {
         }
     }, [page]);
 
-    const divRef = useRef(null)
+    const divRef = useRef<HTMLDivElement>(null)
     const alertVariants = {
         initial: {
             opacity: 0,
@@ -260,7 +260,7 @@ const Dashboard = () => {
                     </BottomNavigation>
                 </motion.div> : null}
             </AnimatePresence>
-            <div ref={divRef} className={`h-20 w-full absolute bottom-0`}></div>
+            {selectedPage === "Timeline" && <div ref={divRef} className={`h-20 w-full absolute bottom-0`}></div>}
         </div>
     );
 }

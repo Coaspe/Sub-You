@@ -18,9 +18,10 @@ module.exports = {
       colors: {
         main: "#736578",
         white: "#ffffff",
+        chatWhite: "#F4F8F9",
       },
       height: {
-        bgpost: "650px",
+        bgpost: "550px",
         smpost: "450px",
       },
       maxWidth: {

@@ -25,7 +25,7 @@ var db = admin.database();
 const firestore = getFirestore()
 
 export const endAuction = (auctionKey: string) => {
-  db.ref(`auctions/${auctionKey}/done`).update(true)
+  db.ref(`auctions/${auctionKey}`).update({done: false})
 }
 export const updateTime = (auctionKey: string, time: string) => {
   db.ref(`auctions/${auctionKey}`).update({time: time})
