@@ -118,7 +118,6 @@ const Newpostmodal: React.FC<newPostModalProps> = (
         left: '50%',
         transform: 'translate(-50%, -50%)',
         bgcolor: 'background.paper',
-        border: '1px solid #000',
         boxShadow: 24,
         p: 4,
     };
@@ -163,13 +162,13 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     }, [previewURL])
 
     return (
-        <Modal
-            open={open}
-            onClose={handleClose}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
-            className="w-full sm:hidden"
-        >
+            <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+                className="w-full sm:hidden"
+            >
                 <Box sx={style} className="flex flex-col items-center justify-between w-1/2">
                     <span className="font-noto text-2xl font-bold mb-7">
                         New Post
@@ -211,11 +210,11 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                             : 
                             (
                                 <div 
-                                    className="flex flex-col justify-center items-center h-5/6"
-                                    style={{ width: 500, height: 500 }}
+                                    className="flex flex-col justify-center items-center w-full"
+                                    style={{ height: 500 }}
                                     >
                                     <img
-                                        className='animate-pingmax-w-full max-h-full'
+                                        className='max-w-full max-h-full'
                                         src="./images/logo.png"
                                         alt="New Post default"
                                     />
@@ -240,6 +239,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                             }}
                             />
                     </form>
+                    <div className='flex items-center'>
                     <TextField
                         id="outlined-comment"
                         label="comment"
@@ -279,6 +279,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                         className={`${previewURL[0] === "/images/logo.png" && "pointer-events-none"} cursor-pointer`}
                         sx={{ color: previewURL[0] !== "/images/logo.png" ? "#008000" : "#8e9598" }}
                         />
+                    </div>
                 </Box>
             </Modal>
     )

@@ -15,4 +15,5 @@ ReactDOM.render(
   </FirebaseContext.Provider>,
   document.getElementById('root')
 );
+
 serviceWorkerRegistration.register();

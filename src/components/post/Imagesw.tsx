@@ -48,7 +48,7 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
 
   
   return (
-    <motion.div layout className="flex flex-col items-center border-t-2 border-b-2 border-main border-opacity-30">
+    <motion.div layout className="flex flex-col items-center border-b border-main border-opacity-30">
         <motion.div
           layout
           animate={{ backgroundColor: postContentProps.averageColor[page] }}
@@ -85,16 +85,16 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
             />
         </AnimatePresence>
         </motion.div>
-      <div className="flex items-center mb-3">
-        <img  className="w-5 mr-1 cursor-pointer" src="images/left.png" alt="left"  onClick={()=>{setPage((page)=>(page - 1 === -1 ? page : page - 1))}} />
+      {postContentProps.imageSrc.length > 1 && <div className="flex items-center mb-3">
+        <img className="w-5 mr-2 cursor-pointer rounded-full" src="images/left.png" alt="left" onClick={() => { setPage((page) => (page - 1 === -1 ? page : page - 1)) }} />
         <AnimateSharedLayout>
           {postContentProps.imageSrc.map((data, index) => (
             <motion.div layout className={`w-1 h-1 rounded-full bg-main bg-opacity-40 mr-1 ${index === page && "w-2 h-2 bg-opacity-100"}`}></motion.div>
           ))}
         </AnimateSharedLayout>
-        <img className="w-5 cursor-pointer" src="images/right.png" alt="right" onClick={() => { setPage((page) => (page + 1 ===  postContentProps.imageSrc.length ? page : page + 1))}} />
+        <img className="w-5 cursor-pointer ml-1" src="images/right.png" alt="right" onClick={() => { setPage((page) => (page + 1 === postContentProps.imageSrc.length ? page : page + 1)) }} />
 
-      </div>
+      </div>}
     </motion.div>
     )
 }

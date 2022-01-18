@@ -22,6 +22,8 @@
     "axios": "^0.24.0",
     "compressorjs": "^1.1.1",
     "crypto-js": "^4.1.1",
+    "dotenv": "^14.2.0",
+    "ethers": "^5.5.3",
     "fast-average-color": "^7.0.1",
     "firebase": "^9.5.0",
     "framer-motion": "^4.1.17",
@@ -33,7 +35,7 @@
     "react-loading-skeleton": "^3.0.1",
     "react-redux": "^7.2.6",
     "react-router-dom": "^6.0.2",
-    "react-scripts": "4.0.3",
+    "react-scripts": "^4.0.3",
     "redux": "^4.1.2",
     "serve": "^13.0.2",
     "styled-components": "^5.3.3",
@@ -80,6 +82,7 @@
     "@types/react-router-dom": "^5.1.2",
     "autoprefixer": "^9.8.8",
     "postcss": "^7.0.39",
+    "react-error-overlay": "^6.0.9",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.17"
   }
 }

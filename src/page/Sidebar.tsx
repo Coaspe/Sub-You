@@ -6,6 +6,7 @@ import { sidebarData } from "../data/sidebarData"
 import { useNavigate } from 'react-router';
 import Newpostmodal from "../components/Newpostmodal"
 import { CircularProgress } from "@mui/material"
+import { connectWallet, getCurrentWalletConnected } from "../helpers/connectWallet"
 
 interface sidebarProps {
     userInfo: getUserType
@@ -34,10 +35,11 @@ const Sidebar: React.FC<sidebarProps> = (
     const [modalOpen, setModalOpen] = useState(false)
     const [windowInfo, setWindowInfo] = useState(0)
     const navigate = useNavigate()
-    
+    const [wallet, setWallet] = useState("")
     const handleExpand = () => {
         setSideExpanded(!sideExpanded)
     }
+
 
     const handleClickProfile = () => {
         navigate(`/p/${userInfo?.userEmailEncrypted}`)
@@ -55,7 +57,20 @@ const Sidebar: React.FC<sidebarProps> = (
             },
     }
 
+    const getCurrentWallet = async () => {
+        const {status, address} = await getCurrentWalletConnected()
+        setWallet(address)
+        console.log("status", status);   
+    }
+    const getWalletFirstTime = async () => {
+        const { status, address } = await connectWallet()
+        if (address) {
+            
+        }
+    }
+
     useEffect(() => {
+        getCurrentWallet()
         const cacheImages = async () => {
         await new Promise(function (resolve, reject) {
           const img = new Image();
@@ -92,7 +107,7 @@ const Sidebar: React.FC<sidebarProps> = (
                     variants={divVariants}
                     initial="initial"
                     animate="animate"
-                    className={`col-span-2 h-full font-noto items-center bg-main bg-opacity-10 flex flex-col sm:hidden z-10`}>
+                    className={`shadow-lg col-span-2 h-full font-noto items-center bg-main bg-opacity-10 flex flex-col sm:hidden z-10`}>
                 {userInfo.postDocId ? (
                         <motion.div
                         initial={{opacity:0}}
@@ -127,6 +142,13 @@ const Sidebar: React.FC<sidebarProps> = (
                                                     C124.865,64.01,70,127.909,70,204.634L70,285l-30,30v40H10v30h30h375h30v-30H415z"/>
                                             </g>
                                         </svg>
+                                    <button
+                                        className="cursor-pointer"
+                                        onClick={() => {
+                                        connectWallet()
+                                    }}>
+                                         {wallet ? "Hellow" : "Connect wallet"}
+                                        </button>
                                     </div>
                                 </div>
                                 

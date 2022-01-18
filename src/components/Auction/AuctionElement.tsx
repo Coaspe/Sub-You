@@ -26,6 +26,7 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
     const [sellerInfo, setSellerInfo] = useState<getUserType>({} as getUserType)
 
     useEffect(() => {
+    
         getUserByUserId(auctionInfo.seller).then((res: any) => {
             setSellerInfo(res)
         })

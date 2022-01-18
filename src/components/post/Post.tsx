@@ -56,7 +56,7 @@ const Post: React.FC<postProps> = (
                         animate={{ opacity: 1, }}
                         exit={{opacity : 0, height : 0}}
                         // transition={{ type: "spring", bounce: 0.25}}
-                        className="mb-10 flex flex-col w-full max-w-md border-2 border-main border-opacity-30 bg-white sm:col-span-3 ">
+                        className="shadow-lg mb-10 flex flex-col w-full max-w-md border border-main border-opacity-30 bg-white sm:col-span-3 ">
                         <PostHeader
                             postContentProps={postContentProps}
                             setIsLoading={setIsLoading}
@@ -64,7 +64,7 @@ const Post: React.FC<postProps> = (
                             setPostsVisible={setPostsVisible}
                             />
                         <Imagesw postContentProps={postContentProps} />
-                        <Footer postContentProps={postContentProps} />
+                        {/* <Footer postContentProps={postContentProps} /> */}
                     </m.div>
                 }
             </LazyMotion>

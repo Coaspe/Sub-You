@@ -79,6 +79,7 @@ export const singInWithGoogleInfoToFB = async (info) => {
     .collection("users")
     .doc(info.additionalUserInfo.profile.email)
     .set({
+      wallet: "",
       userEmail: info.additionalUserInfo.profile.email.toLowerCase(),
       uid: info.user.uid,
       username: info.additionalUserInfo.profile.name.toLowerCase(),
