@@ -20,7 +20,8 @@ const Post: React.FC<postProps> = (
         setPostsVisible }) => {
             
     const [load, setLoad] = useState(false)
-    
+    const [selectedMode, setSelectedMode] = useState("image")
+
     const cacheImages = (srcArray: string[]) => {
         const promise = srcArray.map((src: string) => {
             
@@ -58,12 +59,13 @@ const Post: React.FC<postProps> = (
                         // transition={{ type: "spring", bounce: 0.25}}
                         className="shadow-lg mb-10 flex flex-col w-full max-w-md border border-main border-opacity-30 bg-white sm:col-span-3 ">
                         <PostHeader
+                            setSelectedMode={setSelectedMode}
                             postContentProps={postContentProps}
                             setIsLoading={setIsLoading}
                             postVisible={postVisible}
                             setPostsVisible={setPostsVisible}
                             />
-                        <Imagesw postContentProps={postContentProps} />
+                            <Imagesw postContentProps={postContentProps} selectedMode={selectedMode} />
                         {/* <Footer postContentProps={postContentProps} /> */}
                     </m.div>
                 }

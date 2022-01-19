@@ -1,6 +1,7 @@
 import { postContent } from "../../types"
 import { useState } from "react";
 import { motion, AnimatePresence, AnimateSharedLayout } from "framer-motion";
+import Comment from "./Comment";
  
 
 const variants = {
@@ -34,9 +35,10 @@ const swipePower = (offset: number, velocity: number) => {
   return Math.abs(offset) * velocity;
 };
 interface imageswProps {
-  postContentProps : postContent
+  postContentProps: postContent
+  selectedMode: string
 }
-const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
+const Imagesw: React.FC<imageswProps> = ({ postContentProps, selectedMode }) => {
     
   const [direction, setDirection] = useState(0);
   const [page, setPage] = useState(0);
@@ -46,9 +48,8 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
     setPage(value)
   };
 
-  
   return (
-    <motion.div layout className="flex flex-col items-center border-b border-main border-opacity-30">
+    <motion.div layout className="relative flex flex-col items-center border-b border-main border-opacity-30">
         <motion.div
           layout
           animate={{ backgroundColor: postContentProps.averageColor[page] }}
@@ -79,22 +80,24 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps }) => {
                 }
 
               }}
-              className="max-h-full max-w-full"
+              className="max-h-full max-w-full "
               src={postContentProps.imageSrc[page]}
               alt={`Page : ${page - 1}`}
             />
         </AnimatePresence>
         </motion.div>
-      {postContentProps.imageSrc.length > 1 && <div className="flex items-center mb-3">
-        <img className="w-5 mr-2 cursor-pointer rounded-full" src="images/left.png" alt="left" onClick={() => { setPage((page) => (page - 1 === -1 ? page : page - 1)) }} />
-        <AnimateSharedLayout>
-          {postContentProps.imageSrc.map((data, index) => (
-            <motion.div layout className={`w-1 h-1 rounded-full bg-main bg-opacity-40 mr-1 ${index === page && "w-2 h-2 bg-opacity-100"}`}></motion.div>
-          ))}
-        </AnimateSharedLayout>
-        <img className="w-5 cursor-pointer ml-1" src="images/right.png" alt="right" onClick={() => { setPage((page) => (page + 1 === postContentProps.imageSrc.length ? page : page + 1)) }} />
-
-      </div>}
+      {postContentProps.imageSrc.length > 1 &&
+        <div className="flex items-center mb-3">
+          <img className="w-5 mr-2 cursor-pointer rounded-full" src="images/left.png" alt="left" onClick={() => { setPage((page) => (page - 1 === -1 ? page : page - 1)) }} />
+          <AnimateSharedLayout>
+            {postContentProps.imageSrc.map((data, index) => (
+              <motion.div layout className={`w-1 h-1 rounded-full bg-main bg-opacity-40 mr-1 ${index === page && "w-2 h-2 bg-opacity-100"}`}></motion.div>
+            ))}
+          </AnimateSharedLayout>
+          <img className="w-5 cursor-pointer ml-1" src="images/right.png" alt="right" onClick={() => { setPage((page) => (page + 1 === postContentProps.imageSrc.length ? page : page + 1)) }} />
+        </div>
+      }
+      {selectedMode === "comment" && <Comment />}
     </motion.div>
     )
 }
