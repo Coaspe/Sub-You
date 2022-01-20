@@ -1,5 +1,19 @@
 import { firebase, storageRef, FieldValue, rtDBRef } from "../lib/firebase";
 
+export const getComments = async (postDocID) => {
+  const result = await firebase
+    .firestore()
+    .collection("posts")
+    .doc(postDocID)
+    .get();
+
+  return await firebase
+    .firestore()
+    .collection("comments")
+    .where("__name__", "in", result.data().comments)
+    .get();
+};
+
 export const makeAuction = (sellerUid, photoURL, firstPrice) => {
   const key = rtDBRef.child("auctions").push().key;
   rtDBRef.child(`auctions/users/${sellerUid}/sell`).push(key);

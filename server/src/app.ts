@@ -1,7 +1,7 @@
 import express from "express"
 import "firebase/compat/auth";
 import { clearInterval } from "timers";
-import { deletePostAdmin, uploadImageAdmin, uploadImageToStorage, updateTime, endAuction } from "./service/firebaseAdmin/firebaseAdmin";
+import { deletePostAdmin, uploadImageAdmin, uploadImageToStorage, updateTime, endAuction, addComment } from "./service/firebaseAdmin/firebaseAdmin";
 
 const app: express.Express = express()
 app.use(express.json())
@@ -96,6 +96,10 @@ app.post("/makeauction", (req: any, res: express.Response) => {
     res.end()
   }, 1800000)
 
+})
+
+app.post("/addcomment", (req: any, res: express.Response) => {
+  addComment(req.body.text, req.body.userUID, req.body.postDocID)
 })
 
 app.listen(3001,() => {

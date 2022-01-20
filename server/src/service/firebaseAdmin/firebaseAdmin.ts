@@ -122,3 +122,26 @@ export async function deletePostAdmin(
       return desertRef.delete();
     }))
 }
+
+export const addComment = async (text: string, userUID: string, postDocID: string) => {
+  const dateCreated = new Date().getDate()
+  
+  // Add new Comment to collection 'comments'
+  const newComment = await firestore
+    .collection("comments")
+    .add({
+      dateCreated,
+      likes: 0,
+      reply: [],
+      text,
+      userUID
+    })
+  
+  // Add new Comment's DocId to post's comments array
+  await firestore
+    .collection("posts")
+    .doc(postDocID)
+    .update({
+    comments: FieldValue.arrayUnion(newComment.id)
+  })
+}

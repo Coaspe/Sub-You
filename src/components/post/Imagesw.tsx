@@ -97,7 +97,7 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps, selectedMode }) => 
           <img className="w-5 cursor-pointer ml-1" src="images/right.png" alt="right" onClick={() => { setPage((page) => (page + 1 === postContentProps.imageSrc.length ? page : page + 1)) }} />
         </div>
       }
-      {selectedMode === "comment" && <Comment />}
+      {selectedMode === "comment" && <Comment postDocID={postContentProps.docId}/>}
     </motion.div>
     )
 }

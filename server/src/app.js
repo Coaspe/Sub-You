@@ -86,6 +86,9 @@ app.post("/makeauction", (req, res) => {
         res.end();
     }, 1800000);
 });
+app.post("/addcomment", (req, res) => {
+    (0, firebaseAdmin_1.addComment)(req.body.text, req.body.userUID, req.body.postDocID);
+});
 app.listen(3001, () => {
     console.log('Server Operated!');
 });

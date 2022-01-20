@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletePostAdmin = exports.uploadImageAdmin = exports.uploadImageToStorage = exports.updateTime = exports.endAuction = void 0;
+exports.addComment = exports.deletePostAdmin = exports.uploadImageAdmin = exports.uploadImageToStorage = exports.updateTime = exports.endAuction = void 0;
 const firebase_1 = require("../../lib/firebase");
 // NodeJS can not use getDownloadURL
 // Make read permission public and write permission needs auth.
@@ -111,3 +111,24 @@ function deletePostAdmin(docId, userEmail, storageImageNameArr) {
     });
 }
 exports.deletePostAdmin = deletePostAdmin;
+const addComment = (text, userUID, postDocID) => __awaiter(void 0, void 0, void 0, function* () {
+    const dateCreated = new Date().getDate();
+    // Add new Comment to collection 'comments'
+    const newComment = yield firestore
+        .collection("comments")
+        .add({
+        dateCreated,
+        likes: 0,
+        reply: [],
+        text,
+        userUID
+    });
+    // Add new Comment's DocId to post's comments array
+    yield firestore
+        .collection("posts")
+        .doc(postDocID)
+        .update({
+        comments: FieldValue.arrayUnion(newComment.id)
+    });
+});
+exports.addComment = addComment;
