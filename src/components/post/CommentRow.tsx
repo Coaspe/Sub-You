@@ -1,11 +1,16 @@
-const CommentRow = () => {
+import { memo } from "react"
+import { commentType } from "../../types"
+interface commentRowProps {
+    commentInfo : commentType
+}
+const CommentRow:React.FC<commentRowProps> = ({ commentInfo }) => {
 return (
-<div className="flex flex-col bg-gray-50 px-3 rounded-xl font-noto py-2 shadow-lg w-11/12">
+<div className="flex flex-col bg-gray-50 px-3 rounded-xl font-noto py-2 shadow-lg w-10/12">
     <div className="flex items-center justify-between">
         <div className="flex items-center">
-            <img className="rounded-full w-8 h-8" src="images/facebookcircle.png" alt="comment" />
+            <img className="rounded-full w-8 h-8" src={commentInfo.userProfileImg} alt="comment" />
             <div className="flex flex-col ml-2 mb-2">
-                <span className="font-bold">username</span>
+                <span className="font-bold">{commentInfo.username}</span>
                 <span className="text-xs text-gray-400 font-semibold">1 hr ago</span>
             </div>
         </div>
@@ -23,9 +28,9 @@ return (
                     fill-rule="evenodd" /></svg>
         </div>
     </div>
-    <p className="text-gray-400 text-sm font-semibold">tmelkfws slekfjslek dmfslkef dmfkfms efmf ss ssk smfms.</p>
+        <p className="text-gray-400 text-sm font-semibold py-2">{commentInfo.text}</p>
 </div>
 )
 }
 
-export default CommentRow
+export default memo(CommentRow)

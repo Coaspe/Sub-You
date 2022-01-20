@@ -1,16 +1,18 @@
 import { firebase, storageRef, FieldValue, rtDBRef } from "../lib/firebase";
 
-export const getComments = async (postDocID) => {
-  const result = await firebase
-    .firestore()
-    .collection("posts")
-    .doc(postDocID)
-    .get();
+export const getCommentsDocId = async (postDocID) => {
+  return (
+    await firebase.firestore().collection("posts").doc(postDocID).get()
+  ).data().comments;
+};
+
+export const getCommentInfinite = async (postDocIDArr, key) => {
+  const tmp = postDocIDArr.slice(key, key + 5);
 
   return await firebase
     .firestore()
     .collection("comments")
-    .where("__name__", "in", result.data().comments)
+    .where("__name__", "in", tmp)
     .get();
 };
 

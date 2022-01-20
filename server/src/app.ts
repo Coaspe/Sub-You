@@ -99,7 +99,27 @@ app.post("/makeauction", (req: any, res: express.Response) => {
 })
 
 app.post("/addcomment", (req: any, res: express.Response) => {
-  addComment(req.body.text, req.body.userUID, req.body.postDocID)
+  const comment = {
+    text: req.body.text,
+    userUID: req.body.userUID,
+    postDocID: req.body.postDocID,
+    userProfileImg: req.body.userProfileImg,
+    username: req.body.username,
+    reply: [],
+    dateCreated: new Date().getTime(),
+    likes:0
+  }
+  addComment(
+    comment.text,
+    comment.userUID,
+    comment.postDocID,
+    comment.userProfileImg,
+    comment.username,
+    comment.dateCreated
+  ).then(() => {
+    res.send(comment)
+    res.end()
+  })
 })
 
 app.listen(3001,() => {

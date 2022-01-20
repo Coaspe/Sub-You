@@ -101,3 +101,13 @@ export type auctionInfoType = {
     seller: string
     transaction: {[dateCreated: number] : { price: number, userUid: string }}
 }
+
+export type commentType = {
+    dateCreated: number
+    likes: number
+    reply: string[]
+    text: string
+    userUID: string
+    username: string
+    userProfileImg: string
+}

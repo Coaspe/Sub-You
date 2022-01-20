@@ -87,7 +87,20 @@ app.post("/makeauction", (req, res) => {
     }, 1800000);
 });
 app.post("/addcomment", (req, res) => {
-    (0, firebaseAdmin_1.addComment)(req.body.text, req.body.userUID, req.body.postDocID);
+    const comment = {
+        text: req.body.text,
+        userUID: req.body.userUID,
+        postDocID: req.body.postDocID,
+        userProfileImg: req.body.userProfileImg,
+        username: req.body.username,
+        reply: [],
+        dateCreated: new Date().getTime(),
+        likes: 0
+    };
+    (0, firebaseAdmin_1.addComment)(comment.text, comment.userUID, comment.postDocID, comment.userProfileImg, comment.username, comment.likes).then(() => {
+        res.send(comment);
+        res.end();
+    });
 });
 app.listen(3001, () => {
     console.log('Server Operated!');

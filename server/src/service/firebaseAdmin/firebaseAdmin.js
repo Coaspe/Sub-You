@@ -111,8 +111,7 @@ function deletePostAdmin(docId, userEmail, storageImageNameArr) {
     });
 }
 exports.deletePostAdmin = deletePostAdmin;
-const addComment = (text, userUID, postDocID) => __awaiter(void 0, void 0, void 0, function* () {
-    const dateCreated = new Date().getDate();
+const addComment = (text, userUID, postDocID, userProfileImg, username, dateCreated) => __awaiter(void 0, void 0, void 0, function* () {
     // Add new Comment to collection 'comments'
     const newComment = yield firestore
         .collection("comments")
@@ -121,7 +120,9 @@ const addComment = (text, userUID, postDocID) => __awaiter(void 0, void 0, void 
         likes: 0,
         reply: [],
         text,
-        userUID
+        userUID,
+        userProfileImg,
+        username
     });
     // Add new Comment's DocId to post's comments array
     yield firestore

@@ -123,8 +123,13 @@ export async function deletePostAdmin(
     }))
 }
 
-export const addComment = async (text: string, userUID: string, postDocID: string) => {
-  const dateCreated = new Date().getDate()
+export const addComment = async (
+  text: string,
+  userUID: string,
+  postDocID: string,
+  userProfileImg: string,
+  username: string,
+  dateCreated: number) => {
   
   // Add new Comment to collection 'comments'
   const newComment = await firestore
@@ -134,7 +139,9 @@ export const addComment = async (text: string, userUID: string, postDocID: strin
       likes: 0,
       reply: [],
       text,
-      userUID
+      userUID,
+      userProfileImg,
+      username
     })
   
   // Add new Comment's DocId to post's comments array
