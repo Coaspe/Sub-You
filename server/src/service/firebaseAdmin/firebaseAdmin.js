@@ -117,7 +117,7 @@ const addComment = (text, userUID, postDocID, userProfileImg, username, dateCrea
         .collection("comments")
         .add({
         dateCreated,
-        likes: 0,
+        likes: [],
         reply: [],
         text,
         userUID,

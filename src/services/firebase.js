@@ -1,5 +1,17 @@
 import { firebase, storageRef, FieldValue, rtDBRef } from "../lib/firebase";
 
+export const updateCommentLikes = async (userUID, commentDocID, like) => {
+  return await firebase
+    .firestore()
+    .collection("comments")
+    .doc(commentDocID)
+    .update({
+      likes: like
+        ? FieldValue.arrayRemove(userUID)
+        : FieldValue.arrayUnion(userUID),
+    });
+};
+
 export const getCommentsDocId = async (postDocID) => {
   return (
     await firebase.firestore().collection("posts").doc(postDocID).get()

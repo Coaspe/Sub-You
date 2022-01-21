@@ -169,7 +169,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                 aria-describedby="modal-modal-description"
                 className="w-full sm:hidden"
             >
-                <Box sx={style} className="flex flex-col items-center justify-between w-1/2">
+                <Box sx={style} className="flex flex-col items-center justify-between w-4/6 h-5/6">
                     <span className="font-noto text-2xl font-bold mb-7">
                         New Post
                     </span>

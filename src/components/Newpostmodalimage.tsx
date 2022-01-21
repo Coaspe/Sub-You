@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useDispatch, useSelector } from 'react-redux'
 import { imageLocationInModalAction } from '../redux'
 import { RootState } from '../redux/store'
+import NewPostModalSkeleton from './NewPostModalSkeleton'
 
 interface NewpostmodalimageProps {
     src: string
@@ -35,7 +36,6 @@ const Newpostmodalimage: React.FC<NewpostmodalimageProps> = ({ src, imagesNum, m
                     {tmp.map((data, index) => (
                         <div className="w-5 h-5 border flex items-center justify-center cursor-pointer"
                             onClick={() => {
-                                
                                 const tmp = myLocation.slice()
                                 const tmp_element = tmp[myIndex]
                                 let tt = 0
@@ -72,11 +72,10 @@ const Newpostmodalimage: React.FC<NewpostmodalimageProps> = ({ src, imagesNum, m
                 </div>
             </motion.div>
             <motion.img initial={{ opacity: 0 }} animate={{ opacity: 1 }} src={previewURL[myIndex]} alt="new" />
-        </motion.div> : (
-        <>
-            {previewURL.map(() => <Skeleton variant="rectangular" width={118} height={200} />)}
-        </>
-    )}
+        </motion.div> 
+        : (
+            <div className="absolute w-full h-full bg-gray-400 animate-pulse" />
+         )}
     </>
     )
 }

@@ -48,7 +48,6 @@ const Profile = () => {
     }, [])
 
     useEffect(() => { 
-        
         // Get Each Posts's first image src, avearage color and Firestore docId 
         // And set those values to variable imageInfo
         if (userInfo.postDocId) {
@@ -63,7 +62,7 @@ const Profile = () => {
                     docId : data.id
                 }))
 
-                setImageInfo(x)
+                setImageInfo(x.reverse())
                 
             })
         }
@@ -88,12 +87,14 @@ const Profile = () => {
     }, [])
 
     return (
-        <div className="z-0">
+        <div className="z-0 w-full flex flex-col items-center">
             {settingModal && <ProfileSettingModal userInfo={userInfo} setSettingModal={setSettingModal} />}
             <AnimateSharedLayout type="crossfade">
                 {docId && <ProfileDetailImage docId={docId} setDocId={setDocId} firstImageSrc={firstImageSrc} />}
-                <Header userInfo={userInfo} />
-                <div className="grid grid-cols-7 w-full justify-items-center">
+                <div className="w-full">
+                    <Header userInfo={userInfo} />
+                </div>
+                <div className="grid grid-cols-7 w-2/3 justify-items-center">
                     {userInfo.postDocId ?
                         (<>
                             <motion.div

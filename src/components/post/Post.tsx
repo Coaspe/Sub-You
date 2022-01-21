@@ -59,6 +59,7 @@ const Post: React.FC<postProps> = (
                         // transition={{ type: "spring", bounce: 0.25}}
                         className="shadow-lg mb-10 flex flex-col w-full max-w-md border border-main border-opacity-30 bg-white sm:col-span-3 ">
                         <PostHeader
+                            selectedMode={selectedMode}
                             setSelectedMode={setSelectedMode}
                             postContentProps={postContentProps}
                             setIsLoading={setIsLoading}
@@ -75,5 +76,4 @@ const Post: React.FC<postProps> = (
         </AnimatePresence>
     )
 }
-
 export default Post

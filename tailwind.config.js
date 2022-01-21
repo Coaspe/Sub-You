@@ -30,8 +30,14 @@ module.exports = {
       fontSize: {
         xxs: ".6rem",
       },
+      fill: {
+        heartHoverGray: "#666666",
+        heartHoverRed: "#ed5269",
+      },
     },
   },
-  variants: {},
+  variants: {
+    fill: ["hover"],
+  },
   plugins: [],
 };

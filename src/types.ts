@@ -104,10 +104,11 @@ export type auctionInfoType = {
 
 export type commentType = {
     dateCreated: number
-    likes: number
+    likes: string[]
     reply: string[]
     text: string
     userUID: string
     username: string
     userProfileImg: string
+    docID: string
 }

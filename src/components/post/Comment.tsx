@@ -1,9 +1,11 @@
 import axios from "axios"
+import { motion } from "framer-motion"
 import { useCallback, useContext, useEffect, useRef, useState } from "react"
 import UserContext from "../../context/user"
 import { getCommentInfinite, getCommentsDocId, getUserByUserId } from "../../services/firebase"
 import { commentType, getUserType } from "../../types"
 import CommentRow from "./CommentRow"
+import PostSkeleton from "./PostSkeleton"
 
 interface commentProps {
     postDocID : string
@@ -15,52 +17,50 @@ const Comment: React.FC<commentProps> = ({ postDocID }) => {
     const [text, setText] = useState("")
     const [comments, setComments] = useState<commentType[]>([])
     const [commentsDocID, setCommentsDocID] = useState<string[]>([])
-    const enterRef = useRef<HTMLDivElement | null>(null)
     const [commentUser, setCommentUser] = useState<getUserType>({} as getUserType)
+    const enterRef = useRef<HTMLDivElement | null>(null)
     const [key, setKey] = useState(0)
+    const [loading, setLoading] = useState(true)
 
     const handleKeypress = (e: any) => {
-    if (e.key === 'Enter') {
-        enterRef.current?.click()
+        if (e.key === 'Enter') {
+            enterRef.current?.click()
         }
     };
-
+    
+    const handleScroll = useCallback(() => {
+        if (commentsDocID.length > 0 && key < commentsDocID.length) {
+            getCommentInfinite(commentsDocID, key).then((res) => {
+                // Datecreated Descending
+                let tmp = res.docs.map((doc: any) => ({...doc.data(), docID:doc.id}))
+                    .sort((a, b) => { return b.dateCreated - a.dateCreated })
+                setComments((origin: any) => {
+                    return [...origin, ...tmp]
+                })
+                setKey((origin) => (origin + tmp.length))
+                setLoading(false)
+            })
+        }
+    }, [commentsDocID, key])
+    
     useEffect(() => {
         getCommentsDocId(postDocID).then((res: any) => {
-            setCommentsDocID(res.reverse())
+            res.length === 0 ? setLoading(false) : setCommentsDocID(res.reverse())
         })
 
         getUserByUserId(user.uid).then((res: any) => {
             setCommentUser(res)
         })
-
     }, [])
-    
-    const handleScroll = useCallback(() => {
-        getCommentInfinite(commentsDocID, key).then((res) => {
-            
-            let tmp = res.docs.map((doc) => doc.data())
-                .sort((a, b) => { return b.dateCreated - a.dateCreated })
-            setComments((origin: any) => {
-                return [...origin, ...tmp]
-            })
-            setKey((origin)=>(origin + tmp.length))
-        })
-    }, [commentsDocID, key])
-    
-    useEffect(() => {
-        
-        if (commentsDocID.length > 0 && key < commentsDocID.length) {    
-            console.log("sef");
-            handleScroll()
-        }
-        
-    }, [commentsDocID])
 
+    useEffect(() => {
+        handleScroll()
+    }, [commentsDocID])
+    
 return (
-<div className="absolute w-full h-full z-20 flex flex-col items-center backdrop-filter backdrop-blur overflow-y-scroll">
+<div className="font-noto absolute w-full h-full z-20 flex flex-col items-center backdrop-filter backdrop-blur overflow-y-scroll">
         {commentUser &&
-            <div className="flex w-full items-center justify-center my-2 mt-4">
+            <div className="flex w-10/12 items-center justify-between my-2 mt-4">
                 <input
                     value={text}
                     onKeyPress={handleKeypress}
@@ -69,8 +69,9 @@ return (
                     }}
                     type="text"
                     placeholder="Type a message here ..."
-                    className="py-2 px-3 rounded-xl text-sm w-2/3 border bg-gray-100" />
-                <div
+                    className="py-2 px-3 rounded-xl text-sm w-10/12 border bg-gray-100" />
+                <motion.div
+                    whileHover={{scale : 1.1}}
                     ref={enterRef}
                     onClick={() => {
                         if (text !== "") {
@@ -90,46 +91,47 @@ return (
                     }}
                     className="w-8 h-8 rounded-full flex items-center justify-center bg-chatWhite cursor-pointer">
                     <svg x="0px" y="0px"
-                        className="w-6"
+                        className="w-7"
                         fill="gray"
-                        viewBox="0 0 60.083 60.083" >
-                        <path d="M60.049,10.871c0-0.002-0.001-0.005-0.001-0.007c-0.023-0.125-0.066-0.239-0.132-0.343
-                c-0.001-0.001-0.001-0.003-0.001-0.004c-0.001-0.002-0.003-0.003-0.004-0.005c-0.063-0.098-0.139-0.182-0.232-0.253
-                c-0.019-0.015-0.039-0.026-0.059-0.04c-0.075-0.049-0.152-0.09-0.239-0.117c-0.055-0.019-0.111-0.025-0.168-0.034
-                c-0.044-0.006-0.083-0.026-0.129-0.026H59.08c-0.039-0.001-0.066,0.003-0.094,0.006c-0.009,0.001-0.017,0-0.026,0.001
-                c-0.009,0.001-0.019,0-0.029,0.002c-0.027,0.004-0.054,0.008-0.08,0.014L0.798,22.062c-0.413,0.086-0.729,0.421-0.788,0.839
-                s0.15,0.828,0.523,1.025l16.632,8.773l2.917,16.187c-0.002,0.012,0.001,0.025,0,0.037c-0.01,0.08-0.011,0.158-0.001,0.237
-                c0.005,0.04,0.01,0.078,0.02,0.117c0.023,0.095,0.06,0.184,0.11,0.268c0.01,0.016,0.01,0.035,0.021,0.051
-                c0.003,0.005,0.008,0.009,0.012,0.013c0.013,0.019,0.031,0.034,0.046,0.053c0.047,0.058,0.096,0.111,0.152,0.156
-                c0.009,0.007,0.015,0.018,0.025,0.025c0.015,0.011,0.032,0.014,0.047,0.024c0.061,0.04,0.124,0.073,0.191,0.099
-                c0.027,0.01,0.052,0.022,0.08,0.03c0.09,0.026,0.183,0.044,0.277,0.044c0.001,0,0.002,0,0.003,0h0c0,0,0,0,0,0
-                c0.004,0,0.008-0.002,0.012-0.002c0.017,0.001,0.034,0.002,0.051,0.002c0.277,0,0.527-0.124,0.712-0.315l11.079-7.386l11.6,7.54
-                c0.164,0.106,0.354,0.161,0.545,0.161c0.105,0,0.212-0.017,0.315-0.051c0.288-0.096,0.518-0.318,0.623-0.604l13.936-37.825
-                c0.093-0.151,0.146-0.33,0.146-0.521C60.083,10.981,60.059,10.928,60.049,10.871z M48.464,17.594L24.471,35.236
-                c-0.039,0.029-0.07,0.065-0.104,0.099c-0.013,0.012-0.026,0.022-0.037,0.035c-0.021,0.023-0.04,0.046-0.059,0.071
-                c-0.018,0.024-0.032,0.049-0.048,0.074c-0.037,0.06-0.068,0.122-0.092,0.188c-0.005,0.013-0.013,0.023-0.017,0.036
-                c-0.001,0.004-0.005,0.006-0.006,0.01l-2.75,8.937l-2.179-12.091L48.464,17.594z M22.908,46.61l2.726-9.004l4.244,2.759l1.214,0.789
-                l-4.124,2.749L22.908,46.61z"/>
+                        viewBox="0 0 466.008 466.008">
+                        <g>
+                            <path d="M397.763,68.245C353.754,24.236,295.241,0,233.004,0S112.254,24.236,68.245,68.245C24.236,112.254,0,170.767,0,233.004
+                                s24.236,120.75,68.245,164.759c44.009,44.009,102.521,68.245,164.759,68.245s120.75-24.236,164.759-68.245
+                                c44.009-44.009,68.245-102.521,68.245-164.759S441.772,112.254,397.763,68.245z M335.984,212.008
+                                c-2.322,5.605-7.791,9.26-13.858,9.26h-38.473v127.596c0,8.284-6.716,15-15,15h-71.298c-8.284,0-15-6.716-15-15V221.268h-38.474
+                                c-6.067,0-11.536-3.654-13.858-9.26c-2.321-5.605-1.038-12.057,3.252-16.347l89.122-89.123c2.813-2.813,6.628-4.394,10.606-4.394
+                                c3.978,0,7.794,1.58,10.606,4.394l89.122,89.123C337.022,199.951,338.306,206.402,335.984,212.008z"/>
+                        </g>
                     </svg>
-                </div>
+                </motion.div>
             </div>}
     <div className="flex flex-col items-center gap-3 mt-3 w-full">
-        {comments !== [] ? 
-            comments.map((comment)=> <CommentRow commentInfo={comment}/>)    
-            :
-            <span>No Comments.</span>
-        }
-        {key < commentsDocID.length &&
-            (
-            <div
-                onClick={() => {
-                    handleScroll()
-                }}
-                className="cursor-pointer bottom-0 absolute w-1/2 bg-white h-10 flex items-center justify-center rounded-xl text-gray-500">
-            Load more...
-            </div>
-        )
-        }
+            {!loading
+                ?
+                (comments.length > 0
+                    ?
+                    <>
+                        {comments.map((comment) => <CommentRow commentInfo={comment} />)}
+                        {key < commentsDocID.length &&
+                            <div
+                                onClick={() => {
+                                    handleScroll()
+                                }}
+                                className="font-semibold text-sm shadow-inner cursor-pointer w-1/2 bg-white h-10 flex items-center justify-center rounded-xl text-gray-500">
+                                Load more...
+                            </div>}
+                    </>
+                    :
+                    <div className="border px-3 py-2 rounded-xl bg-gray-50 text-gray-600 text-sm font-semibold">No Comments Yet</div>)
+                :
+                <>
+                    <PostSkeleton />
+                    <PostSkeleton />
+                    <PostSkeleton />
+                    <PostSkeleton />
+                    <PostSkeleton />
+                </>
+            }
     </div>
 </div>
 )

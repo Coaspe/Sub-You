@@ -5,6 +5,7 @@ import { rtDBRef } from "../../lib/firebase"
 import { lastCheckedTimeAction } from "../../redux"
 import { RootState } from "../../redux/store"
 import MessageListRow from "./MessageListRow"
+import MessageSkeleton from "./MessageSkeleton"
 
 const Message = () => {
 
@@ -130,7 +131,7 @@ const Message = () => {
             <span className="text-3xl font-black">Chats</span>
             <div className="mt-5">
                 {!noChatRoom ?
-                    Object.keys(chatRoomInfo).length > 0 && Object.keys(users).length === Object.keys(chatRoomInfo).length ? 
+                    (Object.keys(chatRoomInfo).length > 0 && Object.keys(users).length === Object.keys(chatRoomInfo).length) ? 
                         Object.keys(chatRoomInfo).map((chatRoomKey: string) => (
                         <MessageListRow
                             info={chatRoomInfo[chatRoomKey]}
@@ -140,7 +141,11 @@ const Message = () => {
                         ))
                         :
                     <div>
-                        Loading
+                        <MessageSkeleton />
+                        <MessageSkeleton />
+                        <MessageSkeleton />
+                        <MessageSkeleton />
+                        <MessageSkeleton />
                     </div>
                 : null}
             </div>

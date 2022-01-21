@@ -136,7 +136,7 @@ export const addComment = async (
     .collection("comments")
     .add({
       dateCreated,
-      likes: 0,
+      likes: [],
       reply: [],
       text,
       userUID,

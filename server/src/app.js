@@ -95,9 +95,9 @@ app.post("/addcomment", (req, res) => {
         username: req.body.username,
         reply: [],
         dateCreated: new Date().getTime(),
-        likes: 0
+        likes: []
     };
-    (0, firebaseAdmin_1.addComment)(comment.text, comment.userUID, comment.postDocID, comment.userProfileImg, comment.username, comment.likes).then(() => {
+    (0, firebaseAdmin_1.addComment)(comment.text, comment.userUID, comment.postDocID, comment.userProfileImg, comment.username, comment.dateCreated).then(() => {
         res.send(comment);
         res.end();
     });

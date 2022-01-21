@@ -107,7 +107,7 @@ app.post("/addcomment", (req: any, res: express.Response) => {
     username: req.body.username,
     reply: [],
     dateCreated: new Date().getTime(),
-    likes:0
+    likes:[]
   }
   addComment(
     comment.text,
