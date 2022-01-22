@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addComment = exports.deletePostAdmin = exports.uploadImageAdmin = exports.uploadImageToStorage = exports.updateTime = exports.endAuction = void 0;
+exports.addComment = exports.deletePostAdmin = exports.uploadImageAdmin = exports.uploadImageToStorage = exports.updateTime = exports.endAuction = exports.updateProfile = void 0;
 const firebase_1 = require("../../lib/firebase");
 // NodeJS can not use getDownloadURL
 // Make read permission public and write permission needs auth.
@@ -29,6 +29,34 @@ admin.initializeApp({
 });
 var db = admin.database();
 const firestore = getFirestore();
+const updateProfile = (userUID, userEmail, profileCaption, profileImg, username) => __awaiter(void 0, void 0, void 0, function* () {
+    let newFileName = `${Date.now()}_${username}`;
+    let fileUpload = bucket.file(`${userEmail}/profileImg/${newFileName}`);
+    (new Promise((resolve, reject) => {
+        const blobStream = fileUpload.createWriteStream({
+            metadata: {
+                contentType: profileImg.mimetype,
+            }
+        });
+        blobStream.on('error', (error) => {
+            reject(error);
+        });
+        blobStream.on('finish', () => {
+            resolve(newFileName);
+        });
+        blobStream.end(profileImg.buffer);
+    })).then(() => __awaiter(void 0, void 0, void 0, function* () {
+        const token = yield firebase_1.storageRef
+            .child(`${userEmail}/profileImg/${newFileName}`)
+            .getDownloadURL();
+        firestore.collection("users").doc(userEmail).update({
+            profileImg: token,
+            profileCaption,
+            username,
+        });
+    }));
+});
+exports.updateProfile = updateProfile;
 const endAuction = (auctionKey) => {
     db.ref(`auctions/${auctionKey}`).update({ done: false });
 };
@@ -60,10 +88,8 @@ const uploadImageToStorage = (file, userEmail) => {
     return Promise.all(fileNameArr);
 };
 exports.uploadImageToStorage = uploadImageToStorage;
-function uploadImageAdmin(caption, ImageUrl, userInfo, category) {
+function uploadImageAdmin(caption, ImageUrl, userInfo, category, averageColor) {
     return __awaiter(this, void 0, void 0, function* () {
-        const postId = ImageUrl;
-        let averageColor = [];
         return Promise.all(ImageUrl.map((imUrl) => {
             return firebase_1.storageRef
                 .child(`${userInfo.email}/${imUrl}`)
@@ -77,7 +103,7 @@ function uploadImageAdmin(caption, ImageUrl, userInfo, category) {
                 comments: [],
                 dateCreated: Date.now(),
                 imageSrc: res,
-                postId: postId,
+                postId: ImageUrl,
                 likes: [],
                 userId: userInfo.uid,
                 category: category,

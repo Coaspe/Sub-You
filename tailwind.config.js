@@ -19,6 +19,7 @@ module.exports = {
         main: "#736578",
         white: "#ffffff",
         chatWhite: "#F4F8F9",
+        stone: "#A4A3A1",
       },
       height: {
         bgpost: "550px",

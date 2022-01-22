@@ -42,12 +42,12 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps, selectedMode }) => 
     
   const [direction, setDirection] = useState(0);
   const [page, setPage] = useState(0);
-
+  console.log(postContentProps);
+  
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     (value - page > 0) ? setDirection(1) : setDirection(-1)
     setPage(value)
   };
-
   return (
     <motion.div layout className="relative flex flex-col items-center border-b border-main border-opacity-30">
         <motion.div
@@ -97,7 +97,7 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps, selectedMode }) => 
           <img className="w-5 cursor-pointer ml-1" src="images/right.png" alt="right" onClick={() => { setPage((page) => (page + 1 === postContentProps.imageSrc.length ? page : page + 1)) }} />
         </div>
       }
-      {selectedMode === "comment" && <Comment postDocID={postContentProps.docId}/>}
+      {selectedMode === "comment" && <Comment postInfo={postContentProps}/>}
     </motion.div>
     )
 }

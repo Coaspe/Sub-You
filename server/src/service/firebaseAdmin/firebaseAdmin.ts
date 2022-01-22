@@ -24,6 +24,47 @@ var db = admin.database();
 
 const firestore = getFirestore()
 
+export const updateProfile = async (
+  userUID: string,
+  userEmail: string,
+  profileCaption: string,
+  profileImg: any,
+  username: string
+) => {
+    let newFileName = `${Date.now()}_${username}`;
+    let fileUpload = bucket.file(`${userEmail}/profileImg/${newFileName}`);
+
+    (new Promise((resolve, reject) => {
+        
+      const blobStream = fileUpload.createWriteStream({
+        metadata: {
+          contentType: profileImg.mimetype,
+        }
+      });
+
+      blobStream.on('error', (error: any) => {
+        reject(error);
+      });
+
+      blobStream.on('finish', () => {
+        resolve(newFileName);
+      });
+
+      blobStream.end(profileImg.buffer);
+
+    })).then(async () => {
+      const token = await storageRef
+        .child(`${userEmail}/profileImg/${newFileName}`)
+        .getDownloadURL()
+      
+      firestore.collection("users").doc(userEmail).update({
+        profileImg: token,
+        profileCaption,
+        username,
+      })
+    })
+};
+
 export const endAuction = (auctionKey: string) => {
   db.ref(`auctions/${auctionKey}`).update({done: false})
 }
@@ -68,10 +109,8 @@ export async function uploadImageAdmin(
   ImageUrl: string[],
   userInfo: any,
   category: any,
+  averageColor: string[]
 ) {
-  const postId = ImageUrl;
-    
-    let averageColor: any[] = [];
 
    return Promise.all(ImageUrl.map((imUrl: any) => {
       return storageRef
@@ -86,7 +125,7 @@ export async function uploadImageAdmin(
          comments: [],
          dateCreated: Date.now(),
          imageSrc: res,
-         postId: postId,
+         postId: ImageUrl,
          likes: [],
          userId: userInfo.uid,
          category: category,

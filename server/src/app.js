@@ -8,7 +8,11 @@ require("firebase/compat/auth");
 const timers_1 = require("timers");
 const firebaseAdmin_1 = require("./service/firebaseAdmin/firebaseAdmin");
 const app = (0, express_1.default)();
+// json request body를 받기 위해 사용한다. application/json
 app.use(express_1.default.json());
+// json request body를 받기 위해 사용한다. application/x-www-form-urlencoded
+// &으로 분리되고, "=" 기호로 값과 키를 연결하는 key-value tuple로 인코딩되는 값입니다. 
+// 영어 알파벳이 아닌 문자들은 percent encoded 으로 인코딩됩니다.
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -30,7 +34,7 @@ app.post("/uploadpost", upload.any(), (req, res) => {
         tmp.push(req.files[element]);
     }
     (0, firebaseAdmin_1.uploadImageToStorage)(tmp, parsedUserInfo.email).then((resArr) => {
-        (0, firebaseAdmin_1.uploadImageAdmin)(req.body.caption, resArr, parsedUserInfo, req.body.category)
+        (0, firebaseAdmin_1.uploadImageAdmin)(req.body.caption, resArr, parsedUserInfo, req.body.category, JSON.parse(req.body.averageColor))
             .then(() => {
             const Response = {
                 alert: [true, "Upload", "success"],
@@ -83,6 +87,7 @@ app.post("/makeauction", (req, res) => {
     setTimeout(function () {
         (0, timers_1.clearInterval)(timer);
         (0, firebaseAdmin_1.endAuction)(req.body.auctionKey);
+        // get last buy request and pay
         res.end();
     }, 1800000);
 });
@@ -101,6 +106,10 @@ app.post("/addcomment", (req, res) => {
         res.send(comment);
         res.end();
     });
+});
+app.post("/updateProfile", upload.single('file'), (req, res) => {
+    console.log(req.file);
+    (0, firebaseAdmin_1.updateProfile)(req.body.userUID, req.body.userEmail, req.body.profileCaption, req.file, req.body.username);
 });
 app.listen(3001, () => {
     console.log('Server Operated!');

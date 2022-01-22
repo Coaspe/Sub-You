@@ -1,10 +1,14 @@
 import express from "express"
 import "firebase/compat/auth";
 import { clearInterval } from "timers";
-import { deletePostAdmin, uploadImageAdmin, uploadImageToStorage, updateTime, endAuction, addComment } from "./service/firebaseAdmin/firebaseAdmin";
+import { deletePostAdmin, uploadImageAdmin, uploadImageToStorage, updateTime, endAuction, addComment, updateProfile } from "./service/firebaseAdmin/firebaseAdmin";
 
 const app: express.Express = express()
+// json request body를 받기 위해 사용한다. application/json
 app.use(express.json())
+// json request body를 받기 위해 사용한다. application/x-www-form-urlencoded
+// &으로 분리되고, "=" 기호로 값과 키를 연결하는 key-value tuple로 인코딩되는 값입니다. 
+// 영어 알파벳이 아닌 문자들은 percent encoded 으로 인코딩됩니다.
 app.use(express.urlencoded({ extended: true }))
 
 app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -31,8 +35,9 @@ app.post("/uploadpost", upload.any(), (req: any, res: express.Response) => {
     const element = location[i];
     tmp.push(req.files[element])
   }
+  
   uploadImageToStorage(tmp, parsedUserInfo.email).then((resArr: any) => {
-    uploadImageAdmin(req.body.caption, resArr, parsedUserInfo, req.body.category)
+    uploadImageAdmin(req.body.caption, resArr, parsedUserInfo, req.body.category, JSON.parse(req.body.averageColor))
       .then(() => {
       const Response = {
         alert: [true, "Upload", "success"],
@@ -93,9 +98,9 @@ app.post("/makeauction", (req: any, res: express.Response) => {
   setTimeout(function() {
     clearInterval(timer)
     endAuction(req.body.auctionKey)
+    // get last buy request and pay
     res.end()
   }, 1800000)
-
 })
 
 app.post("/addcomment", (req: any, res: express.Response) => {
@@ -122,6 +127,9 @@ app.post("/addcomment", (req: any, res: express.Response) => {
   })
 })
 
-app.listen(3001,() => {
+app.post("/updateProfile", upload.single('file') , (req: any, res: express.Response) => {
+  updateProfile(req.body.userUID, req.body.userEmail, req.body.profileCaption, req.file, req.body.username)
+})
+app.listen(3001, () => {
   console.log('Server Operated!');
 });

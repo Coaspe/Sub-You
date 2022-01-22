@@ -63,9 +63,9 @@ const PostHeader: React.FC<postHeaderProps> = (
   
   return (
     <motion.div layout className="flex items-center justify-between bg-chatWhite px-2 py-2 font-noto sm:h-12 shadow-md z-30">
-          <motion.div className="flex items-center justify-center ml-2">
-            <Avatar sx={{width : 35, height : 35}} className="mr-2" alt="user avatar" src={postContentProps.avatarImgSrc} />
-            <span className="font-noto font-semibold text-sm">{postContentProps.username}</span>
+      <motion.div className="flex items-center justify-center ml-2">
+        <Avatar sx={{width : 35, height : 35}} className="mr-2" alt="user avatar" src={postContentProps.avatarImgSrc} />
+        <span className="font-noto font-semibold text-sm">{postContentProps.username}</span>
       </motion.div>
       <div className="flex items-center">
             <svg x="0px" y="0px"

@@ -213,3 +213,24 @@ const getPostByDocId = (docId) => __awaiter(void 0, void 0, void 0, function* ()
     return (yield firebase_1.firebase.firestore().collection("posts").doc(docId).get()).data();
 });
 exports.getPostByDocId = getPostByDocId;
+// export const getAverage = async (src: string) => {
+//   function toDataUrl(src:string, callback: any) {
+//     var xhr = new XMLHttpRequest();
+//     xhr.onload = function() {
+//         var reader = new FileReader();
+//         reader.onloadend = function() {
+//             callback(reader.result);
+//         }
+//         reader.readAsDataURL(xhr.response);
+//     };
+//     xhr.open('GET', src);
+//     xhr.responseType = 'blob';
+//     xhr.send();
+//   }
+//   toDataUrl(src, function(myBase64: string | ArrayBuffer | null) {
+//     console.log(myBase64); // myBase64 is the base64 string
+//   });
+//   getAverageColor(src).then((res) => {
+//   console.log(res.hex);
+//   })
+// }

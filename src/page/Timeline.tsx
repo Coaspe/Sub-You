@@ -1,10 +1,9 @@
 import Post from "../components/post/Post";
 import { postContent } from "../types";
-import Postskeleton from "../components/Postskeleton";
+import Postskeleton from "../components/post/Postskeleton";
 import { motion } from 'framer-motion'
 import { useSelector } from "react-redux"
 import {RootState} from "../redux/store"
-
 
 interface timelineProps {
   sideExpanded: boolean

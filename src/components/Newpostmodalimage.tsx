@@ -1,16 +1,16 @@
-import { Skeleton } from '@mui/material'
 import { motion } from 'framer-motion'
 import { useDispatch, useSelector } from 'react-redux'
 import { imageLocationInModalAction } from '../redux'
 import { RootState } from '../redux/store'
-import NewPostModalSkeleton from './NewPostModalSkeleton'
+
 
 interface NewpostmodalimageProps {
     src: string
+    average: string[]
     imagesNum: number,
     myIndex : number
 }
-const Newpostmodalimage: React.FC<NewpostmodalimageProps> = ({ src, imagesNum, myIndex }) => {
+const Newpostmodalimage: React.FC<NewpostmodalimageProps> = ({ src, average, imagesNum, myIndex }) => {
     const dispatch = useDispatch()
     const previewURL : string[] = useSelector((state: RootState) => state.setPreviewURL.previewURL)
 
@@ -30,7 +30,7 @@ const Newpostmodalimage: React.FC<NewpostmodalimageProps> = ({ src, imagesNum, m
     return (
     <>
         {location[myLocation[myIndex]] !== undefined ?
-        <motion.div layout className={`relative w-full h-full flex items-center justify-center col-span-1 row-start-${location[myLocation[myIndex]][0]} col-start-${location[myLocation[myIndex]][1]}`}>
+        <motion.div layout style={{backgroundColor : average[myIndex]}} className={`relative w-full h-full flex items-center justify-center col-span-1 row-start-${location[myLocation[myIndex]][0]} col-start-${location[myLocation[myIndex]][1]}`}>
             <motion.div className='absolute w-full h-full opacity-0 hover:opacity-100 hover:bg-black hover:bg-opacity-80 flex justify-center items-center'>
                 <div className='w-1/2 h-1/2 grid grid-cols-3 gap-2 items-center'>
                     {tmp.map((data, index) => (

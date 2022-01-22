@@ -2,21 +2,21 @@ import axios from "axios"
 import { motion } from "framer-motion"
 import { useCallback, useContext, useEffect, useRef, useState } from "react"
 import UserContext from "../../context/user"
-import { getCommentInfinite, getCommentsDocId, getUserByUserId } from "../../services/firebase"
-import { commentType, getUserType } from "../../types"
+import { getCommentInfinite, getUserByUserId } from "../../services/firebase"
+import { commentType, getUserType, postContent } from "../../types"
 import CommentRow from "./CommentRow"
-import PostSkeleton from "./PostSkeleton"
+import CommentSkeleton from "./CommentSkeleton"
 
 interface commentProps {
-    postDocID : string
+    postInfo: postContent
 }
 
-const Comment: React.FC<commentProps> = ({ postDocID }) => {
+const Comment: React.FC<commentProps> = ({ postInfo }) => {
 
     const { user } = useContext(UserContext)
     const [text, setText] = useState("")
     const [comments, setComments] = useState<commentType[]>([])
-    const [commentsDocID, setCommentsDocID] = useState<string[]>([])
+    const [commentsDocID, setCommentsDocID] = useState<string[]>([...postInfo.comments].reverse())
     const [commentUser, setCommentUser] = useState<getUserType>({} as getUserType)
     const enterRef = useRef<HTMLDivElement | null>(null)
     const [key, setKey] = useState(0)
@@ -44,17 +44,13 @@ const Comment: React.FC<commentProps> = ({ postDocID }) => {
     }, [commentsDocID, key])
     
     useEffect(() => {
-        getCommentsDocId(postDocID).then((res: any) => {
-            res.length === 0 ? setLoading(false) : setCommentsDocID(res.reverse())
-        })
-
         getUserByUserId(user.uid).then((res: any) => {
             setCommentUser(res)
         })
     }, [])
 
     useEffect(() => {
-        handleScroll()
+        postInfo.comments.length === 0 ? setLoading(false) : handleScroll()
     }, [commentsDocID])
     
 return (
@@ -78,7 +74,7 @@ return (
                             axios.post("http://localhost:3001/addcomment", {
                                 text,
                                 userUID: user.uid,
-                                postDocID,
+                                postDocID: postInfo.docId,
                                 userProfileImg: commentUser.profileImg,
                                 username: commentUser.username
                             }).then((res) => {
@@ -125,11 +121,11 @@ return (
                     <div className="border px-3 py-2 rounded-xl bg-gray-50 text-gray-600 text-sm font-semibold">No Comments Yet</div>)
                 :
                 <>
-                    <PostSkeleton />
-                    <PostSkeleton />
-                    <PostSkeleton />
-                    <PostSkeleton />
-                    <PostSkeleton />
+                    {/* 5개씩 comments를 로드하므로 comments의 개수가 5개가 넘으면 5개만 보여준다. */}
+                    {postInfo.comments.length >= 5
+                        ? Array(5).fill(0).map(() => (<CommentSkeleton />))
+                        : postInfo.comments.map(() => (<CommentSkeleton />))
+                    }
                 </>
             }
     </div>

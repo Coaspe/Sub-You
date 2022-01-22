@@ -12,6 +12,7 @@ import { RootState } from '../redux/store';
 import { AnimatePresence, motion } from 'framer-motion';
 import axios from 'axios';
 import Newpostmodalimage from './Newpostmodalimage';
+import FastAverageColor from 'fast-average-color'
 
 interface newPostModalProps { 
     open: boolean;
@@ -32,6 +33,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     const { user } = useContext(UserContext);
     const [comment, setComment] = useState("");
     const [file, setFile] = useState<Blob[]>([]);
+    const [average, setAverage] = useState<string[]>([]);
     const [load, setLoad] = useState(false)
     const dispatch = useDispatch()
     const postSetChanged : (string|boolean)[] = useSelector((state: RootState) => state.setPostSetChanged.postSetChanged)
@@ -62,11 +64,13 @@ const Newpostmodal: React.FC<newPostModalProps> = (
     const handleFileOnChange = (event: any) => {
 
         let files: Array<Blob> = []
-        let images : string[]= [];
+        let images: string[] = []
+        let average: string[] = []
+
+        const fac = new FastAverageColor();
 
         for (let i = 0; i < event.target.files.length; i++) {
-            console.log(event.target.files);
-            
+
             const element = event.target.files[i]
             
             let qual = 0.45;
@@ -82,16 +86,24 @@ const Newpostmodal: React.FC<newPostModalProps> = (
             new Compressor(element, {
             quality: qual,
             success(result: any) {
-                files.push(result)
-                images.push(URL.createObjectURL(result))
-                if (images.length === event.target.files.length)
-                {
-                    if (previewURL[0] !== "/images/logo.png") {
-                        previewURL.map((data)=>(URL.revokeObjectURL(data)))
-                     }           
-                    setPreviewURL(images)
-                    setFile(files)
-                }
+                const url = URL.createObjectURL(result)
+                // Get Photo's average color for space
+                fac.getColorAsync(url).then((res) => {
+                    files.push(result)
+                    images.push(url)
+                    average.push(res.hex);
+                    console.log(res.hex)
+                    if (images.length === event.target.files.length && images.length === average.length)
+                    {
+                        if (previewURL[0] !== "/images/logo.png") {
+                            previewURL.map((data)=>(URL.revokeObjectURL(data)))
+                         }
+                        setAverage(average)
+                        setPreviewURL(images)
+                        setFile(files)
+                    }
+                })
+
             },
             error(err) {
                 console.log(err.message);
@@ -146,9 +158,11 @@ const Newpostmodal: React.FC<newPostModalProps> = (
             return Promise.all(promise)
         }
 
+        // Caching images for smooth UX
         cacheImages(previewURL).then(() => {
             let tmp: Array<[number, number]> = []
             let tmp2: Array<number> = []
+
             for (let i = 0; i < previewURL.length; i++) {
                 tmp.push([Math.floor(i / 3) + 1, Math.floor(i % 3) + 1]);
                 tmp2.push(i)
@@ -169,7 +183,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                 aria-describedby="modal-modal-description"
                 className="w-full sm:hidden"
             >
-                <Box sx={style} className="flex flex-col items-center justify-between w-4/6 h-5/6">
+                <Box sx={style} className="flex flex-col items-center justify-between w-5/6 h-5/6">
                     <span className="font-noto text-2xl font-bold mb-7">
                         New Post
                     </span>
@@ -180,6 +194,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                                 (<>
                                     {previewURL.map((url, i) => (
                                         <Newpostmodalimage
+                                            average={average}
                                             src={url}
                                             imagesNum={previewURL.length}
                                             myIndex={i}
@@ -253,7 +268,6 @@ const Newpostmodal: React.FC<newPostModalProps> = (
 
                         for (let i = 0; i < file.length; i++) {
                             param.append(`file${i}`, file[i]); 
-                            console.log(`file${i}`, file[i]);
                         }
 
                         param.append("caption", comment as string)
@@ -261,6 +275,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                         param.append("category", "SNS")
                         param.append("postSetChanged", JSON.stringify(postSetChanged))
                         param.append("location", JSON.stringify(myLocation))
+                        param.append("averageColor", JSON.stringify(average))
                         
                         setIsLoading(true)
                         

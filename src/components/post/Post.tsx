@@ -1,10 +1,9 @@
 import { postContent } from "../../types"
-import Footer from "./Footer"
 import Imagesw from "./Imagesw"
 import PostHeader from "./PostHeader"
 import { AnimatePresence, LazyMotion, m, domAnimation } from "framer-motion"
 import { useEffect, useState } from "react"
-import Postskeleton from "../Postskeleton"
+import Postskeleton from "./Postskeleton"
 
 interface postProps {
     postContentProps: postContent
@@ -67,7 +66,6 @@ const Post: React.FC<postProps> = (
                             setPostsVisible={setPostsVisible}
                             />
                             <Imagesw postContentProps={postContentProps} selectedMode={selectedMode} />
-                        {/* <Footer postContentProps={postContentProps} /> */}
                     </m.div>
                 }
             </LazyMotion>
