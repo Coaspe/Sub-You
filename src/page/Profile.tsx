@@ -58,7 +58,7 @@ const Profile = () => {
                 
                 const x : firstImageInfo[] = re.map((data : any) => ({
                     src : data.data().imageSrc[0],
-                    color: "#fff",
+                    color: data.data().averageColor[0],
                     docId : data.id
                 }))
 
@@ -102,8 +102,8 @@ const Profile = () => {
                                 animate={{ opacity : 1 }}
                                 className="flex col-span-5 col-start-2 items-start mt-6 ">
                                 {/* Profile Image Div */}
-                                <div className="flex w-1/3 items-start mr-3">
-                                    <img className="w-full max-h-full max-w-full object-cover rounded-md shadow-xl" src={userInfo.profileImg} alt="profile" />
+                                <div className="flex w-1/3 mr-3 h-full items-center justify-center">
+                                    <img className="w-full max-h-full max-w-full object-cover rounded-xl shadow-xl" src={userInfo.profileImg} alt="profile" />
                                 </div>
                                 
                                 {/* Username, User Intro comment, Nationality, Message Btn, 
@@ -169,32 +169,32 @@ const Profile = () => {
                                 <div className="flex justify-center w-2/3 col-span-3 col-start-3 py-12 border-b-2">
                                     <span className="text-4xl font-noto">Auctions</span>
                                 </div>
-                                {/* Posts list */}
-                                <div className="flex justify-center w-2/3 col-span-3 col-start-3 py-12 border-b-2">
-                                    <span className="text-4xl font-noto">Posts</span>
-                                </div>
-                                <div className="grid grid-cols-3 gap-3 col-span-5 col-start-2 items-start mt-6">
-                                    {imageInfo.length > 0 && imageInfo[0].docId ? (
-                                        imageInfo.map((data: firstImageInfo) => (
-                                            <motion.div
-                                                layoutId={`container-${data.docId}`}
-                                                onClick={() => {
-                                                    setDocId(data.docId)
-                                                    setFirstImageSrc(data.src)
-                                                }}
-                                                style={{backgroundColor : data.color}}
-                                                whileHover={{scale : 1.1}}
-                                                initial={{opacity : 0,}}
-                                                animate={{ opacity: 1, }}
-                                                exit={{ opacity: 0,  }}
-                                                className="cursor-pointer w-full h-full flex items-center justify-center">
-                                                <motion.img layoutId={`image-${data.docId}`} className="max-h-full max-w-full" src={data.src} alt="sss" />
-                                            </motion.div>
-                                        ))
-                                        ): (
-                                            null 
-                                        )}
-                                </div>
+                            {/* Posts list */}
+                            <div className="flex justify-center w-2/3 col-span-3 col-start-3 py-12 border-b-2">
+                                <span className="text-4xl font-noto">Posts</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-3 col-span-5 col-start-2 items-start mt-6">
+                                {imageInfo.length > 0 && imageInfo[0].docId ? (
+                                    imageInfo.map((data: firstImageInfo) => (
+                                        <motion.div
+                                            layoutId={`container-${data.docId}`}
+                                            onClick={() => {
+                                                setDocId(data.docId)
+                                                setFirstImageSrc(data.src)
+                                            }}
+                                            style={{backgroundColor : data.color}}
+                                            whileHover={{scale : 1.1}}
+                                            initial={{opacity : 0,}}
+                                            animate={{ opacity: 1, }}
+                                            exit={{ opacity: 0,  }}
+                                            className="cursor-pointer w-full h-full flex items-center justify-center">
+                                            <motion.img layoutId={`image-${data.docId}`} className="max-h-full max-w-full" src={data.src} alt="sss" />
+                                        </motion.div>
+                                    ))
+                                    ): (
+                                        null 
+                                    )}
+                            </div>
                         </>)
                     : null}
                 </div>

@@ -12,10 +12,11 @@ import Sidebar from "./Sidebar";
 import {useCallback, useContext, useEffect, useState, useRef} from 'react'
 import { motion, AnimatePresence } from "framer-motion";
 import UserContext from "../context/user";
-import { getUserByUserId, getPhotos, getPhotosInfiniteScroll } from "../services/firebase";
+import { getUserByUserId, getPhotos, getPhotosInfiniteScroll, doesEmailExist } from "../services/firebase";
 import { getUserType, postContent, userInfoFromFirestore } from "../types";
 import ProfileSetting from '../components/Profile/ProfileSetting';
-import firebase from 'firebase/compat';
+import { collection, getDocs, query, where, } from "firebase/firestore";
+import { firestore } from '../lib/firebase';
 import Artists from '../page/Artists';
 import { alertAction, postsAction, userInfoAction } from '../redux';
 import { RootState } from '../redux/store';
@@ -111,12 +112,9 @@ const Dashboard = () => {
 
     useEffect(() => {
         async function getTimelinePhotos() {
-            const result = await firebase
-                .firestore()
-                .collection("users")
-                .where("uid", "==", contextUser.uid)
-                .get();
-            
+            const q = query(collection(firestore, "users"), where("uid", "==", contextUser.uid));
+            const result = await getDocs(q)
+
             const user = result.docs.map((item) => ({
                 ...item.data(),
                 docId: item.id,
@@ -131,6 +129,8 @@ const Dashboard = () => {
         if (postSetChanged[0] !== "delete") {
             doSetPosts([])
             getTimelinePhotos().then((res: any) => {
+                console.log(res);
+                
                 if (res.length > 0) {
                     doSetPosts(res)
                     const tmp = []
@@ -159,6 +159,7 @@ const Dashboard = () => {
         if (key !== 0) {
             sendQuery();
         }
+        doesEmailExist("aspalt85@gmail.com")
     }, [page]);
 
     const divRef = useRef<HTMLDivElement>(null)

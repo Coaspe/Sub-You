@@ -1,8 +1,6 @@
-import Firebase from "firebase/compat/app";
-import "firebase/compat/database";
-import "firebase/compat/firestore";
-import "firebase/compat/auth";
-import "firebase/compat/storage";
+import { initializeApp } from "firebase/app";
+import { getStorage } from "firebase/storage";
+import { getFirestore, FieldValue } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
@@ -17,9 +15,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const firebase = Firebase.initializeApp(firebaseConfig);
-const { FieldValue } = Firebase.firestore;
-const storageRef = Firebase.storage().ref();
-const rtDBRef = firebase.database().ref();
+const Firebase = initializeApp(firebaseConfig);
+const firebase = Firebase.firebase;
+const firestore = getFirestore(Firebase);
+const storageRef = getStorage(Firebase);
+const rtDBRef = getDatabase(Firebase);
 
-export { firebase, FieldValue, storageRef, rtDBRef };
+export { firebase, firestore, FieldValue, storageRef, rtDBRef };

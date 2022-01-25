@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addComment = exports.deletePostAdmin = exports.uploadImageAdmin = exports.uploadImageToStorage = exports.updateTime = exports.endAuction = exports.updateProfile = void 0;
+exports.addComment = exports.deletePostAdmin = exports.uploadImageAdmin = exports.uploadImageToStorage = exports.updateTime = exports.endAuction = exports.updateProfileWithoutImage = exports.updateProfileWithImage = void 0;
 const firebase_1 = require("../../lib/firebase");
 // NodeJS can not use getDownloadURL
 // Make read permission public and write permission needs auth.
@@ -29,10 +29,10 @@ admin.initializeApp({
 });
 var db = admin.database();
 const firestore = getFirestore();
-const updateProfile = (userUID, userEmail, profileCaption, profileImg, username) => __awaiter(void 0, void 0, void 0, function* () {
+const updateProfileWithImage = (userEmail, profileCaption, profileImg, username) => __awaiter(void 0, void 0, void 0, function* () {
     let newFileName = `${Date.now()}_${username}`;
     let fileUpload = bucket.file(`${userEmail}/profileImg/${newFileName}`);
-    (new Promise((resolve, reject) => {
+    return (new Promise((resolve, reject) => {
         const blobStream = fileUpload.createWriteStream({
             metadata: {
                 contentType: profileImg.mimetype,
@@ -56,7 +56,14 @@ const updateProfile = (userUID, userEmail, profileCaption, profileImg, username)
         });
     }));
 });
-exports.updateProfile = updateProfile;
+exports.updateProfileWithImage = updateProfileWithImage;
+const updateProfileWithoutImage = (userEmail, profileCaption, username) => __awaiter(void 0, void 0, void 0, function* () {
+    return firestore.collection("users").doc(userEmail).update({
+        profileCaption,
+        username,
+    });
+});
+exports.updateProfileWithoutImage = updateProfileWithoutImage;
 const endAuction = (auctionKey) => {
     db.ref(`auctions/${auctionKey}`).update({ done: false });
 };

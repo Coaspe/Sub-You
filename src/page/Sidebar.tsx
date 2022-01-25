@@ -84,9 +84,8 @@ const Sidebar: React.FC<sidebarProps> = (
                         initial={{opacity:0}}
                         animate={{opacity:1}}
                         className={`flex flex-col items-center left-2 h-full`}>
-                                <div 
-                                className="flex flex-col items-center w-3/5 mt-10 pb-10">
-                                    <img className="w-full max-h-full max-w-full object-cover rounded-md shadow-2xl mb-5" src={userInfo.profileImg} alt="profile" />
+                                <div className="flex flex-col items-center w-3/5 mt-10 pb-10">
+                                    <img className="w-full max-h-full max-w-full object-cover shadow-lg rounded-md mb-5" src={userInfo.profileImg} alt="profile" />
                                     <div className="flex items-center">
                                         {isLoading ? (<CircularProgress size={20} />) : (<img className="w-4" src="/images/check.png" alt="No Problems" />)}
                                         <span onClick={handleClickProfile} className="cursor-pointer font-black text-lg ml-2">{userInfo.username}</span>

@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from "react"
 import { useSelector } from "react-redux"
 import UserContext from "../../context/user"
 import { rtDBRef } from "../../lib/firebase"
+import { ref, onValue, get, child} from "firebase/database";
 import { RootState } from "../../redux/store"
 import { auctionInfoType } from "../../types"
 import AuctionElement from "./AuctionElement"
@@ -16,41 +17,35 @@ const Auction = () => {
     const [buyAuctionInfo, setBuyAuctionInfo] = useState<{ [key: string] : auctionInfoType }>({} as { [key: string] : auctionInfoType })
     const [sellOrBuyMyAuction, setSellOrBuyMyAuction] = useState("Sell")
     const [sellOrBuyPrevious, setSellOrBuyPrevious] = useState("Sell")
+
     useEffect(() => {
-    console.log(auctionInfo);
-        }, [auctionInfo])
-    useEffect(() => {
-    console.log(sellAuctionInfo);
-    }, [sellAuctionInfo])
-    useEffect(() => {
-    console.log(buyAuctionInfo);
-    }, [buyAuctionInfo])
-    useEffect(() => {
-        // Get Auctions Informations
-        rtDBRef.child(`auctions/users/${user.uid}`).get().then((res) => {
+        
+        get(child(ref(rtDBRef), `auctions/users/${user.uid}`)).then((res) => {
             if (res.exists()) {
                 if (res.val().buy && res.val().sell) {
 
                     let tmp: { [key: string]: auctionInfoType } = {}
                     Object.values(res.val().buy).forEach((auc) => {
-
-                        rtDBRef.child(`auctions/${auc}`).once('value', (snap) => {
+                        onValue(ref(rtDBRef, `auctions/${auc}`), (snap) => {
                             tmp[snap.key as string] = snap.val()
                             if (Object.keys(tmp).length === Object.keys(res.val().buy).length) {
                                 setBuyAuctionInfo(tmp)
                             }
-                        })
+                        }, {
+                            onlyOnce: true
+                        });
                     })
 
                     let tmp2: { [key: string]: auctionInfoType } = {}
                     Object.values(res.val().sell).forEach((auc) => {
-
-                        rtDBRef.child(`auctions/${auc}`).once('value', (snap) => {
+                        onValue(ref(rtDBRef, `auctions/${auc}`), (snap) => {
                             tmp2[snap.key as string] = snap.val()
                             if (Object.keys(tmp2).length === Object.keys(res.val().sell).length) {
                                 setSellAuctionInfo(tmp2)
                             }
-                        })
+                        }, {
+                            onlyOnce: true
+                        });
                     })
 
                     setAuctionInfo({ ...tmp, ...tmp2 })
@@ -58,33 +53,35 @@ const Auction = () => {
                 } else if (res.val().buy && !res.val().sell) {
                     let tmp: { [key: string]: auctionInfoType } = {}
                     Object.values(res.val().buy).forEach((auc) => {
-
-                        rtDBRef.child(`auctions/${auc}`).once('value', (snap) => {
+                        onValue(ref(rtDBRef, `auctions/${auc}`), (snap) => {
                             tmp[snap.key as string] = snap.val()
                             if (Object.keys(tmp).length === Object.keys(res.val().buy).length) {
                                 setBuyAuctionInfo(tmp)
                                 setAuctionInfo(tmp)
                             }
-                        })
+                        }, {
+                            onlyOnce: true
+                        });
                     })
                 } else if (!res.val().buy && res.val().sell) {
                     console.log("here");
                     
                     let tmp2: { [key: string]: auctionInfoType } = {}
                     Object.values(res.val().sell).forEach((auc) => {
-
-                        rtDBRef.child(`auctions/${auc}`).once('value', (snap) => {
+                        onValue(ref(rtDBRef, `auctions/${auc}`), (snap) => {
                             tmp2[snap.key as string] = snap.val()
                             if (Object.keys(tmp2).length === Object.keys(res.val().sell).length) {
                                 setSellAuctionInfo(tmp2)
                                 setAuctionInfo(tmp2)
                             }
-                        })
+                        }, {
+                            onlyOnce: true
+                        });
                     })
                 }
             }
-            
         })
+        // Get Auctions Informations
     }, [])
     
     const sideExpanded: boolean = useSelector((state: RootState) => state.setSidebarExpanded.sideBarExpanded)

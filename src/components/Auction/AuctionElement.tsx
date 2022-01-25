@@ -1,7 +1,8 @@
 import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion"
 import { memo, useContext, useEffect, useState } from "react"
-import UserContext from "../../context/user"
 import { rtDBRef } from "../../lib/firebase"
+import { ref, onValue, get, child, query, limitToLast} from "firebase/database";
+import UserContext from "../../context/user"
 import { getUserByUserId, makeTransaction, participateInAuction } from "../../services/firebase"
 import { auctionInfoType, getUserType } from "../../types"
 import AuctionTransactionRow from "./AuctionTransactionRow"
@@ -30,7 +31,7 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
         getUserByUserId(auctionInfo.seller).then((res: any) => {
             setSellerInfo(res)
         })
-        rtDBRef.child(`auctions/${auctionKey}/time`).on("value", (snap) => {
+        onValue(ref(rtDBRef, `auctions/${auctionKey}/time`), (snap) => {
             setLeftTime(snap.val().toString())
         })
     }, [])
@@ -38,17 +39,18 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
     useEffect(() => {
 
         if (auctionInfo.buyers) { 
-            console.log(auctionInfo.buyers);
-            rtDBRef.child(`auctions/${auctionKey}/transactions`).limitToLast(10).on("value", (snap) => {
+            const q = query(ref(rtDBRef, `auctions/${auctionKey}/transactions`), limitToLast(10))
+            onValue(q, (snap) => {
                 const lastKey = Object.keys(snap.val())[Object.keys(snap.val()).length - 1]
                 const lastVal = snap.val()[lastKey]
-    
+
                 const reversed_arr = Object.values(snap.val()) as transactionType[]
                 const reversedKey = Object.keys(snap.val())
-    
+
                 setTransactions([reversedKey, reversed_arr])
                 setLastest([lastKey, lastVal])
-            })
+            });
+
             
             let query_user = Object.values(auctionInfo.buyers).filter((user) => !Object.keys(users).includes(user))
             let tmp: { [uid: string]: getUserType } = {}

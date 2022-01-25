@@ -24,8 +24,7 @@ var db = admin.database();
 
 const firestore = getFirestore()
 
-export const updateProfile = async (
-  userUID: string,
+export const updateProfileWithImage = async (
   userEmail: string,
   profileCaption: string,
   profileImg: any,
@@ -34,7 +33,7 @@ export const updateProfile = async (
     let newFileName = `${Date.now()}_${username}`;
     let fileUpload = bucket.file(`${userEmail}/profileImg/${newFileName}`);
 
-    (new Promise((resolve, reject) => {
+    return (new Promise((resolve, reject) => {
         
       const blobStream = fileUpload.createWriteStream({
         metadata: {
@@ -64,7 +63,16 @@ export const updateProfile = async (
       })
     })
 };
-
+export const updateProfileWithoutImage = async (
+  userEmail: string,
+  profileCaption: string,
+  username: string
+) => {
+  return firestore.collection("users").doc(userEmail).update({
+    profileCaption,
+    username,
+  })
+};
 export const endAuction = (auctionKey: string) => {
   db.ref(`auctions/${auctionKey}`).update({done: false})
 }

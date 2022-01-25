@@ -1,15 +1,16 @@
 import { useState, useEffect, useContext } from "react";
 import FirebaseContext from "../context/firebase";
-import Firebase from "firebase/compat/app";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const useAuthListner = () => {
   const { firebase } = useContext(FirebaseContext);
-  const [user, setUser] = useState<Firebase.User>(
+  const [user, setUser] = useState<any>(
     JSON.parse(localStorage.getItem("authUser") as string)
   );
-  
+
   useEffect(() => {
-    const listener = firebase.auth().onAuthStateChanged((authUser) => {
+    const auth = getAuth()
+    onAuthStateChanged(auth, (authUser) => {
       // we have a user... therefore we can store the user in localstorage
       if (authUser) {
         localStorage.setItem("authUser", JSON.stringify(authUser));
@@ -17,11 +18,9 @@ const useAuthListner = () => {
       } else {
         // we don't have an authUser, therefore clear the localstorage
         localStorage.removeItem("authUser");
-        setUser({} as Firebase.User);
+        setUser({} as any);
       }
     });
-
-    return () => listener();
   }, [firebase]);
   return { user } ;
 };

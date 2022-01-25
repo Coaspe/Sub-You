@@ -1,5 +1,11 @@
 module.exports = {
-  purge: [],
+  mode: "jit",
+  purge: [
+    "./public/**/*.html",
+    "./src/components/*.{js,jsx,ts,tsx}",
+    "./src/components/**/*.{ts,tsx}",
+    "./src/page/*.{ts,tsx}",
+  ],
   darkMode: false, // or 'media' or 'class'
   theme: {
     screens: {

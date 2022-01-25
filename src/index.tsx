@@ -3,7 +3,7 @@ import './index.css';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import FirebaseContext from "./context/firebase";
-import { firebase, FieldValue, storageRef } from "./lib/firebase";
+import { firebase, storageRef, FieldValue } from "./lib/firebase";
 import { store } from './redux/store';
 import { Provider } from 'react-redux';
 

@@ -1,3 +1,4 @@
+import { onValue, orderByChild, query, ref } from "firebase/database";
 import { AnimatePresence } from "framer-motion";
 import { useContext, useEffect, useRef, useState } from "react"
 import UserContext from "../../context/user";
@@ -22,14 +23,15 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ info, chatRoomKey, user, 
 
     useEffect(() => {
         const getMessages = (key: string) => {
-        rtDBRef
-            .child(`chatRooms/${key}/messages`)
-            .orderByChild("dateCreated")
-            .once("value", (snap) => {
-                console.log(snap.val());
+            const q = query(ref(rtDBRef, `chatRooms/${key}/messages`), orderByChild("dateCreated"))
+            
+            onValue(q, (snap) => {
                 setMessages(Object.values(snap.val()))
-            })
+            }, {
+                onlyOnce: true
+            });
         }
+        
         if (chatRoomKey !== undefined && messages !== []) {
             getMessages(chatRoomKey)
         }

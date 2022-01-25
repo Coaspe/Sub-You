@@ -1,53 +1,57 @@
-import { firebase, storageRef, FieldValue, rtDBRef } from "../lib/firebase";
+import { firebase, firestore, rtDBRef } from "../lib/firebase";
+import {
+  collection,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  where,
+  startAfter,
+  updateDoc,
+  doc,
+  getDoc,
+  setDoc,
+  arrayRemove,
+  arrayUnion,
+} from "firebase/firestore";
+import { push, child, ref, update } from "firebase/database";
 
 export const updateCommentLikes = async (userUID, commentDocID, like) => {
-  return await firebase
-    .firestore()
-    .collection("comments")
-    .doc(commentDocID)
-    .update({
-      likes: like
-        ? FieldValue.arrayRemove(userUID)
-        : FieldValue.arrayUnion(userUID),
-    });
+  return updateDoc(doc(firestore, "comments", commentDocID), {
+    likes: like ? arrayRemove(userUID) : arrayUnion(userUID),
+  });
 };
 
 export const getCommentsDocId = async (postDocID) => {
-  return (
-    await firebase.firestore().collection("posts").doc(postDocID).get()
-  ).data().comments;
+  return (await getDoc(doc(firestore, "posts", postDocID))).data().comments;
 };
 
 export const getCommentInfinite = async (postDocIDArr, key) => {
   const tmp = postDocIDArr.slice(key, key + 5);
-
-  return await firebase
-    .firestore()
-    .collection("comments")
-    .where("__name__", "in", tmp)
-    .get();
+  return await getDocs(
+    query(collection(firestore, "comments"), where("__name__", "in", tmp))
+  );
 };
 
 export const makeAuction = (sellerUid, photoURL, firstPrice) => {
-  const key = rtDBRef.child("auctions").push().key;
-  rtDBRef.child(`auctions/users/${sellerUid}/sell`).push(key);
+  const key = push(child(ref(rtDBRef), "auctions")).key;
 
   let tmp = {};
   tmp["seller"] = sellerUid;
   tmp["photoURL"] = photoURL;
   tmp["time"] = "30 : 00";
   tmp["done"] = false;
-  rtDBRef.child(`auctions/${key}`).update(tmp);
 
-  rtDBRef.child(`auctions/${key}/buyers`).push(sellerUid);
+  update(ref(rtDBRef, `auctions/${key}`), tmp);
+  push(child(ref(rtDBRef), `auctions/${key}/buyers`), sellerUid);
   makeTransaction(sellerUid, firstPrice, key);
 
   return key;
 };
 
 export const participateInAuction = (buyerUid, price, auctionKey) => {
-  rtDBRef.child(`auctions/${auctionKey}/buyers`).push(buyerUid);
-  rtDBRef.child(`auctions/users/${buyerUid}/buy`).push(auctionKey);
+  push(child(ref(rtDBRef), `auctions/${auctionKey}/buyers`), buyerUid);
+  push(child(ref(rtDBRef), `auctions/users/${buyerUid}/buy`), auctionKey);
   makeTransaction(buyerUid, price, auctionKey);
 };
 
@@ -55,19 +59,17 @@ export const makeTransaction = (buyerUid, price, auctionKey) => {
   let tmp = {};
   let time = new Date().getTime();
   tmp[time] = { price: price, userUid: buyerUid };
-
-  rtDBRef.child(`auctions/${auctionKey}/transactions`).update(tmp);
+  update(ref(rtDBRef, `auctions/${auctionKey}/transactions`), tmp);
 };
 
 export const updateLastCheckedTime = (key, time) => {
-  const path = rtDBRef.child(`lastCheckedTime`);
   let tmp = {};
   tmp[key] = time;
-  return path.update(tmp);
+  return update(ref(rtDBRef, `lastCheckedTime`), tmp);
 };
 
 export const makeMessageRoom = (users) => {
-  const key = rtDBRef.child("chatRooms").push().key;
+  const key = push(child(ref(rtDBRef), `chatRooms`)).key;
 
   let messageRoom = {
     users: users,
@@ -76,22 +78,19 @@ export const makeMessageRoom = (users) => {
   let updates = {};
 
   updates["/chatRooms/" + key] = messageRoom;
-
-  return rtDBRef.update(updates);
+  return update(ref(rtDBRef), updates);
 };
 
 export const sendMessage = (key, message, user) => {
   const date = Date.now();
-  const address = rtDBRef.child(`chatRooms/${key}/messages/${date}`);
-
-  return address.update({
+  return update(ref(rtDBRef, `chatRooms/${key}/messages/${date}`), {
     user: user,
     message: message,
     dateCreated: date,
   });
 };
 
-export const singInWithGoogleInfoToFB = async (info) => {
+export const singInWithGoogleInfoToFB = (info) => {
   const CryptoJS = require("crypto-js");
 
   const secretKey = info.user.uid;
@@ -102,52 +101,46 @@ export const singInWithGoogleInfoToFB = async (info) => {
     .toString()
     .replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/ ]/gim, "");
 
-  await firebase
-    .firestore()
-    .collection("users")
-    .doc(info.additionalUserInfo.profile.email)
-    .set({
-      wallet: "",
-      userEmail: info.additionalUserInfo.profile.email.toLowerCase(),
-      uid: info.user.uid,
-      username: info.additionalUserInfo.profile.name.toLowerCase(),
-      following: [],
-      followers: [],
-      postDocId: [],
-      dateCreated: Date.now(),
-      profileImg: info.user.photoURL,
-      profileCaption: "",
-      userEmailEncrypted: encrypted,
-    });
+  setDoc(doc(firestore, "users", info.additionalUserInfo.profile.email), {
+    wallet: "",
+    userEmail: info.additionalUserInfo.profile.email.toLowerCase(),
+    uid: info.user.uid,
+    username: info.additionalUserInfo.profile.name.toLowerCase(),
+    following: [],
+    followers: [],
+    postDocId: [],
+    dateCreated: Date.now(),
+    profileImg: info.user.photoURL,
+    profileCaption: "",
+    userEmailEncrypted: encrypted,
+  });
 };
 
-export const signInWithFacebookInfoToFB = async (info) => {
-  await firebase
-    .firestore()
-    .collection("users")
-    .doc(info.additionalUserInfo.profile.email)
-    .set({
-      userEmail: info.additionalUserInfo.profile.email.toLowerCase(),
-      uid: info.user.uid,
-      username: info.additionalUserInfo.profile.name.toLowerCase(),
-      following: [],
-      followers: [],
-      dateCreated: Date.now(),
-      profileImg: info.user.photoURL,
-      profileCaption: "",
-    });
+export const signInWithFacebookInfoToFB = (info) => {
+  setDoc(doc(firestore, "users", info.additionalUserInfo.profile.email), {
+    wallet: "",
+    userEmail: info.additionalUserInfo.profile.email.toLowerCase(),
+    uid: info.user.uid,
+    username: info.additionalUserInfo.profile.name.toLowerCase(),
+    following: [],
+    followers: [],
+    postDocId: [],
+    dateCreated: Date.now(),
+    profileImg: info.user.photoURL,
+    profileCaption: "",
+  });
 };
-
 export async function doesEmailExist(userEmail) {
-  const result = await firebase
-    .firestore()
-    .collection("users")
-    .where("userEmail", "==", userEmail)
-    .get();
+  const q = query(
+    collection(firestore, "users"),
+    where("userEmail", "==", userEmail)
+  );
+  const result = await getDocs(q);
 
-  return result.docs.length > 0;
+  return result.docs[0].data() === undefined;
 }
 
+// update version 9 later
 export const signupWithEmail = async (email, password, username) => {
   const createdUserResult = await firebase
     .auth()
@@ -156,35 +149,43 @@ export const signupWithEmail = async (email, password, username) => {
   await createdUserResult.user.updateProfile({
     displayName: username,
   });
-  await firebase.firestore().collection("users").doc("email").set({
-    uid: createdUserResult.user.uid,
-    username: username.toLowerCase(),
-    userEmail: email.toLowerCase(),
-    postDocId: [],
-    following: [],
-    followers: [],
-    dateCreated: Date.now(),
-    profileImg: "",
-    profileCaption: "",
-  });
+  if (!doesEmailExist(email)) {
+    await setDoc(doc(firestore, "users", email), {
+      uid: createdUserResult.user.uid,
+      username: username.toLowerCase(),
+      userEmail: email.toLowerCase(),
+      postDocId: [],
+      following: [],
+      followers: [],
+      dateCreated: Date.now(),
+      profileImg: "",
+      profileCaption: "",
+    });
+  } else {
+    console.log("Email already exsists!");
+  }
 };
 
 export const getUserByEmail = async (email) => {
-  const result = await firebase
-    .firestore()
-    .collection("users")
-    .where("userEmail", "==", email.toLowerCase())
-    .get();
+  await getDocs(
+    query(
+      collection(firestore, "users"),
+      where("userEmail", "==", email.toLowerCase())
+    )
+  );
+  const result = await getDocs(
+    query(
+      collection(firestore, "users"),
+      where("userEmail", "==", email.toLowerCase())
+    )
+  );
 
   return result.docs.map((item) => ({ ...item.data() }))[0];
 };
 
 export async function getUserByUserId(userId) {
-  const result = await firebase
-    .firestore()
-    .collection("users")
-    .where("uid", "==", userId)
-    .get();
+  const q = query(collection(firestore, "users"), where("uid", "==", userId));
+  const result = await getDocs(q);
 
   const user = result.docs.map((item) => ({
     ...item.data(),
@@ -195,13 +196,14 @@ export async function getUserByUserId(userId) {
 }
 
 export async function getPhotos(userId, following) {
-  const result = await firebase
-    .firestore()
-    .collection("posts")
-    .where("userId", "in", following.concat(userId))
-    .orderBy("dateCreated", "desc")
-    .limit(3)
-    .get();
+  const q = query(
+    collection(firestore, "posts"),
+    where("userId", "in", following.concat(userId)),
+    orderBy("dateCreated", "desc"),
+    limit(3)
+  );
+
+  const result = await getDocs(q);
 
   const userFollowedPhotos = result.docs.map((photo) => ({
     ...photo.data(),
@@ -223,14 +225,14 @@ export async function getPhotos(userId, following) {
 }
 
 export async function getPhotosInfiniteScroll(userId, following, key) {
-  const result = await firebase
-    .firestore()
-    .collection("posts")
-    .where("userId", "in", following.concat(userId))
-    .orderBy("dateCreated", "desc")
-    .startAfter(key)
-    .limit(1)
-    .get();
+  const q = query(
+    collection(firestore, "posts"),
+    where("userId", "in", following.concat(userId)),
+    orderBy("dateCreated", "desc"),
+    startAfter(key),
+    limit(1)
+  );
+  const result = await getDocs(q);
 
   const userFollowedPhotos = result.docs.map((photo) => ({
     ...photo.data(),
@@ -251,54 +253,8 @@ export async function getPhotosInfiniteScroll(userId, following, key) {
   return photosWithUserDetails;
 }
 
-export async function deletePost(
-  docId,
-  userEmail,
-  storageImageNameArr,
-  setPostSetChanged,
-  setIsLoading,
-  setAlert
-) {
-  setIsLoading(true);
-
-  await firebase.firestore().collection("posts").doc(docId).delete();
-  await firebase
-    .firestore()
-    .collection("users")
-    .doc(userEmail)
-    .update({
-      postDocId: FieldValue.arrayRemove(docId),
-    });
-
-  await Promise.all(
-    storageImageNameArr.map((imageName) => {
-      let desertRef = storageRef.child(`${userEmail}/${imageName}`);
-      return desertRef.delete();
-    })
-  )
-    .then(function () {
-      setPostSetChanged((ch) => {
-        return ["delete", !ch[0]];
-      });
-      setAlert([true, "Delete", "success"]);
-      setTimeout(() => {
-        setAlert([false, "", ""]);
-      }, 3000);
-      setIsLoading(false);
-    })
-    .catch(function (error) {
-      console.log(error);
-      setIsLoading(false);
-      setAlert([true, "Delete", "error"]);
-      setTimeout(() => {
-        setAlert([false, "", ""]);
-      }, 3000);
-      return;
-    });
-}
-
 export async function getAllUser() {
-  let result = (await firebase.firestore().collection("users").get()).docs;
+  let result = (await getDocs(query(collection(firestore, "users")))).docs;
   result = result.map((doc) => doc.data());
   return result;
 }
@@ -308,10 +264,10 @@ export async function getDocFirstImage(postDocIdArr) {
     console.log("No post !");
     return;
   }
+
   return await Promise.all(
     postDocIdArr.map(
-      async (postDocId) =>
-        await firebase.firestore().collection("posts").doc(postDocId).get()
+      async (postDocId) => await getDoc(doc(firestore, "posts", postDocId))
     )
   );
 }
@@ -321,45 +277,39 @@ export async function updateLoggedInUserFollowing(
   user,
   isFollowingProfile
 ) {
-  return await firebase
-    .firestore()
-    .collection("users")
-    .doc(loggedInUserDocId)
-    .update({
-      // Already following remove ! Add following
-      following: isFollowingProfile
-        ? FieldValue.arrayRemove(user)
-        : FieldValue.arrayUnion(user),
-    });
+  return await updateDoc(ref(firestore, `users/${loggedInUserDocId}`), {
+    // Already following remove ! Add following
+    following: isFollowingProfile ? arrayRemove(user) : arrayUnion(user),
+  });
 }
 export async function updateFollowedUserFollowers(
   profileDocId, //currently logged in user document id// the user that someone requests to follow
   user,
   isFollowingProfile
 ) {
-  return await firebase
-    .firestore()
-    .collection("users")
-    .doc(profileDocId)
-    .update({
-      followers: isFollowingProfile
-        ? FieldValue.arrayRemove(user)
-        : FieldValue.arrayUnion(user),
-    });
+  return await updateDoc(ref(firestore, `users/${profileDocId}`), {
+    // Already following remove ! Add following
+    followers: isFollowingProfile ? arrayRemove(user) : arrayUnion(user),
+  });
 }
 
 export const getUserByEmailEncrypted = async (emailEncrypted) => {
-  const result = await firebase
-    .firestore()
-    .collection("users")
-    .where("userEmailEncrypted", "==", emailEncrypted)
-    .get();
+  await getDocs(
+    query(
+      collection(firestore, "users"),
+      where("userEmailEncrypted", "==", emailEncrypted)
+    )
+  );
+  const result = await getDocs(
+    query(
+      collection(firestore, "users"),
+      where("userEmailEncrypted", "==", emailEncrypted)
+    )
+  );
 
   return result.docs.map((item) => ({ ...item.data() }))[0];
 };
 
 export const getPostByDocId = async (docId) => {
-  return (
-    await firebase.firestore().collection("posts").doc(docId).get()
-  ).data();
+  return (await getDoc(doc(firestore, "posts", docId))).data();
 };

@@ -1,3 +1,4 @@
+import { onValue, query, ref, onChildAdded, onChildChanged, limitToLast} from "firebase/database"
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
@@ -27,36 +28,35 @@ const Message = () => {
     useEffect(() => {
         window.scrollTo(0,0)
         const UID = "lX8fJDnfFkO1Z6WjqicdVG6QJps1"
-        rtDBRef.child(`users/${UID}`).on("value", (snap) => {
+        onValue(ref(rtDBRef, `users/${UID}`), (snap) => {
             if (snap.exists()) {
                 setChatRoomsKeys(snap.val())
                 setNoChatRoom(false)
             } else {
                 setNoChatRoom(true)
             }
-        })
+        });
     }, []);
 
     useEffect(() => {
         if (chatRoomsKeys.length > 0) {  
             chatRoomsKeys.forEach((chatRoomKey) => {
                 let tm2p: any = {}
-                
-                rtDBRef.child(`chatRooms/${chatRoomKey}/users`).on("value", (snap) => {
+                onValue(ref(rtDBRef, `chatRooms/${chatRoomKey}/users`), (snap) => {
                     setUsers((origin: any) => {
                         tm2p[chatRoomKey] = snap.val()
                         return {
                             ...origin, ...tm2p
                         }
                     });
-                })
-
-                rtDBRef.child(`chatRooms/${chatRoomKey}/messages`).limitToLast(1).on('child_added', (snap) => {
+                });
+                const q = query(ref(rtDBRef, `chatRooms/${chatRoomKey}/messages`), limitToLast(1));
+                onChildAdded(q, (snap) => {
                     tm2p[chatRoomKey] = { dateCreated: parseInt(snap.key as string), ...snap.val(), dummy: Date.now() }
                     setChatRoomInfo((origin: any) => {
                         return {...origin, ...tm2p}
                     })
-                })
+                });
             })
         }
 
@@ -67,9 +67,7 @@ const Message = () => {
         if (Object.keys(lastCheckedTime).length > 0 && changed === "") {
             
             Object.keys(lastCheckedTime).forEach((key) => {
-                rtDBRef.child(`chatRooms/${key}/messages`).on('value', (snap) => {
-                    console.log("key", key);
-                    
+                onValue(ref(rtDBRef, `chatRooms/${key}/messages`), (snap) => {
                     let tmp = Object.keys(snap.val()).map((date) => (parseInt(date)))
                     
                     let tmp2 = []
@@ -85,16 +83,12 @@ const Message = () => {
                         tmp[key] = tmp2.length
                         return {...unCheckedMessage, ...tmp}
                     })
-                    
-                })
+                });
             })
         } else {
             // When LastCheckedTime change event occurs
                 if (Object.keys(lastCheckedTime).length > 0 && changed !== "" && changed !== '1') {
-                    
-                    // message query maximum need
-                    rtDBRef.child(`chatRooms/${changed}/messages`).on('value', (snap) => {
-
+                onValue(ref(rtDBRef, `chatRooms/${changed}/messages`), (snap) => {
                     let tmp = Object.keys(snap.val()).map((date) => (parseInt(date)))
                     let tmp2 = []
                     for (let i = 0; i < tmp.length; i++) {
@@ -109,20 +103,20 @@ const Message = () => {
                         tmp[changed] = tmp2.length
                         return tmp
                     })
-                })
+                });
             }
         }
     }, [lastCheckedTime])
     
     
-    useEffect(()=> {
-        rtDBRef.child(`lastCheckedTime`).on('value', (snap) => {
+    useEffect(() => {
+        onValue(ref(rtDBRef, 'lastCheckedTime'), (snap) => {
             setLastCheckedTime(snap.val())
-        })
-        rtDBRef.child(`lastCheckedTime`).on('child_changed', (snap) => { 
+        });
+        onChildChanged(ref(rtDBRef, 'lastCheckedTime'), (snap) => {
             const key: string = snap.key as string
             setChanged(key)
-        })
+        });
     }, [])
     
     return (

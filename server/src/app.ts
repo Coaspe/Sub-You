@@ -1,7 +1,16 @@
 import express from "express"
 import "firebase/compat/auth";
 import { clearInterval } from "timers";
-import { deletePostAdmin, uploadImageAdmin, uploadImageToStorage, updateTime, endAuction, addComment, updateProfile } from "./service/firebaseAdmin/firebaseAdmin";
+import {
+  updateProfileWithoutImage,
+  deletePostAdmin,
+  uploadImageAdmin,
+  uploadImageToStorage,
+  updateTime,
+  endAuction,
+  addComment,
+  updateProfileWithImage
+} from "./service/firebaseAdmin/firebaseAdmin";
 
 const app: express.Express = express()
 // json request body를 받기 위해 사용한다. application/json
@@ -127,9 +136,22 @@ app.post("/addcomment", (req: any, res: express.Response) => {
   })
 })
 
-app.post("/updateProfile", upload.single('file') , (req: any, res: express.Response) => {
-  updateProfile(req.body.userUID, req.body.userEmail, req.body.profileCaption, req.file, req.body.username)
+app.post("/updateProfileWithImage", upload.single("file"), (req: any, res: express.Response) => {
+  updateProfileWithImage(req.body.userEmail, req.body.profileCaption, req.file, req.body.username).then(() => {
+    res.end()
+  }).catch((err: any) => {
+    console.log(err.message);
+  })
 })
+
+app.post("/updateProfileWithoutImage", (req: any, res: express.Response) => {
+  updateProfileWithoutImage(req.body.userEmail, req.body.profileCaption, req.body.username).then(() => {
+    res.end()
+  }).catch((err: any) => {
+    console.log(err.message);
+  })
+})
+
 app.listen(3001, () => {
   console.log('Server Operated!');
 });

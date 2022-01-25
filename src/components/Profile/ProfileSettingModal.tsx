@@ -56,7 +56,7 @@ const ProfileSettingModal: React.FC<props> = ({ userInfo, setSettingModal }) => 
                 <motion.div onClick={(event)=>{event.stopPropagation()}}className="w-2/3 h-1/3 bg-red-50 z-20 flex px-2">
                         {/* Profile Image Div */}
                         <div className="flex w-1/3 h-full flex-col items-center justify-center mr-2">
-                            <img className="w-full max-h-full max-w-full object-cover rounded-md shadow-xl" src={imageURL} alt="profile" />
+                            <img className="max-h-full max-w-full rounded-md shadow-xl" src={imageURL} alt="profile" />
                             <label
                                 className="font-noto px-2 py-1 text-center bg-main rounded-md cursor-pointer"
                                 htmlFor="input-file"
@@ -86,7 +86,7 @@ const ProfileSettingModal: React.FC<props> = ({ userInfo, setSettingModal }) => 
                                     <input value={userName} onChange={(e)=>{setUserName(e.target.value)}} className="font-noto font-bold text-2xl mr-2 bg-transparent" />
                                 </div>
                                 <div className="flex flex-col items-end w-full">
-                                    <textarea spellCheck="false" onChange={(e)=>{setProfileCaption(e.target.value)}} value={profileCaption} className="w-full h-20 font-noto text-sm text-gray-400" />
+                                    <textarea spellCheck="false" onChange={(e)=>{setProfileCaption(e.target.value)}} value={profileCaption} className="resize-none w-full h-30 font-noto text-sm text-gray-400 bg-transparent" />
                                 </div>
                             </div>
                             {/* Caption */}
@@ -96,16 +96,19 @@ const ProfileSettingModal: React.FC<props> = ({ userInfo, setSettingModal }) => 
                                         return
                                     } else {
                                         if (imageURL === userInfo.profileImg) {
-                                            
+                                            axios.post('http://localhost:3001/updateProfileWithoutImage', {
+                                                userEmail: userInfo.userEmail,
+                                                profileCaption,
+                                                username: userName
+                                            })
                                         } else {
                                             let param = new window.FormData()
                                             param.append("file", file); 
-                                            param.append("userUID", userInfo.uid as string)
                                             param.append("userEmail", userInfo.userEmail)
                                             param.append("profileCaption", profileCaption)
                                             param.append("username", userName)
 
-                                            axios.post('http://localhost:3001/updateProfile', param)
+                                            axios.post('http://localhost:3001/updateProfileWithImage', param)
                                         }
                                         setSettingModal(false)
                                     }

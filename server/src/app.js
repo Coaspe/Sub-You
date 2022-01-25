@@ -107,9 +107,19 @@ app.post("/addcomment", (req, res) => {
         res.end();
     });
 });
-app.post("/updateProfile", upload.single('file'), (req, res) => {
-    console.log(req.file);
-    (0, firebaseAdmin_1.updateProfile)(req.body.userUID, req.body.userEmail, req.body.profileCaption, req.file, req.body.username);
+app.post("/updateProfileWithImage", (req, res) => {
+    (0, firebaseAdmin_1.updateProfileWithImage)(req.body.userEmail, req.body.profileCaption, req.file, req.body.username).then(() => {
+        res.end();
+    }).catch((err) => {
+        console.log(err.message);
+    });
+});
+app.post("/updateProfileWithoutImage", (req, res) => {
+    (0, firebaseAdmin_1.updateProfileWithoutImage)(req.body.userEmail, req.body.profileCaption, req.body.username).then(() => {
+        res.end();
+    }).catch((err) => {
+        console.log(err.message);
+    });
 });
 app.listen(3001, () => {
     console.log('Server Operated!');

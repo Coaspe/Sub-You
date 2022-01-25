@@ -45,7 +45,7 @@ const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKe
             <AnimateSharedLayout type="crossfade">
                 {userInfo[info.user] &&
                     <>
-                    <motion.div whileHover={ {scale : 1.05 }} className="relative items-center w-full justify-between border px-6 py-2 rounded-2xl mb-3 shadow-lg cursor-pointer">
+                    <motion.div whileHover={ {scale : 1.05 }} className="relative items-center w-full justify-between border px-6 py-2 rounded-2xl mb-3 shadow-2xl cursor-pointer">
                         {!expanded && <motion.div className="absolute w-full h-full" onClick={() => { setExpanded((origin) => !origin) }} layoutId="gg"></motion.div>}
                         <div className="flex justify-between w-full items-center">
                         <div className="flex items-center">
