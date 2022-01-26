@@ -3,6 +3,7 @@ import { storageRef } from "../../lib/firebase";
 // NodeJS can not use getDownloadURL
 // Make read permission public and write permission needs auth.
 
+// Firebase Storage
 const { Storage } = require('@google-cloud/storage');
 const storage = new Storage({
   projectId: "sub-you",
@@ -10,8 +11,10 @@ const storage = new Storage({
 });
 const bucket = storage.bucket("gs://sub-you.appspot.com/");
 
+// Firestore
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 
+// Firebase admin
 var admin = require("firebase-admin");
 var serviceAccount = require("C:/sub-you-firebase-adminsdk-3lyxd-78e61d6399.json");
 admin.initializeApp({
@@ -20,6 +23,7 @@ admin.initializeApp({
   databaseURL: "https://sub-you-default-rtdb.firebaseio.com/"
 });
 
+// Realtime Database
 var db = admin.database();
 
 const firestore = getFirestore()
@@ -63,6 +67,7 @@ export const updateProfileWithImage = async (
       })
     })
 };
+
 export const updateProfileWithoutImage = async (
   userEmail: string,
   profileCaption: string,

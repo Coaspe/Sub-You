@@ -22,9 +22,8 @@ const Auction = () => {
         
         get(child(ref(rtDBRef), `auctions/users/${user.uid}`)).then((res) => {
             if (res.exists()) {
+                let tmp: { [key: string]: auctionInfoType } = {}
                 if (res.val().buy && res.val().sell) {
-
-                    let tmp: { [key: string]: auctionInfoType } = {}
                     Object.values(res.val().buy).forEach((auc) => {
                         onValue(ref(rtDBRef, `auctions/${auc}`), (snap) => {
                             tmp[snap.key as string] = snap.val()
@@ -51,7 +50,6 @@ const Auction = () => {
                     setAuctionInfo({ ...tmp, ...tmp2 })
 
                 } else if (res.val().buy && !res.val().sell) {
-                    let tmp: { [key: string]: auctionInfoType } = {}
                     Object.values(res.val().buy).forEach((auc) => {
                         onValue(ref(rtDBRef, `auctions/${auc}`), (snap) => {
                             tmp[snap.key as string] = snap.val()
@@ -64,15 +62,12 @@ const Auction = () => {
                         });
                     })
                 } else if (!res.val().buy && res.val().sell) {
-                    console.log("here");
-                    
-                    let tmp2: { [key: string]: auctionInfoType } = {}
                     Object.values(res.val().sell).forEach((auc) => {
                         onValue(ref(rtDBRef, `auctions/${auc}`), (snap) => {
-                            tmp2[snap.key as string] = snap.val()
-                            if (Object.keys(tmp2).length === Object.keys(res.val().sell).length) {
-                                setSellAuctionInfo(tmp2)
-                                setAuctionInfo(tmp2)
+                            tmp[snap.key as string] = snap.val()
+                            if (Object.keys(tmp).length === Object.keys(res.val().sell).length) {
+                                setSellAuctionInfo(tmp)
+                                setAuctionInfo(tmp)
                             }
                         }, {
                             onlyOnce: true

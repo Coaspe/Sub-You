@@ -26,7 +26,7 @@ const CommentRow: React.FC<commentRowProps> = ({ commentInfo }) => {
     };
 
     return (
-    <div className="flex flex-col bg-gray-50 px-3 rounded-xl font-noto py-2 shadow-lg w-10/12">
+    <div key={`${commentInfo.dateCreated}/${commentInfo.username}`} className="flex flex-col bg-gray-50 px-3 rounded-xl font-noto py-2 shadow-lg w-10/12">
         <div className="flex items-center justify-between">
             <div className="flex items-center">
                 <img className="rounded-full w-8 h-8" src={commentInfo.userProfileImg} alt="comment" />

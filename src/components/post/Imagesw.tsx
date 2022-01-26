@@ -1,7 +1,8 @@
-import { postContent } from "../../types"
-import { useState } from "react";
+import { commentType, postContent } from "../../types"
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence, AnimateSharedLayout } from "framer-motion";
 import Comment from "./Comment";
+import { getCommentsDocId } from "../../services/firebase";
  
 
 const variants = {
@@ -42,12 +43,16 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps, selectedMode }) => 
     
   const [direction, setDirection] = useState(0);
   const [page, setPage] = useState(0);
-  console.log(postContentProps);
+  const [commentDocID, setCommentDocID] = useState<string[]>([])
   
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    (value - page > 0) ? setDirection(1) : setDirection(-1)
-    setPage(value)
-  };
+  useEffect(() => {
+    if (selectedMode === "image") {
+      getCommentsDocId(postContentProps.docId).then((res) => {
+        setCommentDocID([...res].reverse())
+      })
+    }
+  }, [selectedMode])
+
   return (
     <motion.div layout className="relative flex flex-col items-center border-b border-main border-opacity-30">
         <motion.div
@@ -91,13 +96,13 @@ const Imagesw: React.FC<imageswProps> = ({ postContentProps, selectedMode }) => 
           <img className="w-5 mr-2 cursor-pointer rounded-full" src="images/left.png" alt="left" onClick={() => { setPage((page) => (page - 1 === -1 ? page : page - 1)) }} />
           <AnimateSharedLayout>
             {postContentProps.imageSrc.map((data, index) => (
-              <motion.div layout className={`w-1 h-1 rounded-full bg-main bg-opacity-40 mr-1 ${index === page && "w-2 h-2 bg-opacity-100"}`}></motion.div>
+              <motion.div key={index} layout className={`w-1 h-1 rounded-full bg-main bg-opacity-40 mr-1 ${index === page && "w-2 h-2 bg-opacity-100"}`}></motion.div>
             ))}
           </AnimateSharedLayout>
           <img className="w-5 cursor-pointer ml-1" src="images/right.png" alt="right" onClick={() => { setPage((page) => (page + 1 === postContentProps.imageSrc.length ? page : page + 1)) }} />
         </div>
       }
-      {selectedMode === "comment" && <Comment postInfo={postContentProps}/>}
+      {selectedMode === "comment" && <Comment commentDocID={commentDocID} postDocID={postContentProps.docId} />}
     </motion.div>
     )
 }

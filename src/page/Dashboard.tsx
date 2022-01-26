@@ -12,7 +12,7 @@ import Sidebar from "./Sidebar";
 import {useCallback, useContext, useEffect, useState, useRef} from 'react'
 import { motion, AnimatePresence } from "framer-motion";
 import UserContext from "../context/user";
-import { getUserByUserId, getPhotos, getPhotosInfiniteScroll, doesEmailExist } from "../services/firebase";
+import { getUserByUserId, getPhotos, getPhotosInfiniteScroll, doesEmailExist, getTimelinePhotos } from "../services/firebase";
 import { getUserType, postContent, userInfoFromFirestore } from "../types";
 import ProfileSetting from '../components/Profile/ProfileSetting';
 import { collection, getDocs, query, where, } from "firebase/firestore";
@@ -44,7 +44,7 @@ const Dashboard = () => {
     
     const [value, setValue] = useState(0);
     const [direction, setDirection] = useState(1);
-    const { user: contextUser } = useContext(UserContext);
+    const { user:contextUser } = useContext(UserContext);
     const [isLoading, setIsLoading] = useState(false)
     const [morePostLoading, setMorePostLoading] = useState(false)
     const [selectedPage, setSelectedPage] = useState("Timeline")
@@ -111,26 +111,9 @@ const Dashboard = () => {
     }, [contextUser.uid, doSetUserInfo, postSetChanged])
 
     useEffect(() => {
-        async function getTimelinePhotos() {
-            const q = query(collection(firestore, "users"), where("uid", "==", contextUser.uid));
-            const result = await getDocs(q)
-
-            const user = result.docs.map((item) => ({
-                ...item.data(),
-                docId: item.id,
-            }));
-            
-            const userTemp = user as userInfoFromFirestore[]
-            const { following } = userTemp[0]
-            
-            return getPhotos(contextUser.uid, following)
-        }
-
         if (postSetChanged[0] !== "delete") {
             doSetPosts([])
-            getTimelinePhotos().then((res: any) => {
-                console.log(res);
-                
+            getTimelinePhotos(contextUser.uid).then((res: any) => {
                 if (res.length > 0) {
                     doSetPosts(res)
                     const tmp = []
@@ -159,7 +142,6 @@ const Dashboard = () => {
         if (key !== 0) {
             sendQuery();
         }
-        doesEmailExist("aspalt85@gmail.com")
     }, [page]);
 
     const divRef = useRef<HTMLDivElement>(null)
@@ -189,9 +171,9 @@ const Dashboard = () => {
                         exit="exit"
                         className="top-10 translate-x-2/4 left-1/4 w-1/2 z-50 fixed">
                         {alert[2] === 'success' ? (
-                            <Alert severity="success" color="success" onClose={() => { doSetAlert([false, "", ""]) }}>{`${alert[1]} is complete!!!`}</Alert>
+                            <Alert severity="success" color="success" onClose={() => { doSetAlert([false, "", ""]) }}>{`${alert[1]} is complete!`}</Alert>
                         ) : (alert[2] === 'error' ? (
-                                <Alert severity="error" color="error" onClose={() => { doSetAlert([false, "", ""]) }}>{`${alert[1]} is failed!!!`}</Alert>
+                                <Alert severity="error" color="error" onClose={() => { doSetAlert([false, "", ""]) }}>{`${alert[1]} is failed!`}</Alert>
                             ) : (alert[2] === 'warning' ? (
                                     <Alert severity="warning" color="warning" onClose={() => { doSetAlert([false, "", ""]) }}>This is a warning alert — check it out!</Alert>
                                 ) : (

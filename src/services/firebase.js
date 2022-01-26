@@ -13,8 +13,31 @@ import {
   setDoc,
   arrayRemove,
   arrayUnion,
+  deleteDoc,
 } from "firebase/firestore";
 import { push, child, ref, update } from "firebase/database";
+
+export const getComments = (postDocID) => {
+  return getDocs(
+    query(firestore, "comments"),
+    where("__name__", "in", postDocID)
+  );
+};
+
+export const getTimelinePhotos = async (uid) => {
+  const q = query(collection(firestore, "users"), where("uid", "==", uid));
+  const result = await getDocs(q);
+
+  const user = result.docs.map((item) => ({
+    ...item.data(),
+    docId: item.id,
+  }));
+
+  const userTemp = user;
+  const { following } = userTemp[0];
+
+  return getPhotos(uid, following);
+};
 
 export const updateCommentLikes = async (userUID, commentDocID, like) => {
   return updateDoc(doc(firestore, "comments", commentDocID), {

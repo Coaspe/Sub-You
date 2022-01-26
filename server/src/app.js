@@ -107,7 +107,7 @@ app.post("/addcomment", (req, res) => {
         res.end();
     });
 });
-app.post("/updateProfileWithImage", (req, res) => {
+app.post("/updateProfileWithImage", upload.single("file"), (req, res) => {
     (0, firebaseAdmin_1.updateProfileWithImage)(req.body.userEmail, req.body.profileCaption, req.file, req.body.username).then(() => {
         res.end();
     }).catch((err) => {

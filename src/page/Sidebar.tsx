@@ -133,7 +133,8 @@ const Sidebar: React.FC<sidebarProps> = (
                                 <AnimateSharedLayout>
                                     <ol className="w-3/5 flex flex-col items-center mt-14">
                                         {sidebarData.map(({svg, title}) => (
-                                            <motion.li 
+                                            <motion.li
+                                                key={title}
                                                 onClick={() => {
                                                     setSelectedPage(title)
                                                     if (title === "New Post") {

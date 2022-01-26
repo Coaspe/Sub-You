@@ -3,25 +3,25 @@ import { motion } from "framer-motion"
 import { useCallback, useContext, useEffect, useRef, useState } from "react"
 import UserContext from "../../context/user"
 import { getCommentInfinite, getUserByUserId } from "../../services/firebase"
-import { commentType, getUserType, postContent } from "../../types"
+import { commentType, getUserType } from "../../types"
 import CommentRow from "./CommentRow"
 import CommentSkeleton from "./CommentSkeleton"
 
 interface commentProps {
-    postInfo: postContent
+    commentDocID: string[]
+    postDocID: string
 }
 
-const Comment: React.FC<commentProps> = ({ postInfo }) => {
+const Comment: React.FC<commentProps> = ({ commentDocID, postDocID }) => {
 
     const { user } = useContext(UserContext)
     const [text, setText] = useState("")
     const [comments, setComments] = useState<commentType[]>([])
-    const [commentsDocID, setCommentsDocID] = useState<string[]>([...postInfo.comments].reverse())
     const [commentUser, setCommentUser] = useState<getUserType>({} as getUserType)
     const enterRef = useRef<HTMLDivElement | null>(null)
     const [key, setKey] = useState(0)
     const [loading, setLoading] = useState(true)
-
+    const [moreLoading, setMoreLoading] = useState(false)
     const handleKeypress = (e: any) => {
         if (e.key === 'Enter') {
             enterRef.current?.click()
@@ -29,11 +29,12 @@ const Comment: React.FC<commentProps> = ({ postInfo }) => {
     };
     
     const handleScroll = useCallback(() => {
-        if (commentsDocID.length > 0 && key < commentsDocID.length) {
-            getCommentInfinite(commentsDocID, key).then((res) => {
+        if (commentDocID.length > 0 && key < commentDocID.length) {
+            setMoreLoading(true)
+            getCommentInfinite(commentDocID, key).then((res) => {
                 // Datecreated Descending
                 let tmp = res.docs.map((doc: any) => ({...doc.data(), docID:doc.id}))
-                    .sort((a, b) => { return b.dateCreated - a.dateCreated })
+                    .sort((a: any, b: any) => { return b.dateCreated - a.dateCreated })
                 setComments((origin: any) => {
                     return [...origin, ...tmp]
                 })
@@ -41,7 +42,7 @@ const Comment: React.FC<commentProps> = ({ postInfo }) => {
                 setLoading(false)
             })
         }
-    }, [commentsDocID, key])
+    }, [commentDocID, key])
     
     useEffect(() => {
         getUserByUserId(user.uid).then((res: any) => {
@@ -50,9 +51,16 @@ const Comment: React.FC<commentProps> = ({ postInfo }) => {
     }, [])
 
     useEffect(() => {
-        postInfo.comments.length === 0 ? setLoading(false) : handleScroll()
-    }, [commentsDocID])
-    
+        commentDocID.length === 0 ? setLoading(false) : handleScroll()
+    }, [])
+
+    useEffect(() => {
+        setMoreLoading(false)
+    }, [comments])
+
+    useEffect(() => {
+        console.log(key)
+    }, [key])
 return (
 <div className="font-noto absolute w-full h-full z-20 flex flex-col items-center backdrop-filter backdrop-blur overflow-y-scroll">
         {commentUser &&
@@ -74,7 +82,7 @@ return (
                             axios.post("http://localhost:3001/addcomment", {
                                 text,
                                 userUID: user.uid,
-                                postDocID: postInfo.docId,
+                                postDocID: postDocID,
                                 userProfileImg: commentUser.profileImg,
                                 username: commentUser.username
                             }).then((res) => {
@@ -107,14 +115,14 @@ return (
                 (comments.length > 0
                     ?
                     <>
-                        {comments.map((comment) => <CommentRow commentInfo={comment} />)}
-                        {key < commentsDocID.length &&
+                        {comments.map((comment, index) => <CommentRow key={comment.docID} commentInfo={comment} />)}
+                        {key < commentDocID.length &&
                             <div
                                 onClick={() => {
                                     handleScroll()
                                 }}
-                                className="font-semibold text-sm shadow-inner cursor-pointer w-1/2 bg-white h-10 flex items-center justify-center rounded-xl text-gray-500">
-                                Load more...
+                                className={`${moreLoading && "pointer-events-none"} font-semibold text-sm shadow-inner cursor-pointer w-1/2 bg-white h-10 flex items-center justify-center rounded-xl text-gray-500`}>
+                                {!moreLoading ? "Load more..." : "Loading..."}
                             </div>}
                     </>
                     :
@@ -122,9 +130,9 @@ return (
                 :
                 <>
                     {/* 5개씩 comments를 로드하므로 comments의 개수가 5개가 넘으면 5개만 보여준다. */}
-                    {postInfo.comments.length >= 5
-                        ? Array(5).fill(0).map(() => (<CommentSkeleton />))
-                        : postInfo.comments.map(() => (<CommentSkeleton />))
+                    {commentDocID.length >= 5
+                        ? Array(5).fill(0).map((data, index) => (<CommentSkeleton key={index} />))
+                        : commentDocID.map((data, index) => (<CommentSkeleton key={index} />))
                     }
                 </>
             }

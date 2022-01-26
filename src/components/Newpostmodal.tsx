@@ -187,24 +187,22 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                     <span className="font-noto text-2xl font-bold mb-7">
                         New Post
                     </span>
-                    <AnimatePresence>
                         {previewURL[0] !== "/images/logo.png" ? 
-                            (<motion.div animate={{opacity: 1}} className="w-full h-full grid grid-cols-3 gap-2 justify-items-center items-center">
+                        (<motion.div layout animate={{ opacity: 1 }} className={`w-full h-full grid grid-cols-3 gap-2 justify-items-center items-center`}>
                             {load ?
                                 (<>
                                     {previewURL.map((url, i) => (
                                         <Newpostmodalimage
+                                            key={url}
                                             average={average}
-                                            src={url}
                                             imagesNum={previewURL.length}
                                             myIndex={i}
                                         />
-
                                     ))}
                                 </>)
                                 :
                                 (<>
-                                    {previewURL.map(() => <div className="animate-pulse w-full h-full bg-black bg-opacity-80 rounded-md">
+                                    {previewURL.map((data, index) => <div key={index} className="animate-pulse w-full h-full bg-black bg-opacity-80 rounded-md">
                                         <br />
                                         <br />
                                         <br />
@@ -235,7 +233,6 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                                     />
                                 </div>
                         )}
-                    </AnimatePresence>
                     <label
                         className="font-noto pt-1 pb-1 pl-3 pr-3 mr-2 mt-2 w-1/6 text-center bg-main rounded-md cursor-pointer"
                         htmlFor="input-file"
