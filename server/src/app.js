@@ -58,7 +58,7 @@ app.post("/uploadpost", upload.any(), (req, res) => {
 app.post("/deletepost", (req, res) => {
     (0, firebaseAdmin_1.deletePostAdmin)(req.body.docId, req.body.email, req.body.storageImageNameArr).then(() => {
         const Response = {
-            alert: [true, "Delete", "success"],
+            alert: [true, "Post Delete", "success"],
             postSetChanged: ["delete", !req.body.postSetChanged[1]],
             loading: false
         };
@@ -108,13 +108,19 @@ app.post("/addcomment", (req, res) => {
     });
 });
 app.post("/deleteComment", (req, res) => {
-    try {
-        (0, firebaseAdmin_1.deleteComment)(req.body.postDocID, req.body.commentDocID);
-    }
-    catch (error) {
-        res.send(error);
-    }
-    res.end();
+    (0, firebaseAdmin_1.deleteComment)(req.body.postDocID, req.body.commentDocID).then(() => {
+        const Response = {
+            alert: [true, "Comment Delete", "success"],
+        };
+        res.send(JSON.stringify(Response));
+        res.end();
+    }).catch((error) => {
+        const Response = {
+            alert: [true, "Comment Delete", "alert"],
+        };
+        res.send(JSON.stringify(Response));
+        res.end();
+    });
 });
 app.post("/updateProfileWithImage", upload.single("file"), (req, res) => {
     (0, firebaseAdmin_1.updateProfileWithImage)(req.body.userEmail, req.body.profileCaption, req.file, req.body.username).then(() => {

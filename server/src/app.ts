@@ -74,7 +74,7 @@ app.post("/uploadpost", upload.any(), (req: any, res: express.Response) => {
 app.post("/deletepost", (req: any, res: express.Response) => {
   deletePostAdmin(req.body.docId, req.body.email, req.body.storageImageNameArr).then(() => {
     const Response = {
-      alert: [true, "Delete", "success"],
+      alert: [true, "Post Delete", "success"],
       postSetChanged: ["delete", !req.body.postSetChanged[1]],
       loading: false
     }
@@ -137,12 +137,21 @@ app.post("/addcomment", (req: any, res: express.Response) => {
   })
 })
 app.post("/deleteComment", (req: any, res: express.Response) => {
-  try {
-    deleteComment(req.body.postDocID, req.body.commentDocID)
-  } catch (error) {
-    res.send(error)
-  }
-  res.end()
+  deleteComment(req.body.postDocID, req.body.commentDocID).then(() => {
+    const Response = {
+      alert: [true, "Comment Delete", "success"],
+    }
+    res.send(JSON.stringify(Response))
+    res.end()
+  }).catch((error) => {
+    console.log(error);
+    const Response = {
+      alert: [true, "Comment Delete", "error"],
+    }
+    res.send(JSON.stringify(Response))
+    res.end()
+  })
+
 })
 app.post("/updateProfileWithImage", upload.single("file"), (req: any, res: express.Response) => {
   updateProfileWithImage(req.body.userEmail, req.body.profileCaption, req.file, req.body.username).then(() => {

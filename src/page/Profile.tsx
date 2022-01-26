@@ -177,6 +177,7 @@ const Profile = () => {
                                 {imageInfo.length > 0 && imageInfo[0].docId ? (
                                     imageInfo.map((data: firstImageInfo) => (
                                         <motion.div
+                                            key={data.docId}
                                             layoutId={`container-${data.docId}`}
                                             onClick={() => {
                                                 setDocId(data.docId)

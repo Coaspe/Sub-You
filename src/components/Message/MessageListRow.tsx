@@ -31,8 +31,6 @@ const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKe
                 return {...origin, ...tmp}
             })
         })
-
-        
     }, [users])
 
     useEffect(() => {

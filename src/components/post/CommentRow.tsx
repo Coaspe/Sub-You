@@ -7,6 +7,8 @@ import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import axios from "axios";
+import { useDispatch } from 'react-redux'
+import { alertAction } from "../../redux";
 
 interface commentRowProps {
     commentInfo: commentType
@@ -20,6 +22,7 @@ const CommentRow: React.FC<commentRowProps> = ({ commentInfo, postDocID }) => {
     const [like, setLike] = useState(commentInfo.likes.includes(user.uid) ? true : false)
     const [likes, setLikes] = useState(commentInfo.likes.length)
     const [deleted, setDeleted] = useState(false)
+    const dispatch = useDispatch()
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -27,7 +30,9 @@ const CommentRow: React.FC<commentRowProps> = ({ commentInfo, postDocID }) => {
     const handleClose = () => {
         setAnchorEl(null);
     };
-
+    const doSetAlert = (alert: [boolean, string, string]) => {
+        dispatch(alertAction.setAlert({alert: alert}))
+    }
     return (
         <div key={`${commentInfo.dateCreated}/${commentInfo.username}`}
             className={`${deleted && "blur-sm pointer-events-none"} flex flex-col bg-gray-50 px-3 rounded-xl font-noto py-2 shadow-lg w-10/12`}>
@@ -74,6 +79,12 @@ const CommentRow: React.FC<commentRowProps> = ({ commentInfo, postDocID }) => {
                                 axios.post("http://localhost:3001/deleteComment", {
                                     postDocID: postDocID,
                                     commentDocID: commentInfo.docID
+                                }).then((res) => {
+                                    console.log(res.data);
+                                    doSetAlert(res.data.alert)
+                                    setTimeout(() => {
+                                    doSetAlert([false,"",""])
+                                }, 3000);
                                 })
                             }}>
                                 <img className="w-4 mr-3" src="/images/delete.png" alt="Delete" />

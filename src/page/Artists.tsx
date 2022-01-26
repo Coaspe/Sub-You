@@ -33,7 +33,7 @@ const Artists: React.FC<artistsProps> = ({ sideExpanded }) => {
         <motion.div layout className={`h-screen flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-7 sm:mx-5 sm:col-start-1`}>
                 <motion.div className="w-full flex flex-col items-center sm:col-span-6 sm:mx-3">
                     {users !== [] ? (
-                        users.map((user: getUserType) => (<Artist user={user} />))
+                        users.map((user: getUserType) => (<Artist key={user.uid} user={user} />))
                     ) : null}
                 </motion.div>
         </motion.div>

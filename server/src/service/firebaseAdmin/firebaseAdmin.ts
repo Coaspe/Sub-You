@@ -206,8 +206,10 @@ export const addComment = async (
 }
 
 export const deleteComment = (postDocID: string, commentDocID: string) => {
-    firestore.collection("posts").doc(postDocID).update(({
+  return Promise.all(
+    [firestore.collection("posts").doc(postDocID).update(({
       comments: FieldValue.arrayRemove(commentDocID)
-    }))
-    firestore.collection("comments").doc(commentDocID).delete()
+    })),
+    firestore.collection("comments").doc(commentDocID).delete()]
+  )
 }

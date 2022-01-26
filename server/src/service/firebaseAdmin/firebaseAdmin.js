@@ -171,9 +171,9 @@ const addComment = (text, userUID, postDocID, userProfileImg, username, dateCrea
 });
 exports.addComment = addComment;
 const deleteComment = (postDocID, commentDocID) => {
-    firestore.collection("posts").doc(postDocID).update(({
-        comments: FieldValue.arrayRemove(commentDocID)
-    }));
-    firestore.collection("comments").doc(commentDocID).delete();
+    return Promise.all([firestore.collection("posts").doc(postDocID).update(({
+            comments: FieldValue.arrayRemove(commentDocID)
+        })),
+        firestore.collection("comments").doc(commentDocID).delete()]);
 };
 exports.deleteComment = deleteComment;

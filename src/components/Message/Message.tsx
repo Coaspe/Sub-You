@@ -128,6 +128,7 @@ const Message = () => {
                     (Object.keys(chatRoomInfo).length > 0 && Object.keys(users).length === Object.keys(chatRoomInfo).length) ? 
                         Object.keys(chatRoomInfo).map((chatRoomKey: string) => (
                         <MessageListRow
+                            key={chatRoomKey}
                             info={chatRoomInfo[chatRoomKey]}
                             chatRoomKey={chatRoomKey}
                             users={users[chatRoomKey]}

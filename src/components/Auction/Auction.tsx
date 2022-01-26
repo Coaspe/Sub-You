@@ -105,15 +105,15 @@ const Auction = () => {
                 <div className="grid grid-cols-2 w-full gap-4 mt-5 h-full">
                     {sellOrBuyMyAuction === "All" && auctionInfo &&
                         Object.keys(auctionInfo).filter((data)=>auctionInfo[data].done === false).map((key) => (
-                            <AuctionElement auctionKey={key} auctionInfo={auctionInfo[key]} />
+                            <AuctionElement key={key} auctionKey={key} auctionInfo={auctionInfo[key]} />
                         ))}
                     {sellOrBuyMyAuction === "Sell" && sellAuctionInfo &&
                         Object.keys(sellAuctionInfo).filter((data)=>sellAuctionInfo[data].done === false).map((key) => (
-                            <AuctionElement auctionKey={key} auctionInfo={sellAuctionInfo[key]} />
+                            <AuctionElement key={key} auctionKey={key} auctionInfo={sellAuctionInfo[key]} />
                         ))}
                     {sellOrBuyMyAuction === "Buy" && buyAuctionInfo &&
                         Object.keys(buyAuctionInfo).filter((data)=>buyAuctionInfo[data].done === false).map((key) => (
-                            <AuctionElement auctionKey={key} auctionInfo={buyAuctionInfo[key]} />
+                            <AuctionElement key={key} auctionKey={key} auctionInfo={buyAuctionInfo[key]} />
                         ))}
                 </div>
             </div>
@@ -140,15 +140,15 @@ const Auction = () => {
                 <div className="grid grid-cols-2 w-full gap-4 mt-5 h-full">
                     {sellOrBuyPrevious === "All" && auctionInfo &&
                         Object.keys(auctionInfo).filter((data)=>auctionInfo[data].done === true).map((key) => (
-                            <AuctionElement auctionKey={key} auctionInfo={auctionInfo[key]} />
+                            <AuctionElement key={key} auctionKey={key} auctionInfo={auctionInfo[key]} />
                         ))}
                     {sellOrBuyPrevious === "Sell" && sellAuctionInfo &&
                         Object.keys(sellAuctionInfo).filter((data)=>sellAuctionInfo[data].done === true).map((key) => (
-                            <AuctionElement auctionKey={key} auctionInfo={sellAuctionInfo[key]} />
+                            <AuctionElement key={key} auctionKey={key} auctionInfo={sellAuctionInfo[key]} />
                         ))}
                     {sellOrBuyPrevious === "Buy" && buyAuctionInfo &&
                         Object.keys(buyAuctionInfo).filter((data)=>buyAuctionInfo[data].done === true).map((key) => (
-                            <AuctionElement auctionKey={key} auctionInfo={buyAuctionInfo[key]} />
+                            <AuctionElement key={key} auctionKey={key} auctionInfo={buyAuctionInfo[key]} />
                         ))}
                 </div>
             </div>
