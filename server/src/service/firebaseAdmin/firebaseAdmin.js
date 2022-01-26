@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addComment = exports.deletePostAdmin = exports.uploadImageAdmin = exports.uploadImageToStorage = exports.updateTime = exports.endAuction = exports.updateProfileWithoutImage = exports.updateProfileWithImage = void 0;
+exports.deleteComment = exports.addComment = exports.deletePostAdmin = exports.uploadImageAdmin = exports.uploadImageToStorage = exports.updateTime = exports.endAuction = exports.updateProfileWithoutImage = exports.updateProfileWithImage = void 0;
 const firebase_1 = require("../../lib/firebase");
 // NodeJS can not use getDownloadURL
 // Make read permission public and write permission needs auth.
@@ -170,3 +170,10 @@ const addComment = (text, userUID, postDocID, userProfileImg, username, dateCrea
     });
 });
 exports.addComment = addComment;
+const deleteComment = (postDocID, commentDocID) => {
+    firestore.collection("posts").doc(postDocID).update(({
+        comments: FieldValue.arrayRemove(commentDocID)
+    }));
+    firestore.collection("comments").doc(commentDocID).delete();
+};
+exports.deleteComment = deleteComment;

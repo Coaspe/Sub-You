@@ -9,7 +9,8 @@ import {
   updateTime,
   endAuction,
   addComment,
-  updateProfileWithImage
+  updateProfileWithImage,
+  deleteComment
 } from "./service/firebaseAdmin/firebaseAdmin";
 
 const app: express.Express = express()
@@ -135,7 +136,14 @@ app.post("/addcomment", (req: any, res: express.Response) => {
     res.end()
   })
 })
-
+app.post("/deleteComment", (req: any, res: express.Response) => {
+  try {
+    deleteComment(req.body.postDocID, req.body.commentDocID)
+  } catch (error) {
+    res.send(error)
+  }
+  res.end()
+})
 app.post("/updateProfileWithImage", upload.single("file"), (req: any, res: express.Response) => {
   updateProfileWithImage(req.body.userEmail, req.body.profileCaption, req.file, req.body.username).then(() => {
     res.end()

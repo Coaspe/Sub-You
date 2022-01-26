@@ -6,17 +6,20 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import axios from "axios";
 
 interface commentRowProps {
     commentInfo: commentType
+    postDocID: string
 }
-const CommentRow: React.FC<commentRowProps> = ({ commentInfo }) => {
+const CommentRow: React.FC<commentRowProps> = ({ commentInfo, postDocID }) => {
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const {user} = useContext(UserContext)
     const [like, setLike] = useState(commentInfo.likes.includes(user.uid) ? true : false)
     const [likes, setLikes] = useState(commentInfo.likes.length)
+    const [deleted, setDeleted] = useState(false)
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -26,7 +29,8 @@ const CommentRow: React.FC<commentRowProps> = ({ commentInfo }) => {
     };
 
     return (
-    <div key={`${commentInfo.dateCreated}/${commentInfo.username}`} className="flex flex-col bg-gray-50 px-3 rounded-xl font-noto py-2 shadow-lg w-10/12">
+        <div key={`${commentInfo.dateCreated}/${commentInfo.username}`}
+            className={`${deleted && "blur-sm pointer-events-none"} flex flex-col bg-gray-50 px-3 rounded-xl font-noto py-2 shadow-lg w-10/12`}>
         <div className="flex items-center justify-between">
             <div className="flex items-center">
                 <img className="rounded-full w-8 h-8" src={commentInfo.userProfileImg} alt="comment" />
@@ -66,6 +70,11 @@ const CommentRow: React.FC<commentRowProps> = ({ commentInfo }) => {
                             {user.uid === commentInfo.userUID && (
                             <MenuItem onClick={async () => {
                                 handleClose()
+                                setDeleted(true)
+                                axios.post("http://localhost:3001/deleteComment", {
+                                    postDocID: postDocID,
+                                    commentDocID: commentInfo.docID
+                                })
                             }}>
                                 <img className="w-4 mr-3" src="/images/delete.png" alt="Delete" />
                                 <span className="font-noto text-xs">Delete</span>
