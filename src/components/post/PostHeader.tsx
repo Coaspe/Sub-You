@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { alertAction, postSetChangedAction } from "../../redux";
 import { RootState } from '../../redux/store';
 import axios from "axios";
-import { makeAuction } from "../../services/firebase";
+import MakeAuctionModal from "./MakeAuctionModal";
 
 interface postHeaderProps {
   postContentProps: postContent
@@ -38,7 +38,8 @@ const PostHeader: React.FC<postHeaderProps> = (
   const open = Boolean(anchorEl);
   const dispatch = useDispatch()
   const postSetChanged: (string | boolean)[] = useSelector((state: RootState) => state.setPostSetChanged.postSetChanged)
-  
+  const [makeAuctionModalOpen, setMakeAuctionModalOpen] = useState(false)
+
   const setPostSetChanged = (postSetChanged: (string | boolean)[]) => {
     dispatch(postSetChangedAction.setPostSetChanged({postSetChanged : postSetChanged}))
   }
@@ -62,11 +63,13 @@ const PostHeader: React.FC<postHeaderProps> = (
   }, [postContentProps.userId, user.uid])
   
   return (
+    <>
+      {makeAuctionModalOpen && <MakeAuctionModal makeAuctionModalOpen={makeAuctionModalOpen} setSettingModal={setMakeAuctionModalOpen} imageSrc={postContentProps.imageSrc} userUID={postContentProps.userId}/>}
     <motion.div layout className="flex items-center justify-between bg-chatWhite px-2 py-2 font-noto sm:h-12 shadow-md z-30">
-      <motion.div className="flex items-center justify-center ml-2">
+      <div className="flex items-center justify-center ml-2">
         <Avatar sx={{width : 35, height : 35}} className="mr-2" alt="user avatar" src={postContentProps.avatarImgSrc} />
         <span className="font-noto font-semibold text-sm">{postContentProps.username}</span>
-      </motion.div>
+      </div>
       <div className="flex items-center">
             <svg x="0px" y="0px"
               onClick={()=>{setSelectedMode("image")}}
@@ -125,13 +128,8 @@ const PostHeader: React.FC<postHeaderProps> = (
               <span className="font-noto text-xs">Save</span>
           </MenuItem>
           <MenuItem onClick={() => {
-            const auctionKey = makeAuction(user.uid, postContentProps.imageSrc[0], 0.1)
-            handleClose()
-            axios.post("http://localhost:3001/makeauction", {
-              auctionKey: auctionKey
-            }).then((res) => {
-              console.log(res);
-            })
+              setMakeAuctionModalOpen(true)
+              handleClose()
           }}>
               <img className="w-4 mr-3" src="/images/hammer.png" alt="Auction" />
               <span className="font-noto text-xs">Auction</span>
@@ -177,6 +175,7 @@ const PostHeader: React.FC<postHeaderProps> = (
             </Menu>
           </motion.div>
     </motion.div>
+    </>
   )
 }
 

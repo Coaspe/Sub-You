@@ -126,7 +126,15 @@ const Sidebar: React.FC<sidebarProps> = (
                                         <span className="text-gray-400 text-xxs">
                                             Followings
                                         </span>
-                                    </div>                   
+                                    </div>                                     
+                                    <div className="flex flex-col items-center">
+                                        <span className="font-black text-sm">
+                                            {userInfo.SUB}
+                                        </span>
+                                        <span className="text-gray-400 text-xxs">
+                                            SUB
+                                        </span>
+                                    </div>                       
                                 </div>
                                 
                                 {/* Side Navigataion */}

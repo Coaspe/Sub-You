@@ -74,22 +74,38 @@ app.post("/deletepost", (req, res) => {
         res.end();
     });
 });
-app.post("/makeauction", (req, res) => {
-    let minute = 30;
-    let second = 0;
-    console.log(req.body.auctionKey);
-    function tik() {
-        second = second - 1 < 0 ? 59 : second - 1;
-        minute = second === 59 ? minute - 1 : minute;
-        (0, firebaseAdmin_1.updateTime)(req.body.auctionKey, `${minute.toString()} : ${second.toString()}`);
-    }
-    let timer = setInterval(tik, 1000);
-    setTimeout(function () {
-        (0, timers_1.clearInterval)(timer);
-        (0, firebaseAdmin_1.endAuction)(req.body.auctionKey);
-        // get last buy request and pay
+app.post("/makeAuction", (req, res) => {
+    const key = (0, firebaseAdmin_1.makeAuction)(req.body.sellerUid, req.body.photoURL, req.body.firstPrice);
+    if (key === -1) {
+        res.send("Error");
         res.end();
-    }, 1800000);
+    }
+    else {
+        let minute = 1;
+        let second = 0;
+        function tik() {
+            second = second - 1 < 0 ? 59 : second - 1;
+            minute = second === 59 ? minute - 1 : minute;
+            (0, firebaseAdmin_1.updateTime)(key, `${minute.toString()} : ${second.toString()}`);
+        }
+        let timer = setInterval(tik, 1000);
+        setTimeout(function () {
+            (0, timers_1.clearInterval)(timer);
+            (0, firebaseAdmin_1.endAuction)(key);
+            // get last buy request and pay
+            res.send("Auction Completed");
+            res.end();
+        }, 60000);
+    }
+});
+app.post("/makeTransaction", (req, res) => {
+    (0, firebaseAdmin_1.makeTransaction)(req.body.buyerUid, req.body.price, req.body.auctionKey).then((aa) => {
+        res.send(aa);
+        res.end();
+    });
+});
+app.post("/participateInAuction", (req, res) => {
+    (0, firebaseAdmin_1.participateInAuction)(req.body.buyerUid, req.body.price, req.body.auctionKey);
 });
 app.post("/addcomment", (req, res) => {
     const comment = {
@@ -115,8 +131,9 @@ app.post("/deleteComment", (req, res) => {
         res.send(JSON.stringify(Response));
         res.end();
     }).catch((error) => {
+        console.log(error);
         const Response = {
-            alert: [true, "Comment Delete", "alert"],
+            alert: [true, "Comment Delete", "error"],
         };
         res.send(JSON.stringify(Response));
         res.end();

@@ -79,7 +79,7 @@ export const updateProfileWithoutImage = async (
   })
 };
 export const endAuction = (auctionKey: string) => {
-  db.ref(`auctions/${auctionKey}`).update({done: false})
+  db.ref(`auctions/${auctionKey}`).update({done: true})
 }
 export const updateTime = (auctionKey: string, time: string) => {
   db.ref(`auctions/${auctionKey}`).update({time: time})
@@ -213,3 +213,56 @@ export const deleteComment = (postDocID: string, commentDocID: string) => {
     firestore.collection("comments").doc(commentDocID).delete()]
   )
 }
+
+export const participateInAuction = (buyerUid: string, price: number, auctionKey: string) => {
+  db.ref(`auctions/${auctionKey}/buyers`).push(buyerUid)
+  db.ref(`auctions/users/${buyerUid}/buy`).push(auctionKey)
+  return makeTransaction(buyerUid, price, auctionKey);
+};
+
+export const makeTransaction = (buyerUid: string, price: number, auctionKey: string) => {
+  let time = new Date().getTime();
+
+  // Atomic update
+  return db.ref(`auctions/${auctionKey}/transactions`).transaction((trans: any) => {
+    let tmp = Object.assign({}, trans)
+    tmp[time] = { price: price, userUid: buyerUid }
+    return tmp
+  })
+};
+
+export const makeAuction = (sellerUid: string, photoURL: string, firstPrice: number) => {
+  const key = db.ref("auctions").push().key
+
+  if (key === null) {
+    return -1
+  }
+
+  let tmp: any = {};
+  tmp["seller"] = sellerUid;
+  tmp["photoURL"] = photoURL;
+  tmp["time"] = "30 : 00";
+  tmp["done"] = false;
+
+  if (key !== null) {
+    db.ref(`auctions/users/${sellerUid}/sell`).push(key, (error: any) => {
+      if (error) {
+        console.log(error);
+      }
+    })
+    db.ref(`auctions/${key}`).update(tmp, (error: any) => {
+      if (error) {
+        console.log(error);
+      }
+    })
+    db.ref(`auctions/${key}/buyers`).push(sellerUid, (error: any) => {
+      if (error) {
+        console.log(error);
+      }
+    })
+  }
+
+  makeTransaction(sellerUid, firstPrice, key);
+
+  return key;
+};

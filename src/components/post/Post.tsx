@@ -65,7 +65,7 @@ const Post: React.FC<postProps> = (
                             postVisible={postVisible}
                             setPostsVisible={setPostsVisible}
                             />
-                            <Imagesw postContentProps={postContentProps} selectedMode={selectedMode} />
+                        <Imagesw postContentProps={postContentProps} selectedMode={selectedMode} />
                     </m.div>
                 }
             </LazyMotion>

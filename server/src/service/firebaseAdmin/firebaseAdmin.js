@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteComment = exports.addComment = exports.deletePostAdmin = exports.uploadImageAdmin = exports.uploadImageToStorage = exports.updateTime = exports.endAuction = exports.updateProfileWithoutImage = exports.updateProfileWithImage = void 0;
+exports.makeAuction = exports.makeTransaction = exports.participateInAuction = exports.deleteComment = exports.addComment = exports.deletePostAdmin = exports.uploadImageAdmin = exports.uploadImageToStorage = exports.updateTime = exports.endAuction = exports.updateProfileWithoutImage = exports.updateProfileWithImage = void 0;
 const firebase_1 = require("../../lib/firebase");
 // NodeJS can not use getDownloadURL
 // Make read permission public and write permission needs auth.
@@ -69,7 +69,7 @@ const updateProfileWithoutImage = (userEmail, profileCaption, username) => __awa
 });
 exports.updateProfileWithoutImage = updateProfileWithoutImage;
 const endAuction = (auctionKey) => {
-    db.ref(`auctions/${auctionKey}`).update({ done: false });
+    db.ref(`auctions/${auctionKey}`).update({ done: true });
 };
 exports.endAuction = endAuction;
 const updateTime = (auctionKey, time) => {
@@ -177,3 +177,50 @@ const deleteComment = (postDocID, commentDocID) => {
         firestore.collection("comments").doc(commentDocID).delete()]);
 };
 exports.deleteComment = deleteComment;
+const participateInAuction = (buyerUid, price, auctionKey) => {
+    db.ref(`auctions/${auctionKey}/buyers`).push(buyerUid);
+    db.ref(`auctions/users/${buyerUid}/buy`).push(auctionKey);
+    return (0, exports.makeTransaction)(buyerUid, price, auctionKey);
+};
+exports.participateInAuction = participateInAuction;
+const makeTransaction = (buyerUid, price, auctionKey) => {
+    let time = new Date().getTime();
+    // Atomic update
+    return db.ref(`auctions/${auctionKey}/transactions`).transaction((trans) => {
+        let tmp = Object.assign({}, trans);
+        tmp[time] = { price: price, userUid: buyerUid };
+        return tmp;
+    });
+};
+exports.makeTransaction = makeTransaction;
+const makeAuction = (sellerUid, photoURL, firstPrice) => {
+    const key = db.ref("auctions").push().key;
+    if (key === null) {
+        return -1;
+    }
+    let tmp = {};
+    tmp["seller"] = sellerUid;
+    tmp["photoURL"] = photoURL;
+    tmp["time"] = "30 : 00";
+    tmp["done"] = false;
+    if (key !== null) {
+        db.ref(`auctions/users/${sellerUid}/sell`).push(key, (error) => {
+            if (error) {
+                console.log(error);
+            }
+        });
+        db.ref(`auctions/${key}`).update(tmp, (error) => {
+            if (error) {
+                console.log(error);
+            }
+        });
+        db.ref(`auctions/${key}/buyers`).push(sellerUid, (error) => {
+            if (error) {
+                console.log(error);
+            }
+        });
+    }
+    (0, exports.makeTransaction)(sellerUid, firstPrice, key);
+    return key;
+};
+exports.makeAuction = makeAuction;

@@ -54,6 +54,7 @@ export type userInfoType = {
     appName: string
 }
 export type getUserType = {
+    SUB: number
     dateCreated: number
     followers: Array<string>
     following: Array<string>

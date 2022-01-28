@@ -9,7 +9,7 @@ import { Fragment } from 'react';
 const Postskeleton = () => {
     return (
         <>
-        <Card sx={{ width: 444, m: 2, height: 770}}>
+        <Card sx={{ width: 444, m: 2, height: 650}}>
           <CardHeader
             avatar={<Skeleton animation="wave" variant="circular" width={35} height={35} />}
             action={(<IconButton aria-label="settings"><MoreVertIcon /></IconButton>)}
@@ -22,12 +22,6 @@ const Postskeleton = () => {
             )}
             />
             <Skeleton sx={{ height: 500 }} animation="wave" variant="rectangular" />
-          <CardContent>
-            <Fragment>
-              <Skeleton animation="wave" height={10} style={{ marginBottom: 6 }} />
-              <Skeleton animation="wave" height={10} width="80%" />
-            </Fragment>
-          </CardContent>
         </Card>
         </>
     )

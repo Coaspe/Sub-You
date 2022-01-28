@@ -10,7 +10,10 @@ import {
   endAuction,
   addComment,
   updateProfileWithImage,
-  deleteComment
+  deleteComment,
+  makeAuction,
+  makeTransaction,
+  participateInAuction
 } from "./service/firebaseAdmin/firebaseAdmin";
 
 const app: express.Express = express()
@@ -90,29 +93,54 @@ app.post("/deletepost", (req: any, res: express.Response) => {
     res.send(JSON.stringify(Response))
     res.end()
   })
-} )
-
-app.post("/makeauction", (req: any, res: express.Response) => {
-  let minute = 30
-  let second = 0
-  console.log(req.body.auctionKey);
-
-  function tik () {
-    second = second - 1 < 0 ? 59 : second - 1
-    minute = second === 59 ? minute - 1 : minute
-    updateTime(req.body.auctionKey, `${minute.toString()} : ${second.toString()}`)
-  }
-
-  let timer = setInterval(tik, 1000)
-
-  setTimeout(function() {
-    clearInterval(timer)
-    endAuction(req.body.auctionKey)
-    // get last buy request and pay
-    res.end()
-  }, 1800000)
 })
 
+app.post("/makeAuction", (req: any, res: express.Response) => {
+
+  const key = makeAuction(req.body.sellerUid, req.body.photoURL, req.body.firstPrice)
+  
+  if (key === -1) {
+    res.send("Error")
+    res.end()
+  } else {
+    console.time('for')
+    let minute = 30
+    let second = 0
+    
+    console.log(new Date().getTime());
+    let timer = setInterval(tick, 1000)
+    
+    function tick() {
+      second = second - 1 < 0 ? 59 : second - 1
+      minute = second === 59 ? minute - 1 : minute
+      // updateTime(key, `${minute < 10 ? '0'+minute.toString() :minute.toString()} : ${second < 10 ? '0'+second.toString() : second.toString()}`)
+      if (minute > 1) {
+        second === 59 && updateTime(key, `${minute < 10 ? '0'+minute.toString()+"분" :minute.toString()+"분"}`)
+      } else {
+        updateTime(key, `${'0'+minute.toString()} : ${second < 10 ? '0'+second.toString() : second.toString()}`)
+      }
+      if (minute === 0 && second === 0) {
+          console.log(new Date().getTime());
+        clearInterval(timer)
+        console.timeEnd('for')
+        endAuction(key)
+        res.send("Auction Completed")
+        res.end()
+      }
+    }
+  
+  }
+})
+app.post("/makeTransaction", (req: any, res: express.Response) => {
+  makeTransaction(req.body.buyerUid, req.body.price, req.body.auctionKey).then((aa: any) => {
+    res.send(aa)
+    res.end()
+  })
+})
+
+app.post("/participateInAuction", (req: any, res: express.Response) => {
+  participateInAuction(req.body.buyerUid, req.body.price, req.body.auctionKey)
+})
 app.post("/addcomment", (req: any, res: express.Response) => {
   const comment = {
     text: req.body.text,

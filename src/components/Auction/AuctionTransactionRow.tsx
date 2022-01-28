@@ -12,7 +12,6 @@ const AuctionTransactionRow: React.FC<transactionRowProps> = ({ dateCreated, use
     const [time, setTime] = useState("")
 
     useEffect(() => {
-        console.log(user);
         const date = new Date(dateCreated)
         setTime(`${date.getHours()}:${date.getMinutes()}`)
     }, [dateCreated])
@@ -31,7 +30,7 @@ const AuctionTransactionRow: React.FC<transactionRowProps> = ({ dateCreated, use
             </span>
             <div className="flex items-center">
                 <span className="text-sm text-gray-700 mr-1">{price}</span>
-                <span className="text-xs text-gray-500">ETH</span>
+                <span className="text-xs text-gray-500">SUB</span>
             </div>
         </>
          :

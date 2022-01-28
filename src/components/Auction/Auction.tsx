@@ -1,4 +1,4 @@
-import { motion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import { useContext, useEffect, useState } from "react"
 import { useSelector } from "react-redux"
 import UserContext from "../../context/user"
@@ -82,81 +82,88 @@ const Auction = () => {
     const sideExpanded: boolean = useSelector((state: RootState) => state.setSidebarExpanded.sideBarExpanded)
     
     return (
-        <motion.div layout className={`h-full flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-7 sm:mx-5 sm:col-start-1`}>
-            <div className="w-full font-noto flex flex-col items-center mb-20">
-                <div className="grid grid-cols-3 w-full">
-                    <span className="text-xl font-black col-start-2 place-self-center">My Auction</span>
-                    <div className="col-start-3 place-self-end text-sm">
-                        <button
-                            onClick={() => {
-                                setSellOrBuyMyAuction("Sell")
-                            }}
-                            className={`${sellOrBuyMyAuction === "Sell" && "bg-white"}`}>Sell</button>
-                        <button                             
-                        onClick={() => {
-                                setSellOrBuyMyAuction("Buy")
-                            }}className={`mx-2 ${sellOrBuyMyAuction === "Buy" && "bg-white"}`}>Buy</button>
-                        <button                             
-                        onClick={() => {
-                                setSellOrBuyMyAuction("All")
-                            }}className={`${sellOrBuyMyAuction === "All" && "bg-white"}`}>All</button>
-                    </div>
-                </div>
-                <div className="grid grid-cols-2 w-full gap-4 mt-5 h-full">
-                    {sellOrBuyMyAuction === "All" && auctionInfo &&
-                        Object.keys(auctionInfo).filter((data)=>auctionInfo[data].done === false).map((key) => (
-                            <AuctionElement key={key} auctionKey={key} auctionInfo={auctionInfo[key]} />
-                        ))}
-                    {sellOrBuyMyAuction === "Sell" && sellAuctionInfo &&
-                        Object.keys(sellAuctionInfo).filter((data)=>sellAuctionInfo[data].done === false).map((key) => (
-                            <AuctionElement key={key} auctionKey={key} auctionInfo={sellAuctionInfo[key]} />
-                        ))}
-                    {sellOrBuyMyAuction === "Buy" && buyAuctionInfo &&
-                        Object.keys(buyAuctionInfo).filter((data)=>buyAuctionInfo[data].done === false).map((key) => (
-                            <AuctionElement key={key} auctionKey={key} auctionInfo={buyAuctionInfo[key]} />
-                        ))}
-                </div>
-            </div>
+        <div className={`h-full flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-7 sm:mx-5 sm:col-start-1`}>
+            <AnimatePresence>
 
-            <div className="w-full font-noto flex flex-col items-center mb-20">
-                <div className="grid grid-cols-3 w-full">
-                    <span className="text-xl font-black col-start-2 place-self-center">Previous</span>
-                    <div className="col-start-3 place-self-end text-sm">
-                        <button
-                        onClick={() => {
-                            setSellOrBuyPrevious("Sell")
-                        }}
-                        className={`${sellOrBuyPrevious === "Sell" && "bg-white"}`}>Sell</button>
-                        <button                             
-                        onClick={() => {
-                            setSellOrBuyPrevious("Buy")
-                        }}className={`mx-2 ${sellOrBuyPrevious === "Buy" && "bg-white"}`}>Buy</button>
-                        <button                             
-                        onClick={() => {
-                            setSellOrBuyPrevious("All")
-                        }}className={`${sellOrBuyPrevious === "All" && "bg-white"}`}>All</button>
+                {/* Now Auction */}
+                <motion.div key="My Auction" layout className="w-full font-noto flex flex-col items-center mb-20">
+                    <div className="grid grid-cols-3 w-full">
+                        <span className="text-xl font-black col-start-2 place-self-center">My Auction</span>
+                        <div className="col-start-3 place-self-end text-sm">
+                            <button
+                                onClick={() => {
+                                    setSellOrBuyMyAuction("Sell")
+                                }}
+                                className={`${sellOrBuyMyAuction === "Sell" && "bg-white"}`}>Sell</button>
+                            <button                             
+                            onClick={() => {
+                                    setSellOrBuyMyAuction("Buy")
+                                }}className={`mx-2 ${sellOrBuyMyAuction === "Buy" && "bg-white"}`}>Buy</button>
+                            <button                             
+                            onClick={() => {
+                                    setSellOrBuyMyAuction("All")
+                                }}className={`${sellOrBuyMyAuction === "All" && "bg-white"}`}>All</button>
+                        </div>
                     </div>
-                </div>
-                <div className="grid grid-cols-2 w-full gap-4 mt-5 h-full">
-                    {sellOrBuyPrevious === "All" && auctionInfo &&
-                        Object.keys(auctionInfo).filter((data)=>auctionInfo[data].done === true).map((key) => (
-                            <AuctionElement key={key} auctionKey={key} auctionInfo={auctionInfo[key]} />
-                        ))}
-                    {sellOrBuyPrevious === "Sell" && sellAuctionInfo &&
-                        Object.keys(sellAuctionInfo).filter((data)=>sellAuctionInfo[data].done === true).map((key) => (
-                            <AuctionElement key={key} auctionKey={key} auctionInfo={sellAuctionInfo[key]} />
-                        ))}
-                    {sellOrBuyPrevious === "Buy" && buyAuctionInfo &&
-                        Object.keys(buyAuctionInfo).filter((data)=>buyAuctionInfo[data].done === true).map((key) => (
-                            <AuctionElement key={key} auctionKey={key} auctionInfo={buyAuctionInfo[key]} />
-                        ))}
-                </div>
-            </div>
-            <div className="w-full font-noto flex flex-col items-center">
-                <span className="text-xl font-black">Hot Auctions</span>
-                <div className="w-full h-screen">No</div>
-            </div>
-        </motion.div>
+                    <motion.div layout className="grid grid-cols-2 w-full gap-4 mt-5">
+                        {sellOrBuyMyAuction === "All" && auctionInfo &&
+                            Object.keys(auctionInfo).filter((data)=>auctionInfo[data].done === false).map((key) => (
+                                <AuctionElement key={key} auctionKey={key} auctionInfo={auctionInfo[key]} />
+                            ))}
+                        {sellOrBuyMyAuction === "Sell" && sellAuctionInfo &&
+                            Object.keys(sellAuctionInfo).filter((data)=>sellAuctionInfo[data].done === false).map((key) => (
+                                <AuctionElement key={key} auctionKey={key} auctionInfo={sellAuctionInfo[key]} />
+                            ))}
+                        {sellOrBuyMyAuction === "Buy" && buyAuctionInfo &&
+                            Object.keys(buyAuctionInfo).filter((data)=>buyAuctionInfo[data].done === false).map((key) => (
+                                <AuctionElement key={key} auctionKey={key} auctionInfo={buyAuctionInfo[key]} />
+                            ))}
+                    </motion.div>
+                </motion.div>
+
+                {/* Previous Auctions */}
+                <motion.div layout key="Previous Auction" className="w-full font-noto flex flex-col items-center mb-20">
+                    <div className="grid grid-cols-3 w-full">
+                        <span className="text-xl font-black col-start-2 place-self-center">Previous</span>
+                        <div className="col-start-3 place-self-end text-sm">
+                            <button
+                            onClick={() => {
+                                setSellOrBuyPrevious("Sell")
+                            }}
+                            className={`${sellOrBuyPrevious === "Sell" && "bg-white"}`}>Sell</button>
+                            <button                             
+                            onClick={() => {
+                                setSellOrBuyPrevious("Buy")
+                            }}className={`mx-2 ${sellOrBuyPrevious === "Buy" && "bg-white"}`}>Buy</button>
+                            <button                             
+                            onClick={() => {
+                                setSellOrBuyPrevious("All")
+                            }}className={`${sellOrBuyPrevious === "All" && "bg-white"}`}>All</button>
+                        </div>
+                    </div>
+                    <motion.div layout className="grid grid-cols-2 w-full gap-4 mt-5">
+                        {sellOrBuyPrevious === "All" && auctionInfo &&
+                            Object.keys(auctionInfo).filter((data)=>auctionInfo[data].done === true).map((key) => (
+                                <AuctionElement key={key} auctionKey={key} auctionInfo={auctionInfo[key]} />
+                                ))}
+                        {sellOrBuyPrevious === "Sell" && sellAuctionInfo &&
+                            Object.keys(sellAuctionInfo).filter((data)=>sellAuctionInfo[data].done === true).map((key) => (
+                                <AuctionElement key={key} auctionKey={key} auctionInfo={sellAuctionInfo[key]} />
+                            ))}
+                        {sellOrBuyPrevious === "Buy" && buyAuctionInfo &&
+                            Object.keys(buyAuctionInfo).filter((data)=>buyAuctionInfo[data].done === true).map((key) => (
+                                <AuctionElement key={key} auctionKey={key} auctionInfo={buyAuctionInfo[key]} />
+                                ))}
+                    </motion.div>
+                </motion.div>
+
+                {/* Hot Auctions */}
+                <motion.div layout key="Hot Aunctions" className="w-full font-noto flex flex-col items-center">
+                    <span className="text-xl font-black">Hot Auctions</span>
+                    <div className="w-full h-screen">No</div>
+                </motion.div>
+            </AnimatePresence>
+        </div>
     )
 
 }

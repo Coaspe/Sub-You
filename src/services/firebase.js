@@ -13,7 +13,6 @@ import {
   setDoc,
   arrayRemove,
   arrayUnion,
-  deleteDoc,
 } from "firebase/firestore";
 import { push, child, ref, update } from "firebase/database";
 
@@ -27,7 +26,6 @@ export const getComments = (postDocID) => {
 export const getTimelinePhotos = async (uid) => {
   const q = query(collection(firestore, "users"), where("uid", "==", uid));
   const result = await getDocs(q);
-
   const user = result.docs.map((item) => ({
     ...item.data(),
     docId: item.id,
@@ -54,35 +52,6 @@ export const getCommentInfinite = async (postDocIDArr, key) => {
   return await getDocs(
     query(collection(firestore, "comments"), where("__name__", "in", tmp))
   );
-};
-
-export const makeAuction = (sellerUid, photoURL, firstPrice) => {
-  const key = push(child(ref(rtDBRef), "auctions")).key;
-
-  let tmp = {};
-  tmp["seller"] = sellerUid;
-  tmp["photoURL"] = photoURL;
-  tmp["time"] = "30 : 00";
-  tmp["done"] = false;
-
-  update(ref(rtDBRef, `auctions/${key}`), tmp);
-  push(child(ref(rtDBRef), `auctions/${key}/buyers`), sellerUid);
-  makeTransaction(sellerUid, firstPrice, key);
-
-  return key;
-};
-
-export const participateInAuction = (buyerUid, price, auctionKey) => {
-  push(child(ref(rtDBRef), `auctions/${auctionKey}/buyers`), buyerUid);
-  push(child(ref(rtDBRef), `auctions/users/${buyerUid}/buy`), auctionKey);
-  makeTransaction(buyerUid, price, auctionKey);
-};
-
-export const makeTransaction = (buyerUid, price, auctionKey) => {
-  let tmp = {};
-  let time = new Date().getTime();
-  tmp[time] = { price: price, userUid: buyerUid };
-  update(ref(rtDBRef, `auctions/${auctionKey}/transactions`), tmp);
 };
 
 export const updateLastCheckedTime = (key, time) => {

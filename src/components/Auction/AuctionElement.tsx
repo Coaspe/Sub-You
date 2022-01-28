@@ -1,11 +1,12 @@
 import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion"
 import { memo, useContext, useEffect, useState } from "react"
 import { rtDBRef } from "../../lib/firebase"
-import { ref, onValue, get, child, query, limitToLast} from "firebase/database";
+import { ref, onValue, query, limitToLast} from "firebase/database";
 import UserContext from "../../context/user"
-import { getUserByUserId, makeTransaction, participateInAuction } from "../../services/firebase"
+import { getUserByUserId } from "../../services/firebase"
 import { auctionInfoType, getUserType } from "../../types"
 import AuctionTransactionRow from "./AuctionTransactionRow"
+import axios from "axios";
 
 interface AuctionElementProps {
     auctionKey: string
@@ -26,6 +27,17 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
     const [leftTime, setLeftTime] = useState("")
     const [sellerInfo, setSellerInfo] = useState<getUserType>({} as getUserType)
 
+    const handleAxios = (path: string) => {
+    return  axios.post(`http://localhost:3001/${path}`, {
+            buyerUid: user.uid,
+            price: price as number,
+            auctionKey
+            }).then((res) => {
+                    console.log(res);
+            }).catch((error) => {
+                    console.log(error);
+        })
+    }
     useEffect(() => {
     
         getUserByUserId(auctionInfo.seller).then((res: any) => {
@@ -65,29 +77,29 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
                     })
                 })
         }
-    }, [auctionInfo])
+    }, [auctionInfo.buyers])
 
     return (
         <AnimateSharedLayout type="crossfade">
-            <motion.div onClick={() => {setElementExpanded(true)}} layoutId="aa" className="col-span-1 flex flex-col items-center justify-between font-noto cursor-pointer">
+            <motion.div animate={{ opacity: [0, 1] }} onClick={() => {setElementExpanded(true)}} layoutId="aa" className="col-span-1 flex flex-col items-center justify-between font-noto cursor-pointer">
                 <motion.div layoutId="header-container" className="flex items-center justify-between w-full mb-1">
                     {sellerInfo
                         ? 
                         <>
-                            <div className="flex items-center justify-between">
+                            <motion.div className="flex items-center justify-between">
                                 <img className="w-7 h-7 rounded-full mr-2" src={sellerInfo.profileImg} alt="Auction user" />
                                 <span className="text-sm">{sellerInfo.username}</span>
-                            </div>
-                            <div className="flex items-center">
+                            </motion.div>
+                            <motion.div className="flex items-center">
                                 <img className="w-4 mr-1" src="images/alarm-clock.png" alt="clock" />
                                 <span className="text-xs">{leftTime}</span>
-                            </div>
+                            </motion.div>
                         </>
                         :
                         null
                     }
                 </motion.div>
-                <motion.div className="bg-white w-full flex flex-col items-center justify-center h-smpost">
+                <motion.div  className="bg-white w-full flex flex-col items-center justify-center h-smpost">
                     <motion.img layoutId="img" className="max-w-full max-h-full" src={auctionInfo.photoURL} alt="Auction element" />
                 </motion.div>
                 <motion.div layoutId="footer-container" className="flex w-full items-center justify-between mt-1">
@@ -128,7 +140,7 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
                         <motion.div layoutId="footer-container" className="my-5 max-h-28 overflow-y-scroll flex flex-col items-center justify-between w-2/3">
                             {Object.keys(users).length > 0 && transactions[0].length > 0 &&
                                 transactions[0].map((key, index) => (
-                                <div className="flex items-center w-full">
+                                <div key={key} className="flex items-center w-full">
                                         { index === 0 && <img className="w-4 mr-3" src="images/crown.png" alt="crown" />}
                                         <AuctionTransactionRow
                                         dateCreated={parseInt(transactions[0][transactions[0].length - 1 - index])}
@@ -144,17 +156,25 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
                                     setPrice(e.target.value)
                                 }}
                                 className="border py-2 pl-2 my-1"
-                                placeholder={`${transactions[0].length > 0 ? lastest[1].price : "Your First!"}`}
+                                placeholder={`${transactions[0].length > 0 ? parseInt(lastest[1].price.toString()) + 1 : "Your First!"}`}
                                 type="number"
-                                prefix="ETH" />
+                                prefix="SUB" />
                             <button
                                 onClick={() => {
-                                    transactions[0].length > 0 ?
-                                    makeTransaction(user.uid, price as number, auctionKey) :
-                                    participateInAuction(user.uid, price as number, auctionKey)
+                                    onValue(ref(rtDBRef, `auctions/users/${user.uid}/buy`), (snap) => {
+                                        if (snap.exists()) {
+                                            Object.values(snap.val()).includes(auctionKey) ?
+                                            handleAxios("makeTransaction")
+                                            : handleAxios("participateInAuction")
+                                        } else {
+                                            handleAxios("participateInAuction")
+                                        }
+                                    }, {
+                                        onlyOnce: true
+                                    })
                                     setPrice("")
                                 }}
-                                className={`h-5 ${transactions[0].length > 0 && lastest[1].price >= price && "pointer-events-none"}`}>Buy</button>
+                                className={`h-5 ${parseInt(lastest[1].price.toString()) >= price && "pointer-events-none"}`}>Buy</button>
                         </div>
                     </motion.div>
                 }
