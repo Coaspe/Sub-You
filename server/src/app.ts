@@ -1,6 +1,5 @@
 import express from "express"
 import "firebase/compat/auth";
-import { clearInterval } from "timers";
 import {
   updateProfileWithoutImage,
   deletePostAdmin,
@@ -35,6 +34,8 @@ const multer = require('multer');
 const upload = multer({
   storage: multer.memoryStorage()
 });
+
+const moment = require('moment')
 
 app.post("/uploadpost", upload.any(), (req: any, res: express.Response) => {
 
@@ -97,49 +98,31 @@ app.post("/deletepost", (req: any, res: express.Response) => {
 
 app.post("/makeAuction", (req: any, res: express.Response) => {
 
-  const key = makeAuction(req.body.sellerUid, req.body.photoURL, req.body.firstPrice)
-  
+  const endTime = moment().add(30, "minutes").valueOf()
+  const key = makeAuction(req.body.sellerUid, req.body.photoURL, req.body.firstPrice, endTime, res)
+
   if (key === -1) {
     res.send("Error")
     res.end()
   } else {
     console.time('for')
-    let minute = 30
-    let second = 0
-    
-    console.log(new Date().getTime());
-    let timer = setInterval(tick, 1000)
-    
-    function tick() {
-      second = second - 1 < 0 ? 59 : second - 1
-      minute = second === 59 ? minute - 1 : minute
-      // updateTime(key, `${minute < 10 ? '0'+minute.toString() :minute.toString()} : ${second < 10 ? '0'+second.toString() : second.toString()}`)
-      if (minute > 1) {
-        second === 59 && updateTime(key, `${minute < 10 ? '0'+minute.toString()+"분" :minute.toString()+"분"}`)
-      } else {
-        updateTime(key, `${'0'+minute.toString()} : ${second < 10 ? '0'+second.toString() : second.toString()}`)
-      }
-      if (minute === 0 && second === 0) {
-          console.log(new Date().getTime());
-        clearInterval(timer)
-        console.timeEnd('for')
-        endAuction(key)
-        res.send("Auction Completed")
-        res.end()
-      }
-    }
+    console.log(moment().format('LTS'));
+    setTimeout(() => {
+      console.log(moment().format('LTS'));
+      console.timeEnd('for')
+      endAuction(key)
+      res.send("Auction Completed")
+      res.end()
+    }, 1800000)
   
   }
 })
 app.post("/makeTransaction", (req: any, res: express.Response) => {
-  makeTransaction(req.body.buyerUid, req.body.price, req.body.auctionKey).then((aa: any) => {
-    res.send(aa)
-    res.end()
-  })
+  makeTransaction(req.body.buyerUid, req.body.price, req.body.auctionKey, res)
 })
 
 app.post("/participateInAuction", (req: any, res: express.Response) => {
-  participateInAuction(req.body.buyerUid, req.body.price, req.body.auctionKey)
+  participateInAuction(req.body.buyerUid, req.body.price, req.body.auctionKey, res)
 })
 app.post("/addcomment", (req: any, res: express.Response) => {
   const comment = {
@@ -199,4 +182,7 @@ app.post("/updateProfileWithoutImage", (req: any, res: express.Response) => {
 
 app.listen(3001, () => {
   console.log('Server Operated!');
+  moment.locale()
+  console.log(moment().format('LTS'));
+  
 });

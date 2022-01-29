@@ -1,4 +1,5 @@
 import { storageRef } from "../../lib/firebase";
+import express from "express"
 
 // NodeJS can not use getDownloadURL
 // Make read permission public and write permission needs auth.
@@ -81,7 +82,7 @@ export const updateProfileWithoutImage = async (
 export const endAuction = (auctionKey: string) => {
   db.ref(`auctions/${auctionKey}`).update({done: true})
 }
-export const updateTime = (auctionKey: string, time: string) => {
+export const updateTime = (auctionKey: string, time: number) => {
   db.ref(`auctions/${auctionKey}`).update({time: time})
 }
 
@@ -214,24 +215,60 @@ export const deleteComment = (postDocID: string, commentDocID: string) => {
   )
 }
 
-export const participateInAuction = (buyerUid: string, price: number, auctionKey: string) => {
+export const participateInAuction = (buyerUid: string, price: number, auctionKey: string, res: express.Response) => {
   db.ref(`auctions/${auctionKey}/buyers`).push(buyerUid)
   db.ref(`auctions/users/${buyerUid}/buy`).push(auctionKey)
-  return makeTransaction(buyerUid, price, auctionKey);
+  return makeTransaction(buyerUid, price, auctionKey, res);
 };
 
-export const makeTransaction = (buyerUid: string, price: number, auctionKey: string) => {
-  let time = new Date().getTime();
+export const payForTransaction = (buyerUid: string, price: number) => {
+  const query = firestore.collection("users").where("uid", "==", buyerUid)
+  
+  return firestore.runTransaction((transaction: any) => {
+    return transaction.get(query).then((doc: any) => {
+        if (doc.docs[0]) {
+          const user = doc.docs[0].data()
+          if (user.SUB >= price) {
+            transaction.update(doc.docs[0]._ref, { SUB: user.SUB - price })
+            return Promise.resolve(user.SUB - price)
+          } else {
+            return Promise.reject("More SUB needed")
+          }
+        }
+      })
+  })
 
-  // Atomic update
-  return db.ref(`auctions/${auctionKey}/transactions`).transaction((trans: any) => {
-    let tmp = Object.assign({}, trans)
-    tmp[time] = { price: price, userUid: buyerUid }
-    return tmp
+
+}
+export const makeTransaction = async (buyerUid: string, price: number, auctionKey: string, res: express.Response) => {
+
+
+  return payForTransaction(buyerUid, price).then(async (re: any) => {
+    console.log(re);
+    
+    let time = new Date().getTime();
+
+    // Atomic update
+    const result = await db.ref(`auctions/${auctionKey}/transactions`).transaction((trans: any) => {
+      let tmp = Object.assign({}, trans)
+      tmp[time] = { price: price, userUid: buyerUid }
+      return tmp
+    })
+    console.log(result);
+    console.log(result.committed);
+    if (result.committed) {
+      res.send(`${re}`)
+    } else {
+      res.send(-1)
+    }
+    res.end()
+  }).catch((error:any) => {
+    res.send(error)
+    res.end()
   })
 };
 
-export const makeAuction = (sellerUid: string, photoURL: string, firstPrice: number) => {
+export const makeAuction = (sellerUid: string, photoURL: string, firstPrice: number, time:number, res:express.Response) => {
   const key = db.ref("auctions").push().key
 
   if (key === null) {
@@ -241,7 +278,7 @@ export const makeAuction = (sellerUid: string, photoURL: string, firstPrice: num
   let tmp: any = {};
   tmp["seller"] = sellerUid;
   tmp["photoURL"] = photoURL;
-  tmp["time"] = "30 : 00";
+  tmp["time"] = time;
   tmp["done"] = false;
 
   if (key !== null) {
@@ -262,7 +299,7 @@ export const makeAuction = (sellerUid: string, photoURL: string, firstPrice: num
     })
   }
 
-  makeTransaction(sellerUid, firstPrice, key);
+  makeTransaction(sellerUid, firstPrice, key, res);
 
   return key;
 };

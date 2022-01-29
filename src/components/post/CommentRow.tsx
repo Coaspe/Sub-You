@@ -9,6 +9,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import axios from "axios";
 import { useDispatch } from 'react-redux'
 import { alertAction } from "../../redux";
+import moment from 'moment'
 
 interface commentRowProps {
     commentInfo: commentType
@@ -93,7 +94,7 @@ const CommentRow: React.FC<commentRowProps> = ({ commentInfo, postDocID }) => {
                         </Menu>
                     </div>
                     <div className="flex items-center">
-                        <span className="text-xxs text-gray-400 font-semibold">1 hr 전</span>
+                            <span className="text-xxs text-gray-400 font-semibold">{moment(commentInfo.dateCreated).fromNow()}</span>
                         <span className="text-xxs text-gray-400 font-semibold ml-3">{likes} 좋아요</span>
                         <span className="text-xxs text-gray-400 font-semibold ml-3">{commentInfo.reply.length === 0 ? "답글 쓰기" : `${commentInfo.reply.length} 답글`}</span>
                     </div>

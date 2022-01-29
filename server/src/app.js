@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 require("firebase/compat/auth");
-const timers_1 = require("timers");
 const firebaseAdmin_1 = require("./service/firebaseAdmin/firebaseAdmin");
 const app = (0, express_1.default)();
 // json request body를 받기 위해 사용한다. application/json
@@ -24,6 +23,7 @@ const multer = require('multer');
 const upload = multer({
     storage: multer.memoryStorage()
 });
+const moment = require('moment');
 app.post("/uploadpost", upload.any(), (req, res) => {
     const parsedUserInfo = JSON.parse(req.body.userInfo);
     const paredPostSetChanged = JSON.parse(req.body.postSetChanged);
@@ -75,37 +75,29 @@ app.post("/deletepost", (req, res) => {
     });
 });
 app.post("/makeAuction", (req, res) => {
-    const key = (0, firebaseAdmin_1.makeAuction)(req.body.sellerUid, req.body.photoURL, req.body.firstPrice);
+    const endTime = moment().add(30, "minutes").valueOf();
+    const key = (0, firebaseAdmin_1.makeAuction)(req.body.sellerUid, req.body.photoURL, req.body.firstPrice, endTime, res);
     if (key === -1) {
         res.send("Error");
         res.end();
     }
     else {
-        let minute = 1;
-        let second = 0;
-        function tik() {
-            second = second - 1 < 0 ? 59 : second - 1;
-            minute = second === 59 ? minute - 1 : minute;
-            (0, firebaseAdmin_1.updateTime)(key, `${minute.toString()} : ${second.toString()}`);
-        }
-        let timer = setInterval(tik, 1000);
-        setTimeout(function () {
-            (0, timers_1.clearInterval)(timer);
+        console.time('for');
+        console.log(moment().format('LTS'));
+        setTimeout(() => {
+            console.log(moment().format('LTS'));
+            console.timeEnd('for');
             (0, firebaseAdmin_1.endAuction)(key);
-            // get last buy request and pay
             res.send("Auction Completed");
             res.end();
-        }, 60000);
+        }, 1800000);
     }
 });
 app.post("/makeTransaction", (req, res) => {
-    (0, firebaseAdmin_1.makeTransaction)(req.body.buyerUid, req.body.price, req.body.auctionKey).then((aa) => {
-        res.send(aa);
-        res.end();
-    });
+    (0, firebaseAdmin_1.makeTransaction)(req.body.buyerUid, req.body.price, req.body.auctionKey, res);
 });
 app.post("/participateInAuction", (req, res) => {
-    (0, firebaseAdmin_1.participateInAuction)(req.body.buyerUid, req.body.price, req.body.auctionKey);
+    (0, firebaseAdmin_1.participateInAuction)(req.body.buyerUid, req.body.price, req.body.auctionKey, res);
 });
 app.post("/addcomment", (req, res) => {
     const comment = {
@@ -155,4 +147,6 @@ app.post("/updateProfileWithoutImage", (req, res) => {
 });
 app.listen(3001, () => {
     console.log('Server Operated!');
+    moment.locale();
+    console.log(moment().format('LTS'));
 });
