@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
-import { memo, useEffect, useState } from "react";
+import { memo } from "react";
 import { getUserType } from "../../types";
+import moment from "moment"
+import { ENToKR } from "../../data/fromNowENtoKR";
 
 interface transactionRowProps {
     dateCreated: number
@@ -9,24 +11,18 @@ interface transactionRowProps {
 }
 
 const AuctionTransactionRow: React.FC<transactionRowProps> = ({ dateCreated, user, price }) => {
-    const [time, setTime] = useState("")
-
-    useEffect(() => {
-        const date = new Date(dateCreated)
-        setTime(`${date.getHours()}:${date.getMinutes()}`)
-    }, [dateCreated])
 
     return (
     <motion.div animate={{opacity : [0, 1]}} className="flex w-full items-center justify-between mb-1">
         {
-            user.profileImg ?  
+            user.profileImg  ?  
         <>
             <div className="flex items-center justify-between">
                 <img className="w-7 h-7 rounded-full mr-2" src={user.profileImg} alt="Auction user" />
                 <span className="text-sm">{user.username}</span>
             </div>
             <span className="text-xs">
-                {time}
+                {ENToKR(moment(dateCreated).fromNow())}
             </span>
             <div className="flex items-center">
                 <span className="text-sm text-gray-700 mr-1">{price}</span>

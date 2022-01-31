@@ -178,9 +178,10 @@ const deleteComment = (postDocID, commentDocID) => {
 };
 exports.deleteComment = deleteComment;
 const participateInAuction = (buyerUid, price, auctionKey, res) => {
-    db.ref(`auctions/${auctionKey}/buyers`).push(buyerUid);
-    db.ref(`auctions/users/${buyerUid}/buy`).push(auctionKey);
-    return (0, exports.makeTransaction)(buyerUid, price, auctionKey, res);
+    (0, exports.makeTransaction)(buyerUid, price, auctionKey, res).then(() => {
+        db.ref(`auctions/${auctionKey}/buyers`).push(buyerUid);
+        db.ref(`auctions/users/${buyerUid}/buy`).push(auctionKey);
+    });
 };
 exports.participateInAuction = participateInAuction;
 const payForTransaction = (buyerUid, price) => {
@@ -189,12 +190,12 @@ const payForTransaction = (buyerUid, price) => {
         return transaction.get(query).then((doc) => {
             if (doc.docs[0]) {
                 const user = doc.docs[0].data();
-                if (user.SUB >= price) {
-                    transaction.update(doc.docs[0]._ref, { SUB: user.SUB - price });
+                if (parseInt(user.SUB) >= parseInt(price.toString())) {
+                    transaction.update(doc.docs[0]._ref, { SUB: parseInt(user.SUB) - parseInt(price.toString()) });
                     return Promise.resolve(user.SUB - price);
                 }
                 else {
-                    return Promise.reject("More SUB needed");
+                    return Promise.reject("MORESUBNEEDED");
                 }
             }
         });
@@ -202,32 +203,54 @@ const payForTransaction = (buyerUid, price) => {
 };
 exports.payForTransaction = payForTransaction;
 const makeTransaction = (buyerUid, price, auctionKey, res) => __awaiter(void 0, void 0, void 0, function* () {
-    return (0, exports.payForTransaction)(buyerUid, price).then((re) => __awaiter(void 0, void 0, void 0, function* () {
-        console.log(re);
-        let time = new Date().getTime();
-        // Atomic update
-        const result = yield db.ref(`auctions/${auctionKey}/transactions`).transaction((trans) => {
-            let tmp = Object.assign({}, trans);
-            tmp[time] = { price: price, userUid: buyerUid };
-            return tmp;
-        });
-        console.log(result);
-        console.log(result.committed);
-        if (result.committed) {
-            res.send(`${re}`);
+    try {
+        const lastest = Object.values((yield db.ref(`auctions/${auctionKey}/transactions`).get()).val());
+        if (price > parseInt(lastest[lastest.length - 1].price)) {
+            // payment
+            const payResult = yield (0, exports.payForTransaction)(buyerUid, price);
+            let time = new Date().getTime();
+            yield db.ref(`auctions/${auctionKey}/transactions`).transaction((trans) => {
+                let tmp = Object.assign({}, trans);
+                tmp[time] = { price: price, userUid: buyerUid };
+                return tmp;
+            }, (error, committed) => {
+                if (committed) {
+                    res.send(`${payResult}`);
+                    // committe이 되었다면 가장 최근이었던 transaction을 취소하며 SUB을 돌려준다.
+                    firestore.runTransaction((transaction) => {
+                        const query = firestore.collection("users").where("uid", "==", lastest[lastest.length - 1].userUid);
+                        // user를 get하고 sub 갱신
+                        return transaction.get(query).then((doc) => {
+                            if (doc.docs[0]) {
+                                const user = doc.docs[0].data();
+                                transaction.update(doc.docs[0]._ref, { SUB: parseInt(user.SUB) + parseInt(lastest[lastest.length - 1].price) });
+                            }
+                            else {
+                                return Promise.reject("NOUSER");
+                            }
+                        });
+                    });
+                }
+                else {
+                    // committe error
+                    return Promise.reject("COMMITTERROR");
+                }
+            });
         }
         else {
-            res.send(-1);
+            // SUB가 부족
+            throw "MORESUBNEEDED";
         }
-        res.end();
-    })).catch((error) => {
+    }
+    catch (error) {
         res.send(error);
         res.end();
-    });
+    }
 });
 exports.makeTransaction = makeTransaction;
 const makeAuction = (sellerUid, photoURL, firstPrice, time, res) => {
     const key = db.ref("auctions").push().key;
+    const firstTime = new Date().getTime();
     if (key === null) {
         return -1;
     }
@@ -237,23 +260,30 @@ const makeAuction = (sellerUid, photoURL, firstPrice, time, res) => {
     tmp["time"] = time;
     tmp["done"] = false;
     if (key !== null) {
-        db.ref(`auctions/users/${sellerUid}/sell`).push(key, (error) => {
-            if (error) {
-                console.log(error);
-            }
-        });
-        db.ref(`auctions/${key}`).update(tmp, (error) => {
-            if (error) {
-                console.log(error);
-            }
-        });
-        db.ref(`auctions/${key}/buyers`).push(sellerUid, (error) => {
-            if (error) {
-                console.log(error);
-            }
-        });
+        const sellKey = db.ref(`auctions/users/${sellerUid}/sell`).push(key).key;
+        const buyersKey = db.ref(`auctions/${key}/buyers`).push(sellerUid).key;
+        if (sellKey && buyersKey) {
+            db.ref(`auctions/${key}`).update(tmp)
+                .then(() => {
+                db.ref(`auctions/${key}/transactions/${firstTime}`).set({
+                    price: firstPrice,
+                    userUid: sellerUid
+                }, (error) => {
+                    if (!error) {
+                        res.status(200).send("경매 등록을 성공하였습니다");
+                        res.end();
+                        return 0;
+                    }
+                });
+            }).catch((error) => {
+                db.ref(`auctions/${key}`).remove();
+                db.ref(`auction/users/${sellerUid}/sell/${sellKey}`).remove();
+                res.status(404).send(error);
+                res.end();
+                return -1;
+            });
+        }
     }
-    (0, exports.makeTransaction)(sellerUid, firstPrice, key, res);
     return key;
 };
 exports.makeAuction = makeAuction;

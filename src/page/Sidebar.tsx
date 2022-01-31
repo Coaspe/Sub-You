@@ -18,7 +18,15 @@ interface sidebarProps {
     selectedPage: string
     setSelectedPage: React.Dispatch<React.SetStateAction<string>>
 }
+export const cacheImages = async (src: string) => {
+    await new Promise(function (resolve, reject) {
+    const img = new Image();
 
+    img.src = src;
+    img.onload = () => resolve(src);
+    img.onerror = () => reject();
+    })
+}
 const Sidebar: React.FC<sidebarProps> = (
     {
         userInfo,
@@ -48,18 +56,8 @@ const Sidebar: React.FC<sidebarProps> = (
                 }
             },
     }
-
     useEffect(() => {
-        const cacheImages = async () => {
-        await new Promise(function (resolve, reject) {
-          const img = new Image();
-
-          img.src = "/images/logo.png";
-          img.onload = () => resolve("/images/logo.png");
-          img.onerror = () => reject();
-        })
-        }
-        cacheImages()
+        cacheImages("/images/logo.png")
     }, [])
 
     window.onresize = function () {
@@ -111,7 +109,7 @@ const Sidebar: React.FC<sidebarProps> = (
                                             Posts
                                         </span>
                                     </div>
-                                    <div className="flex flex-col items-center">
+                                    <div className="flex flex-col items-center mx-2">
                                         <span className="font-black text-sm">
                                             {userInfo.followers.length}
                                         </span>
@@ -119,7 +117,7 @@ const Sidebar: React.FC<sidebarProps> = (
                                             Followers
                                         </span>
                                     </div>
-                                    <div className="flex flex-col items-center">
+                                    <div className="flex flex-col items-center mr-2">
                                         <span className="font-black text-sm">
                                             {userInfo.following.length}
                                         </span>

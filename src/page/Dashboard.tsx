@@ -171,13 +171,13 @@ const Dashboard = () => {
                         exit="exit"
                         className="top-10 translate-x-2/4 left-1/4 w-1/2 z-50 fixed">
                         {alert[2] === 'success' ? (
-                            <Alert severity="success" color="success" onClose={() => { doSetAlert([false, "", ""]) }}>{`${alert[1]} is complete!`}</Alert>
+                            <Alert severity="success" color="success" onClose={() => { doSetAlert([false, "", ""]) }}>{`${alert[1]}`}</Alert>
                         ) : (alert[2] === 'error' ? (
-                                <Alert severity="error" color="error" onClose={() => { doSetAlert([false, "", ""]) }}>{`${alert[1]} is failed!`}</Alert>
+                                <Alert severity="error" color="error" onClose={() => { doSetAlert([false, "", ""]) }}>{`${alert[1]}`}</Alert>
                             ) : (alert[2] === 'warning' ? (
-                                    <Alert severity="warning" color="warning" onClose={() => { doSetAlert([false, "", ""]) }}>This is a warning alert — check it out!</Alert>
+                                    <Alert severity="warning" color="warning" onClose={() => { doSetAlert([false, "", ""]) }}>{`${alert[1]}`}</Alert>
                                 ) : (
-                                        <Alert severity="info" color="info" onClose={() => { doSetAlert([false, "", ""]) }}>This is a info alert — check it out!</Alert>
+                                        <Alert severity="info" color="info" onClose={() => { doSetAlert([false, "", ""]) }}>{`${alert[1]}`}</Alert>
                         )))}
                     </motion.div>
                 }

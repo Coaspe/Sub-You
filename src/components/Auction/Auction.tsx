@@ -82,7 +82,7 @@ const Auction = () => {
     const sideExpanded: boolean = useSelector((state: RootState) => state.setSidebarExpanded.sideBarExpanded)
     
     return (
-        <div className={`h-full flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-7 sm:mx-5 sm:col-start-1`}>
+        <motion.div className={`h-full flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-7 sm:mx-5 sm:col-start-1`}>
             <AnimatePresence>
 
                 {/* Now Auction */}
@@ -163,7 +163,7 @@ const Auction = () => {
                     <div className="w-full h-screen">No</div>
                 </motion.div>
             </AnimatePresence>
-        </div>
+        </motion.div>
     )
 
 }

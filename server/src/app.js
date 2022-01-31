@@ -82,11 +82,7 @@ app.post("/makeAuction", (req, res) => {
         res.end();
     }
     else {
-        console.time('for');
-        console.log(moment().format('LTS'));
         setTimeout(() => {
-            console.log(moment().format('LTS'));
-            console.timeEnd('for');
             (0, firebaseAdmin_1.endAuction)(key);
             res.send("Auction Completed");
             res.end();

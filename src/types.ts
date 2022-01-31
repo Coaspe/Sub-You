@@ -100,7 +100,7 @@ export type auctionInfoType = {
     done: boolean
     photoURL: string
     seller: string
-    transaction: { [dateCreated: number]: { price: number, userUid: string } }
+    transactions: { [dateCreated: number]: { price: number, userUid: string } }
     time: number
 }
 

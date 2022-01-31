@@ -3,6 +3,8 @@ import Tooltip from '@mui/material/Tooltip'
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useState, useEffect } from 'react'
+import { useDispatch } from "react-redux"
+import { alertAction } from "../../redux";
 
 interface props {
     setSettingModal: React.Dispatch<React.SetStateAction<boolean>>
@@ -18,13 +20,17 @@ const MakeAuctionModal:React.FC<props> = ({makeAuctionModalOpen, setSettingModal
     const [loading, setLoading] = useState(false)
     const [seletedImage, setSeletedImage] = useState("")
     const [price, setPrice] = useState<string>("")
+    const dispatch = useDispatch()
+
     const handleOnChange = (e: any) => {
         const re = /^[0-9\b]+$/;
         if ((e.target.value !== '0' && re.test(e.target.value)) || e.target.value === "") {
             setPrice(e.target.value)
         }
     }
-
+    const doSetAlert = (alert: [boolean, string, string]) => {
+        dispatch(alertAction.setAlert({alert: alert}))
+    }
     useEffect(() => {
     const cacheImages = (srcArray: string[]) => {
         const promise = srcArray.map((src: string) => {
@@ -114,8 +120,11 @@ const MakeAuctionModal:React.FC<props> = ({makeAuctionModalOpen, setSettingModal
                                 photoURL: seletedImage,
                                 firstPrice: price
                             }).then((res) => {
-                                console.log(res);
+                                console.log("makeAUction", res);
                                 
+                                res.status === 200 ?
+                                    doSetAlert([true, res.data, "success"]) : doSetAlert([true, res.data, "alert"])
+                                setTimeout(()=>{doSetAlert([false, "", ""])}, 3000)
                             })
                             handleClose()
                         }}

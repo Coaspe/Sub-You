@@ -215,24 +215,25 @@ export const deleteComment = (postDocID: string, commentDocID: string) => {
   )
 }
 
-export const participateInAuction = (buyerUid: string, price: number, auctionKey: string, res: express.Response) => {
-  db.ref(`auctions/${auctionKey}/buyers`).push(buyerUid)
-  db.ref(`auctions/users/${buyerUid}/buy`).push(auctionKey)
-  return makeTransaction(buyerUid, price, auctionKey, res);
+export const participateInAuction = (buyerUid: string, price: string, auctionKey: string, res: express.Response) => {
+  makeTransaction(buyerUid, price, auctionKey, res).then(() => {
+    db.ref(`auctions/${auctionKey}/buyers`).push(buyerUid)
+    db.ref(`auctions/users/${buyerUid}/buy`).push(auctionKey)
+  })
 };
 
-export const payForTransaction = (buyerUid: string, price: number) => {
+export const payForTransaction = (buyerUid: string, price: string) => {
   const query = firestore.collection("users").where("uid", "==", buyerUid)
-  
+
   return firestore.runTransaction((transaction: any) => {
     return transaction.get(query).then((doc: any) => {
         if (doc.docs[0]) {
           const user = doc.docs[0].data()
-          if (user.SUB >= price) {
-            transaction.update(doc.docs[0]._ref, { SUB: user.SUB - price })
-            return Promise.resolve(user.SUB - price)
+          if (parseInt(user.SUB) >= parseInt(price)) {
+            transaction.update(doc.docs[0]._ref, { SUB: parseInt(user.SUB) - parseInt(price) })
+            return Promise.resolve(user.SUB - parseInt(price))
           } else {
-            return Promise.reject("More SUB needed")
+            return Promise.reject("MORESUBNEEDED")
           }
         }
       })
@@ -240,36 +241,52 @@ export const payForTransaction = (buyerUid: string, price: number) => {
 
 
 }
-export const makeTransaction = async (buyerUid: string, price: number, auctionKey: string, res: express.Response) => {
-
-
-  return payForTransaction(buyerUid, price).then(async (re: any) => {
-    console.log(re);
+export const makeTransaction = async (buyerUid: string, price: string, auctionKey: string, res: express.Response) => {
+  try {
+    const lastest: { price: string; userUid: string; }[] = Object.values((await db.ref(`auctions/${auctionKey}/transactions`).get()).val())
     
-    let time = new Date().getTime();
-
-    // Atomic update
-    const result = await db.ref(`auctions/${auctionKey}/transactions`).transaction((trans: any) => {
-      let tmp = Object.assign({}, trans)
-      tmp[time] = { price: price, userUid: buyerUid }
-      return tmp
-    })
-    console.log(result);
-    console.log(result.committed);
-    if (result.committed) {
-      res.send(`${re}`)
+    if (parseInt(price) > parseInt(lastest[lastest.length - 1].price)) {
+      // payment
+      const payResult = await payForTransaction(buyerUid, price)
+      let time = new Date().getTime();
+      await db.ref(`auctions/${auctionKey}/transactions`).transaction((trans: any) => {
+        let tmp = Object.assign({}, trans)
+        tmp[time] = { price: parseInt(price), userUid: buyerUid }
+        return tmp
+      }, (error:any, committed:any) => {
+        if (committed) {
+          res.send(`${payResult}`)
+          // committe이 되었다면 가장 최근이었던 transaction을 취소하며 SUB을 돌려준다.
+          firestore.runTransaction((transaction: any) => {
+            const query = firestore.collection("users").where("uid", "==", lastest[lastest.length - 1].userUid)
+            // user를 get하고 sub 갱신
+            return transaction.get(query).then((doc: any) => {
+              if (doc.docs[0]) {
+                const user = doc.docs[0].data()
+                transaction.update(doc.docs[0]._ref, { SUB: parseInt(user.SUB) + parseInt(lastest[lastest.length - 1].price) })
+              } else {
+                return Promise.reject("NOUSER")
+              }
+            })
+          })
+        } else {
+          // committe error
+          return Promise.reject("COMMITTERROR")
+        }
+      })
     } else {
-      res.send(-1)
+      // SUB가 부족
+      throw "MORESUBNEEDED"
     }
-    res.end()
-  }).catch((error:any) => {
+  } catch (error) {
     res.send(error)
     res.end()
-  })
+  }
 };
 
-export const makeAuction = (sellerUid: string, photoURL: string, firstPrice: number, time:number, res:express.Response) => {
+export const makeAuction = (sellerUid: string, photoURL: string, firstPrice: string, time:number, res:express.Response) => {
   const key = db.ref("auctions").push().key
+  const firstTime = new Date().getTime()
 
   if (key === null) {
     return -1
@@ -282,24 +299,30 @@ export const makeAuction = (sellerUid: string, photoURL: string, firstPrice: num
   tmp["done"] = false;
 
   if (key !== null) {
-    db.ref(`auctions/users/${sellerUid}/sell`).push(key, (error: any) => {
-      if (error) {
-        console.log(error);
-      }
-    })
-    db.ref(`auctions/${key}`).update(tmp, (error: any) => {
-      if (error) {
-        console.log(error);
-      }
-    })
-    db.ref(`auctions/${key}/buyers`).push(sellerUid, (error: any) => {
-      if (error) {
-        console.log(error);
-      }
-    })
+    const sellKey = db.ref(`auctions/users/${sellerUid}/sell`).push(key).key
+    const buyersKey = db.ref(`auctions/${key}/buyers`).push(sellerUid).key
+
+    if (sellKey && buyersKey) {
+      db.ref(`auctions/${key}`).update(tmp)
+        .then(() => {
+          db.ref(`auctions/${key}/transactions/${firstTime}`).set({
+            price: parseInt(firstPrice),
+            userUid: sellerUid
+          }, (error: any) => {
+            if (!error) {
+              res.status(200).send("경매 등록을 성공하였습니다")
+              res.end()
+              return 0
+            }
+          })
+      }).catch((error: any) => {
+          db.ref(`auctions/${key}`).remove()
+          db.ref(`auction/users/${sellerUid}/sell/${sellKey}`).remove()
+          res.status(404).send(error)
+          res.end()
+          return -1
+      })
+    }
   }
-
-  makeTransaction(sellerUid, firstPrice, key, res);
-
   return key;
 };

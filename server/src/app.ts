@@ -100,16 +100,11 @@ app.post("/makeAuction", (req: any, res: express.Response) => {
 
   const endTime = moment().add(30, "minutes").valueOf()
   const key = makeAuction(req.body.sellerUid, req.body.photoURL, req.body.firstPrice, endTime, res)
-
   if (key === -1) {
     res.send("Error")
     res.end()
   } else {
-    console.time('for')
-    console.log(moment().format('LTS'));
     setTimeout(() => {
-      console.log(moment().format('LTS'));
-      console.timeEnd('for')
       endAuction(key)
       res.send("Auction Completed")
       res.end()
@@ -184,5 +179,4 @@ app.listen(3001, () => {
   console.log('Server Operated!');
   moment.locale()
   console.log(moment().format('LTS'));
-  
 });
