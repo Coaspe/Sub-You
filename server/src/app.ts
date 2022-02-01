@@ -5,7 +5,6 @@ import {
   deletePostAdmin,
   uploadImageAdmin,
   uploadImageToStorage,
-  updateTime,
   endAuction,
   addComment,
   updateProfileWithImage,
@@ -100,6 +99,7 @@ app.post("/makeAuction", (req: any, res: express.Response) => {
 
   const endTime = moment().add(30, "minutes").valueOf()
   const key = makeAuction(req.body.sellerUid, req.body.photoURL, req.body.firstPrice, endTime, res)
+  
   if (key === -1) {
     res.send("Error")
     res.end()
@@ -113,7 +113,7 @@ app.post("/makeAuction", (req: any, res: express.Response) => {
   }
 })
 app.post("/makeTransaction", (req: any, res: express.Response) => {
-  makeTransaction(req.body.buyerUid, req.body.price, req.body.auctionKey, res)
+  console.log(makeTransaction(req.body.buyerUid, req.body.price, req.body.auctionKey, res))
 })
 
 app.post("/participateInAuction", (req: any, res: express.Response) => {

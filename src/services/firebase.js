@@ -13,8 +13,15 @@ import {
   setDoc,
   arrayRemove,
   arrayUnion,
+  onSnapshot,
 } from "firebase/firestore";
 import { push, child, ref, update } from "firebase/database";
+
+export const SUBSnapShot = (email, doSetUserInfo) => {
+  onSnapshot(doc(firestore, "users", email), (doc) => {
+    doSetUserInfo(doc.data());
+  });
+};
 
 export const getComments = (postDocID) => {
   return getDocs(
@@ -87,17 +94,17 @@ export const singInWithGoogleInfoToFB = (info) => {
 
   const secretKey = info.user.uid;
   const encrypted = CryptoJS.AES.encrypt(
-    JSON.stringify(info.additionalUserInfo.profile.email.toLowerCase()),
+    JSON.stringify(info.user.email.toLowerCase()),
     secretKey
   )
     .toString()
     .replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/ ]/gim, "");
 
-  setDoc(doc(firestore, "users", info.additionalUserInfo.profile.email), {
+  return setDoc(doc(firestore, "users", info.user.email), {
     wallet: "",
-    userEmail: info.additionalUserInfo.profile.email.toLowerCase(),
+    userEmail: info.user.email.toLowerCase(),
     uid: info.user.uid,
-    username: info.additionalUserInfo.profile.name.toLowerCase(),
+    username: info.user.displayName.toLowerCase(),
     following: [],
     followers: [],
     postDocId: [],
@@ -105,6 +112,7 @@ export const singInWithGoogleInfoToFB = (info) => {
     profileImg: info.user.photoURL,
     profileCaption: "",
     userEmailEncrypted: encrypted,
+    SUB: 0,
   });
 };
 
@@ -123,13 +131,9 @@ export const signInWithFacebookInfoToFB = (info) => {
   });
 };
 export async function doesEmailExist(userEmail) {
-  const q = query(
-    collection(firestore, "users"),
-    where("userEmail", "==", userEmail)
-  );
-  const result = await getDocs(q);
-
-  return result.docs[0].data() === undefined;
+  const q = doc(firestore, "users", userEmail);
+  const result = await getDoc(q);
+  return result.exists();
 }
 
 // update version 9 later

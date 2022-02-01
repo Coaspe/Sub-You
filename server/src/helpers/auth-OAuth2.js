@@ -1,23 +1,20 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.signInWithFacebook = exports.signOut = exports.signInWithGoogle = void 0;
-const app_1 = __importDefault(require("firebase/compat/app"));
-require("firebase/compat/auth");
-const firebase_1 = require("../service/firebase/firebase");
+const firebase_1 = require("../lib/firebase");
+const auth_1 = require("firebase/auth");
+const firebase_2 = require("../service/firebase/firebase");
 const signInWithGoogle = (navi) => {
-    const provider = new app_1.default.auth.GoogleAuthProvider();
+    const provider = new auth_1.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
     provider.addScope("https://www.googleapis.com/auth/contacts.readonly");
-    return app_1.default
+    return firebase_1.firebase
         .auth()
         .signInWithPopup(provider)
         .then((result) => {
-        (0, firebase_1.doesEmailExist)(result.additionalUserInfo.profile.email).then((r) => {
+        (0, firebase_2.doesEmailExist)(result.additionalUserInfo.profile.email).then((r) => {
             if (!r) {
-                (0, firebase_1.singInWithGoogleInfoToFB)(result).then(() => {
+                (0, firebase_2.singInWithGoogleInfoToFB)(result).then(() => {
                     navi("/");
                 });
             }
@@ -32,7 +29,7 @@ const signInWithGoogle = (navi) => {
 };
 exports.signInWithGoogle = signInWithGoogle;
 const signOut = () => {
-    app_1.default
+    firebase_1.firebase
         .auth()
         .signOut()
         .then(() => {
@@ -46,17 +43,17 @@ const signOut = () => {
 };
 exports.signOut = signOut;
 const signInWithFacebook = (navi) => {
-    const provider = new app_1.default.auth.FacebookAuthProvider();
-    app_1.default.auth().useDeviceLanguage();
+    const provider = new auth_1.FacebookAuthProvider();
+    firebase_1.firebase.auth().useDeviceLanguage();
     provider.setCustomParameters({
         display: "popup",
     });
     provider.addScope("user_birthday");
-    return app_1.default
+    return firebase_1.firebase
         .auth()
         .signInWithPopup(provider)
         .then((result) => {
-        (0, firebase_1.signInWithFacebookInfoToFB)(result);
+        (0, firebase_2.signInWithFacebookInfoToFB)(result);
         navi("/");
     })
         .catch((error) => {

@@ -8,9 +8,8 @@ import { auctionInfoType, getUserType } from "../../types"
 import AuctionTransactionRow from "./AuctionTransactionRow"
 import axios from "axios";
 import moment from 'moment'
-import { useDispatch, useSelector } from "react-redux";
-import { alertAction, userInfoAction } from "../../redux";
-import { RootState } from "../../redux/store";
+import { alertAction } from "../../redux";
+import { useDispatch } from "react-redux";
 
 interface AuctionElementProps {
     auctionKey: string
@@ -22,7 +21,6 @@ type transactionType = {
 
 const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo }) => {
     
-    const userInfo: getUserType = useSelector((state: RootState) => state.setUserInfo.userInfo)
     const { user } = useContext(UserContext)
     const [elementExpanded, setElementExpanded] = useState(false)
     const [transactions, setTransactions] = useState<[string[], transactionType[]]>([[], []])
@@ -33,12 +31,8 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
     const [sellerInfo, setSellerInfo] = useState<getUserType>({} as getUserType)
     const [alreadyParticipate, setAlreadyParticipate] = useState(false)
     const [loading, setLoading] = useState([true, true])
-
     const dispatch = useDispatch()
-
-    const doSetUserInfo = useCallback((userInfo: getUserType) => {
-        dispatch(userInfoAction.setUserInfo({userInfo: userInfo}))
-    }, [dispatch])
+    const [buyBtnControl, setBuyBtnControl] = useState(false)
     
     const doSetAlert = (alert: [boolean, string, string]) => {
         dispatch(alertAction.setAlert({alert: alert}))
@@ -60,10 +54,12 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
                 } else if (res.data === "COMMITEERROR") {
                     doSetAlert([true, "결제에 문제가 생겼습니다", "error"])
                     setTimeout(() => { doSetAlert([false, "", ""]) }, 3000)
+                } else if (res.data === "NEEDMOREPRICE") {
+                    doSetAlert([true, "최근 호가보다 가격이 낮습니다", "error"])
+                    setTimeout(() => { doSetAlert([false, "", ""]) }, 3000)
                 }
                 else {
                     doSetAlert([true, `${price} SUB 구매 완료`, "success"])
-                    doSetUserInfo({ ...userInfo, SUB: res.data })
                     setTimeout(()=>{doSetAlert([false, "", ""])}, 3000)
                 }
             })
@@ -230,7 +226,7 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
                                 }
                             </motion.div>
                             {!auctionInfo.done &&
-                                <motion.div className="flex items-center justify-between w-2/3">
+                                <motion.div className="flex items-center justify-around w-2/3">
                                     <input
                                         value={price}
                                         onChange={(e: any) => {
@@ -242,15 +238,22 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
                                         prefix="SUB" />
                                     <button
                                         onClick={() => {
+                                            setBuyBtnControl(true)
+
                                             if (alreadyParticipate) {
                                                 handleAxios("makeTransaction")
                                             } else {
                                                 handleAxios("participateInAuction")
                                                 setAlreadyParticipate(true)
                                             }
+
+                                            setTimeout(() => {
+                                                setBuyBtnControl(false)
+                                            }, 2000)
+
                                             setPrice("")
                                         }}
-                                        className={`h-5 ${parseInt(lastest[1].price.toString()) >= parseInt(price) && "pointer-events-none"}`}>Buy</button>
+                                        className={`h-5 ${(parseInt(lastest[1].price.toString()) >= parseInt(price) || buyBtnControl ) && "pointer-events-none"}`}>Buy</button>
                                 </motion.div>
                             }
                         </motion.div>

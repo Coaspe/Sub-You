@@ -90,7 +90,7 @@ app.post("/makeAuction", (req, res) => {
     }
 });
 app.post("/makeTransaction", (req, res) => {
-    (0, firebaseAdmin_1.makeTransaction)(req.body.buyerUid, req.body.price, req.body.auctionKey, res);
+    console.log((0, firebaseAdmin_1.makeTransaction)(req.body.buyerUid, req.body.price, req.body.auctionKey, res));
 });
 app.post("/participateInAuction", (req, res) => {
     (0, firebaseAdmin_1.participateInAuction)(req.body.buyerUid, req.body.price, req.body.auctionKey, res);

@@ -188,10 +188,14 @@ const payForTransaction = (buyerUid, price) => {
     const query = firestore.collection("users").where("uid", "==", buyerUid);
     return firestore.runTransaction((transaction) => {
         return transaction.get(query).then((doc) => {
+            console.log(doc.docs[0].data);
             if (doc.docs[0]) {
                 const user = doc.docs[0].data();
-                if (parseInt(user.SUB) >= parseInt(price.toString())) {
-                    transaction.update(doc.docs[0]._ref, { SUB: parseInt(user.SUB) - parseInt(price.toString()) });
+                if (user.SUB >= price) {
+                    console.log(typeof (user.SUB));
+                    console.log("user.SUB - price", user.SUB - price);
+                    console.log(typeof (price));
+                    transaction.update(doc.docs[0]._ref, { SUB: user.SUB - price });
                     return Promise.resolve(user.SUB - price);
                 }
                 else {
@@ -205,41 +209,32 @@ exports.payForTransaction = payForTransaction;
 const makeTransaction = (buyerUid, price, auctionKey, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const lastest = Object.values((yield db.ref(`auctions/${auctionKey}/transactions`).get()).val());
-        if (price > parseInt(lastest[lastest.length - 1].price)) {
+        console.log(typeof (lastest[0].price));
+        console.log(typeof (price));
+        if (price > lastest[lastest.length - 1].price) {
             // payment
             const payResult = yield (0, exports.payForTransaction)(buyerUid, price);
-            let time = new Date().getTime();
-            yield db.ref(`auctions/${auctionKey}/transactions`).transaction((trans) => {
+            // Add transaction
+            const transactionResult = yield db.ref(`auctions/${auctionKey}/transactions`).transaction((trans) => {
+                let time = new Date().getTime();
                 let tmp = Object.assign({}, trans);
                 tmp[time] = { price: price, userUid: buyerUid };
                 return tmp;
-            }, (error, committed) => {
-                if (committed) {
-                    res.send(`${payResult}`);
-                    // committe이 되었다면 가장 최근이었던 transaction을 취소하며 SUB을 돌려준다.
-                    firestore.runTransaction((transaction) => {
-                        const query = firestore.collection("users").where("uid", "==", lastest[lastest.length - 1].userUid);
-                        // user를 get하고 sub 갱신
-                        return transaction.get(query).then((doc) => {
-                            if (doc.docs[0]) {
-                                const user = doc.docs[0].data();
-                                transaction.update(doc.docs[0]._ref, { SUB: parseInt(user.SUB) + parseInt(lastest[lastest.length - 1].price) });
-                            }
-                            else {
-                                return Promise.reject("NOUSER");
-                            }
-                        });
-                    });
-                }
-                else {
-                    // committe error
-                    return Promise.reject("COMMITTERROR");
-                }
             });
+            if (lastest.length > 1) {
+                return yield firestore.runTransaction((transaction) => __awaiter(void 0, void 0, void 0, function* () {
+                    // 가장 최근에 등록된 호가 주인의 정보를 get하기 위한 query
+                    const query = firestore.collection("users").where("uid", "==", lastest[lastest.length - 1].userUid);
+                    // user를 get
+                    const doc = yield transaction.get(query);
+                    const user = doc.docs[0].data();
+                    return transaction.update(doc.docs[0]._ref, { SUB: user.SUB + lastest[lastest.length - 1].price });
+                }));
+            }
         }
         else {
-            // SUB가 부족
-            throw "MORESUBNEEDED";
+            // 책정한 price가 가장 최근의 호가보다 작음
+            throw "NEEDMOREPRICE";
         }
     }
     catch (error) {

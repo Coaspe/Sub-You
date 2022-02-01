@@ -1,5 +1,10 @@
-import firebase from "firebase/compat/app";
-import "firebase/compat/auth";
+import {
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithPopup,
+  signOut,
+  getAuth,
+} from "firebase/auth";
 import {
   singInWithGoogleInfoToFB,
   signInWithFacebookInfoToFB,
@@ -8,15 +13,16 @@ import {
 import propType from "prop-types";
 
 export const signInWithGoogle = (navi) => {
-  const provider = new firebase.auth.GoogleAuthProvider();
+  const auth = getAuth();
+  const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
   provider.addScope("https://www.googleapis.com/auth/contacts.readonly");
-  return firebase
-    .auth()
-    .signInWithPopup(provider)
+  return signInWithPopup(auth, provider)
     .then((result) => {
-      doesEmailExist(result.additionalUserInfo.profile.email).then((r) => {
+      console.log(result);
+      doesEmailExist(result.user.email).then((r) => {
         if (!r) {
+          console.log(r);
           singInWithGoogleInfoToFB(result).then(() => {
             navi("/");
           });
@@ -30,10 +36,9 @@ export const signInWithGoogle = (navi) => {
     });
 };
 
-export const signOut = () => {
-  firebase
-    .auth()
-    .signOut()
+export const signOutAuth = () => {
+  const auth = getAuth();
+  signOut(auth)
     .then(() => {
       // Sign-out successful.
       console.log("Sign out");
@@ -45,16 +50,13 @@ export const signOut = () => {
 };
 
 export const signInWithFacebook = (navi) => {
-  const provider = new firebase.auth.FacebookAuthProvider();
-  firebase.auth().useDeviceLanguage();
+  const provider = new FacebookAuthProvider();
   provider.setCustomParameters({
     display: "popup",
   });
 
   provider.addScope("user_birthday");
-  return firebase
-    .auth()
-    .signInWithPopup(provider)
+  return signInWithPopup(provider)
     .then((result) => {
       signInWithFacebookInfoToFB(result);
       navi("/");

@@ -2,7 +2,7 @@ import InputBase from '@mui/material/InputBase';
 import Paper from '@mui/material/Paper';
 import Avatar from '@mui/material/Avatar';
 
-import { signOut } from '../helpers/auth-OAuth2';
+import { signOutAuth } from '../helpers/auth-OAuth2';
 import { useNavigate } from 'react-router';
 import UserContext from '../context/user';
 import { memo, useCallback, useContext} from "react";
@@ -74,7 +74,7 @@ const Header : React.FC<headerProps> = ({ userInfo }) => {
                     <Avatar onClick={handleClickProfile} className="mr-2 cursor-pointer" alt="user avatar" src={userInfo.profileImg}/>
                     <span onClick={handleClickProfile} className="text-md font-bold mr-5 cursor-pointer sm:text-sm sm:mr-0">{user.displayName}</span>
                     <img className="w-7 cursor-pointer sm:hidden" src='/images/logout.png' alt="Logout" onClick={() => {
-                        signOut()
+                        signOutAuth()
                         navigate('/login')
                     }}/>
                 </div>

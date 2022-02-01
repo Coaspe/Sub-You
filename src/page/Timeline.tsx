@@ -26,7 +26,7 @@ const Timeline: React.FC<timelineProps> = (
 
   return (
     <>
-      <motion.div className={`h-full flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-7 sm:mx-5 sm:col-start-1`}>
+      <motion.div className={`h-auto flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-7 sm:mx-5 sm:col-start-1`}>
         {posts.length === 0 ? 
           <>
             <Postskeleton />

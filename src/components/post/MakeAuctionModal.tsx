@@ -115,18 +115,18 @@ const MakeAuctionModal:React.FC<props> = ({makeAuctionModalOpen, setSettingModal
                             `}>
                         <button 
                         onClick={()=>{
-                            axios.post("http://localhost:3001/makeAuction", {
-                                sellerUid: userUID,
-                                photoURL: seletedImage,
-                                firstPrice: price
-                            }).then((res) => {
-                                console.log("makeAUction", res);
-                                
-                                res.status === 200 ?
-                                    doSetAlert([true, res.data, "success"]) : doSetAlert([true, res.data, "alert"])
-                                setTimeout(()=>{doSetAlert([false, "", ""])}, 3000)
-                            })
-                            handleClose()
+                            if (seletedImage !== "" && price !== "") {
+                                axios.post("http://localhost:3001/makeAuction", {
+                                    sellerUid: userUID,
+                                    photoURL: seletedImage,
+                                    firstPrice: parseInt(price)
+                                }).then((res) => {
+                                    res.status === 200 ?
+                                        doSetAlert([true, res.data, "success"]) : doSetAlert([true, res.data, "alert"])
+                                    setTimeout(()=>{doSetAlert([false, "", ""])}, 3000)
+                                })
+                                handleClose()
+                            }
                         }}
                         className="bg-white text-sm">
                             Confirm

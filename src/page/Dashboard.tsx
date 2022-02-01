@@ -12,11 +12,9 @@ import Sidebar from "./Sidebar";
 import {useCallback, useContext, useEffect, useState, useRef} from 'react'
 import { motion, AnimatePresence } from "framer-motion";
 import UserContext from "../context/user";
-import { getUserByUserId, getPhotos, getPhotosInfiniteScroll, doesEmailExist, getTimelinePhotos } from "../services/firebase";
-import { getUserType, postContent, userInfoFromFirestore } from "../types";
+import { getUserByUserId, getPhotosInfiniteScroll, getTimelinePhotos, SUBSnapShot, getUserByEmail } from "../services/firebase";
+import { getUserType, postContent } from "../types";
 import ProfileSetting from '../components/Profile/ProfileSetting';
-import { collection, getDocs, query, where, } from "firebase/firestore";
-import { firestore } from '../lib/firebase';
 import Artists from '../page/Artists';
 import { alertAction, postsAction, userInfoAction } from '../redux';
 import { RootState } from '../redux/store';
@@ -101,14 +99,10 @@ const Dashboard = () => {
         setMorePostLoading(false)
     }, [contextUser.uid, key, userInfo.following, concatPosts]);
 
+    // Supervise userInfo change
     useEffect(() => {
-        const dashboardInit = async () => {
-            await getUserByUserId(contextUser.uid).then((res: any) => {
-                doSetUserInfo(res)
-            })
-        }
-        dashboardInit()
-    }, [contextUser.uid, doSetUserInfo, postSetChanged])
+        SUBSnapShot(contextUser.email, doSetUserInfo)
+    }, [doSetUserInfo])
 
     useEffect(() => {
         if (postSetChanged[0] !== "delete") {

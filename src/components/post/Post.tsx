@@ -55,7 +55,6 @@ const Post: React.FC<postProps> = (
                         initial={{ opacity: 0, }}
                         animate={{ opacity: 1, }}
                         exit={{opacity : 0, height : 0}}
-                        // transition={{ type: "spring", bounce: 0.25}}
                         className="shadow-lg mb-10 flex flex-col w-full max-w-md border border-main border-opacity-30 bg-white sm:col-span-3 ">
                         <PostHeader
                             selectedMode={selectedMode}
