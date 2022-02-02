@@ -257,6 +257,9 @@ export const makeTransaction = async (buyerUid: string, price: number, auctionKe
         return tmp
       })
       if (lastest.length > 1) {
+        console.log("payResult", payResult);
+        console.log("transactionResult", transactionResult);
+        
         return await firestore.runTransaction( async (transaction: any) => {
           // 가장 최근에 등록된 호가 주인의 정보를 get하기 위한 query
           const query = firestore.collection("users").where("uid", "==", lastest[lastest.length - 1].userUid)
@@ -264,6 +267,8 @@ export const makeTransaction = async (buyerUid: string, price: number, auctionKe
           const doc = await transaction.get(query)
           const user = doc.docs[0].data()
           return transaction.update(doc.docs[0]._ref, { SUB: user.SUB + lastest[lastest.length - 1].price })
+        }).catch((error: any) => {
+          console.log(error); 
         })
       }
     } else {
@@ -276,12 +281,12 @@ export const makeTransaction = async (buyerUid: string, price: number, auctionKe
   }
 };
 
-export const makeAuction = (sellerUid: string, photoURL: string, firstPrice: number, time:number, res:express.Response) => {
+export const makeAuction = async (sellerUid: string, photoURL: string, firstPrice: number, time:number, res:express.Response): Promise<null | string> => {
   const key = db.ref("auctions").push().key
   const firstTime = new Date().getTime()
 
   if (key === null) {
-    return -1
+    return null
   }
 
   let tmp: any = {};
@@ -290,31 +295,26 @@ export const makeAuction = (sellerUid: string, photoURL: string, firstPrice: num
   tmp["time"] = time;
   tmp["done"] = false;
 
-  if (key !== null) {
-    const sellKey = db.ref(`auctions/users/${sellerUid}/sell`).push(key).key
-    const buyersKey = db.ref(`auctions/${key}/buyers`).push(sellerUid).key
+  const sellKey = db.ref(`auctions/users/${sellerUid}/sell`).push(key).key
+  const buyersKey = db.ref(`auctions/${key}/buyers`).push(sellerUid).key
 
-    if (sellKey && buyersKey) {
-      db.ref(`auctions/${key}`).update(tmp)
-        .then(() => {
-          db.ref(`auctions/${key}/transactions/${firstTime}`).set({
+  if (sellKey && buyersKey) {
+    try {
+      const updateResult = await db.ref(`auctions/${key}`).update(tmp)
+      const setResult = await db.ref(`auctions/${key}/transactions/${firstTime}`).set({
             price: firstPrice,
             userUid: sellerUid
-          }, (error: any) => {
-            if (!error) {
-              res.status(200).send("경매 등록을 성공하였습니다")
-              res.end()
-              return 0
-            }
-          })
-      }).catch((error: any) => {
-          db.ref(`auctions/${key}`).remove()
-          db.ref(`auction/users/${sellerUid}/sell/${sellKey}`).remove()
-          res.status(404).send(error)
-          res.end()
-          return -1
       })
+      res.send(`경매 등록 성공`)
+      res.end()
+    } catch (error) {
+        db.ref(`auctions/${key}`).remove()
+        db.ref(`auction/users/${sellerUid}/sell/${sellKey}`).remove()
+        res.status(404).send(error)
+        res.end()
+        return null
     }
   }
+
   return key;
 };

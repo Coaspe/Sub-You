@@ -188,7 +188,7 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                         New Post
                     </span>
                         {previewURL[0] !== "/images/logo.png" ? 
-                        (<motion.div layout animate={{ opacity: 1 }} className={`w-full h-full grid grid-cols-3 gap-2 justify-items-center items-center`}>
+                        (<motion.div layout animate={{ opacity: 1 }} className={`w-full h-full grid ${previewURL.length < 3 ? `grid-cols-${previewURL.length}` : "grid-cols-3"} gap-2 justify-items-center items-center`}>
                             {load ?
                                 (<>
                                     {previewURL.map((url, i) => (

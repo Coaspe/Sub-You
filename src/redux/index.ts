@@ -150,16 +150,22 @@ export const setSideBarExpandedReducer = createReducer(sideBarInitialState, buil
 /////////////////////////////////////////////////////////////////////////////////////
 export const lastCheckedTimeAction = {
     setLastCheckedTime: createAction<setLastCheckedTimePayload>("SETLASTCHECKEDTIME"),
+    setUnCheckedMessage: createAction<setLastCheckedTimePayload>("SETUNCHECKEDMESSAGE"),
 }
 const lastCheckedTimeInitialState: lastCheckedTimeState = {
-    lastCheckedTime: {}
+    lastCheckedTime: {},
+    unCheckedMessage: {}
 }
 export const lastCheckedTimeReducer = {
     setLastCheckedTime: (state: lastCheckedTimeState, action: setLastCheckedTimeAction) => {
-        state.lastCheckedTime = action.payload.lastCheckedTime
+        state.lastCheckedTime = action.payload.TimeOrMessage
+    },
+    setUnCheckedMessage: (state: lastCheckedTimeState, action: setLastCheckedTimeAction) => {
+        state.unCheckedMessage = action.payload.TimeOrMessage
     },
 }
 export const setLastCheckedTimeReducer = createReducer(lastCheckedTimeInitialState, builder => {
     builder
         .addCase(lastCheckedTimeAction.setLastCheckedTime, lastCheckedTimeReducer.setLastCheckedTime)
+        .addCase(lastCheckedTimeAction.setUnCheckedMessage, lastCheckedTimeReducer.setUnCheckedMessage)
 })

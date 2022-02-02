@@ -188,8 +188,8 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
 
             <AnimatePresence>
                 {elementExpanded &&
-                    <motion.div onClick={handleElementExpand} animate={{ opacity: [0, 1] }} exit={{ opacity: [1, 0] }} transition={{ duration: 0.3 }} className="top-0 left-0 fixed flex items-center justify-center w-full h-full bg-black z-30 bg-opacity-50">
-                        <motion.div onClick={(event) => { event.stopPropagation() }} layoutId="aa" className="relative flex flex-col items-center justify-center w-1/2 z-50 bg-white py-5 ">
+                    <motion.div onClick={handleElementExpand} animate={{ opacity: [0, 1] }} exit={{ opacity: [1, 0] }} transition={{ duration: 0.3 }} className="top-0 left-0 fixed flex items-center justify-center w-full h-full bg-black z-30 bg-opacity-50 ">
+                        <motion.div onClick={(event) => { event.stopPropagation() }} layoutId="aa" className="relative flex flex-col items-center justify-center w-1/2 z-50 bg-white py-5">
                             <motion.img onClick={handleElementExpand} className="cursor-pointer w-5 absolute right-2 top-2 pointer-cursor" src="/images/close.png" alt="close" />
                             <motion.div layoutId="header-container" className="flex items-center justify-between w-2/3 mb-1">
                                 {sellerInfo
@@ -212,10 +212,10 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
                         <motion.div  className="bg-white w-full flex flex-col items-center justify-center h-smpost">
                         <motion.img layoutId="img" className="max-w-full max-h-full" src={auctionInfo.photoURL} alt="Auction element" />
                         </motion.div>
-                            <motion.div layoutId="footer-container" className="my-5 max-h-28 overflow-y-scroll flex flex-col items-center justify-between w-2/3">
+                            <motion.div layoutId="footer-container" className="my-5 max-h-28 overflow-y-scroll flex flex-col items-center justify-between w-2/3 px-2 py-3">
                                 {!loading[0] && !loading[0] &&
                                     transactions[0].map((key, index) => (
-                                        <div key={key} className="flex items-center w-full">
+                                        <div key={key} className="flex items-center w-full border mb-2 px-2 py-2 rounded-2xl shadow-md">
                                             {index === 0 && <img className="w-4 mr-3" src="images/crown.png" alt="crown" />}
                                             <AuctionTransactionRow
                                                 dateCreated={parseInt(transactions[0][transactions[0].length - 1 - index])}
@@ -232,7 +232,7 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
                                         onChange={(e: any) => {
                                             setPrice(e.target.value.toString())
                                         }}
-                                        className="border py-2 pl-2 my-1"
+                                        className="w-1/2 border py-2 pl-2 my-1 text-sm"
                                         placeholder={(lastest[1].price).toString()}
                                         type="number"
                                         prefix="SUB" />
@@ -253,7 +253,7 @@ const AuctionElement: React.FC<AuctionElementProps> = ({ auctionKey, auctionInfo
 
                                             setPrice("")
                                         }}
-                                        className={`h-5 ${(parseInt(lastest[1].price.toString()) >= parseInt(price) || buyBtnControl ) && "pointer-events-none"}`}>Buy</button>
+                                        className={`p-2 text-sm rounded-full border ${(parseInt(lastest[1].price.toString()) >= parseInt(price) || buyBtnControl ) && "pointer-events-none"}`}>Buy</button>
                                 </motion.div>
                             }
                         </motion.div>

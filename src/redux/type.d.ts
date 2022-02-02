@@ -20,7 +20,6 @@ interface concatPostsAction {
 }
 
 
-
 interface alertState {
     alert: [boolean, string, string];
 }
@@ -108,13 +107,13 @@ interface setSideBarExpandedAction {
 
 
 interface lastCheckedTimeState {
-    lastCheckedTime: {[key: string]: number}
+    lastCheckedTime: { [key: string]: number }
+    unCheckedMessage: { [key: string]: number }
 }
 
 interface setLastCheckedTimePayload {
-    lastCheckedTime: {[key: string]: number}
+    TimeOrMessage: { [key: string]: number }
 }
 interface setLastCheckedTimeAction {
     payload: setLastCheckedTimePayload
 }
-

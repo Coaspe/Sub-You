@@ -3,19 +3,31 @@ import { getUserByUserId } from "../../services/firebase";
 import { chatRoomInfoType, getUserType } from "../../types";
 import { AnimateSharedLayout, motion } from 'framer-motion'
 import MessageDetail from "./MessageDetail";
+import { onValue, ref} from "firebase/database"
+import { rtDBRef } from "../../lib/firebase"
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { lastCheckedTimeAction } from "../../redux";
 
 interface MessageListRowProps {
     info: chatRoomInfoType
     chatRoomKey: string
     users: string[]
-    unCheckedMessage: number
 }
 
-const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKey, unCheckedMessage }) => {
+const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKey }) => {
 
     const [userInfo, setUserInfo] = useState<{ [key: string]: getUserType}>({})
     const [expanded, setExpanded] = useState(false)
     const [time, setTime] = useState("")
+    const [messages, setMessages] = useState<number[]>([])
+    const lastCheckedTime: { [key: string]: number } = useSelector((state: RootState) => state.setLastCheckedTime.lastCheckedTime)
+    const unCheckedMessage: { [key: string]: number } = useSelector((state: RootState) => state.setLastCheckedTime.unCheckedMessage)
+    const dispatch = useDispatch()
+
+    const setUnCheckedMessage = (lastCheckedTime: { [key: string]: number }) => {
+        dispatch(lastCheckedTimeAction.setUnCheckedMessage({ TimeOrMessage: lastCheckedTime }))
+    }
     
     useEffect(() => {
         const tmp: { [chatRoomKey: string]: getUserType } = {}
@@ -38,6 +50,30 @@ const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKe
         setTime(`${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}`)
     }, [info])
 
+    useEffect(() => {
+        if (messages.length > 0 && !expanded) {
+            let tmp2 = []
+            for (let i = 0; i < messages.length; i++) {
+                // resource를 아끼기위해 뒤에서부터 탐색
+                if (messages[messages.length - (i + 1)] > lastCheckedTime[chatRoomKey]) {
+                    tmp2.push(0)
+                } else {
+                    break
+                }
+                let tmp = Object.assign({}, unCheckedMessage)
+                tmp[chatRoomKey] = tmp2.length
+                console.log(tmp);
+                setUnCheckedMessage({...tmp})
+            }
+        }
+    }, [messages])
+    
+    useEffect(() => {
+        onValue(ref(rtDBRef, `chatRooms/${chatRoomKey}/messages`), (snap) => {
+            setMessages(Object.keys(snap.val()).map((data)=>(parseInt(data))))
+        })
+    }, [])
+
     return (
         <>
             <AnimateSharedLayout type="crossfade">
@@ -51,8 +87,8 @@ const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKe
                                 <div className="flex flex-col ml-6">
                                     <div className="flex items-center">
                                         <span className="font-black mb-1 text-sm">{userInfo[info.user].username}</span>
-                                        <div className={`flex rounded-full items-centers justify-center w-5 h-5 bg-red-600 ${!expanded && unCheckedMessage !== 0 ? "visible" : "hidden"}`}>
-                                            <span className="text-sm text-white font-black">{unCheckedMessage}</span>
+                                        <div className={`flex rounded-full items-centers justify-center w-5 h-5 bg-red-600 ${!expanded && (unCheckedMessage[chatRoomKey] !== 0 && unCheckedMessage[chatRoomKey] !== undefined) ? "visible" : "hidden"}`}>
+                                            <span className="text-sm text-white font-black">{unCheckedMessage[chatRoomKey]}</span>
                                         </div>
                                     </div>
                                 <span className="text-xs text-gray-400">{info.message}</span>

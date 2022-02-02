@@ -60,7 +60,7 @@ const MakeAuctionModal:React.FC<props> = ({makeAuctionModalOpen, setSettingModal
             className="w-full flex items-center justify-center"
             >
             <div className="w-1/2 flex bg-white items-center justify-center flex-col rounded-lg font-noto">
-                <div className="w-full grid grid-cols-3 gap-2 px-2 py-2">
+                <div className={`w-full grid ${imageSrc.length < 3 ? `grid-cols-${imageSrc.length}` : "grid-cols-3"} gap-2 px-2 py-2`}>
                     {imageSrc.map((src) => (
                         <div className="w-full h-full flex items-center justify-center relative" key={src}
                             onClick={() => {

@@ -188,13 +188,9 @@ const payForTransaction = (buyerUid, price) => {
     const query = firestore.collection("users").where("uid", "==", buyerUid);
     return firestore.runTransaction((transaction) => {
         return transaction.get(query).then((doc) => {
-            console.log(doc.docs[0].data);
             if (doc.docs[0]) {
                 const user = doc.docs[0].data();
                 if (user.SUB >= price) {
-                    console.log(typeof (user.SUB));
-                    console.log("user.SUB - price", user.SUB - price);
-                    console.log(typeof (price));
                     transaction.update(doc.docs[0]._ref, { SUB: user.SUB - price });
                     return Promise.resolve(user.SUB - price);
                 }
@@ -209,8 +205,6 @@ exports.payForTransaction = payForTransaction;
 const makeTransaction = (buyerUid, price, auctionKey, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const lastest = Object.values((yield db.ref(`auctions/${auctionKey}/transactions`).get()).val());
-        console.log(typeof (lastest[0].price));
-        console.log(typeof (price));
         if (price > lastest[lastest.length - 1].price) {
             // payment
             const payResult = yield (0, exports.payForTransaction)(buyerUid, price);
@@ -222,6 +216,8 @@ const makeTransaction = (buyerUid, price, auctionKey, res) => __awaiter(void 0, 
                 return tmp;
             });
             if (lastest.length > 1) {
+                console.log("payResult", payResult);
+                console.log("transactionResult", transactionResult);
                 return yield firestore.runTransaction((transaction) => __awaiter(void 0, void 0, void 0, function* () {
                     // 가장 최근에 등록된 호가 주인의 정보를 get하기 위한 query
                     const query = firestore.collection("users").where("uid", "==", lastest[lastest.length - 1].userUid);
@@ -229,7 +225,9 @@ const makeTransaction = (buyerUid, price, auctionKey, res) => __awaiter(void 0, 
                     const doc = yield transaction.get(query);
                     const user = doc.docs[0].data();
                     return transaction.update(doc.docs[0]._ref, { SUB: user.SUB + lastest[lastest.length - 1].price });
-                }));
+                })).catch((error) => {
+                    console.log(error);
+                });
             }
         }
         else {
@@ -243,42 +241,37 @@ const makeTransaction = (buyerUid, price, auctionKey, res) => __awaiter(void 0, 
     }
 });
 exports.makeTransaction = makeTransaction;
-const makeAuction = (sellerUid, photoURL, firstPrice, time, res) => {
+const makeAuction = (sellerUid, photoURL, firstPrice, time, res) => __awaiter(void 0, void 0, void 0, function* () {
     const key = db.ref("auctions").push().key;
     const firstTime = new Date().getTime();
     if (key === null) {
-        return -1;
+        return null;
     }
     let tmp = {};
     tmp["seller"] = sellerUid;
     tmp["photoURL"] = photoURL;
     tmp["time"] = time;
     tmp["done"] = false;
-    if (key !== null) {
-        const sellKey = db.ref(`auctions/users/${sellerUid}/sell`).push(key).key;
-        const buyersKey = db.ref(`auctions/${key}/buyers`).push(sellerUid).key;
-        if (sellKey && buyersKey) {
-            db.ref(`auctions/${key}`).update(tmp)
-                .then(() => {
-                db.ref(`auctions/${key}/transactions/${firstTime}`).set({
-                    price: firstPrice,
-                    userUid: sellerUid
-                }, (error) => {
-                    if (!error) {
-                        res.status(200).send("경매 등록을 성공하였습니다");
-                        res.end();
-                        return 0;
-                    }
-                });
-            }).catch((error) => {
-                db.ref(`auctions/${key}`).remove();
-                db.ref(`auction/users/${sellerUid}/sell/${sellKey}`).remove();
-                res.status(404).send(error);
-                res.end();
-                return -1;
+    const sellKey = db.ref(`auctions/users/${sellerUid}/sell`).push(key).key;
+    const buyersKey = db.ref(`auctions/${key}/buyers`).push(sellerUid).key;
+    if (sellKey && buyersKey) {
+        try {
+            const updateResult = yield db.ref(`auctions/${key}`).update(tmp);
+            const setResult = yield db.ref(`auctions/${key}/transactions/${firstTime}`).set({
+                price: firstPrice,
+                userUid: sellerUid
             });
+            res.send(`${updateResult}${setResult}`);
+            res.end();
+        }
+        catch (error) {
+            db.ref(`auctions/${key}`).remove();
+            db.ref(`auction/users/${sellerUid}/sell/${sellKey}`).remove();
+            res.status(404).send(error);
+            res.end();
+            return null;
         }
     }
     return key;
-};
+});
 exports.makeAuction = makeAuction;

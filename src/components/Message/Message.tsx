@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux"
 import { rtDBRef } from "../../lib/firebase"
 import { lastCheckedTimeAction } from "../../redux"
 import { RootState } from "../../redux/store"
+import { sendMessage } from "../../services/firebase"
 import MessageListRow from "./MessageListRow"
 import MessageSkeleton from "./MessageSkeleton"
 
@@ -16,12 +17,10 @@ const Message = () => {
     const [noChatRoom, setNoChatRoom] = useState(false)
     const dispatch = useDispatch()
     const sideExpanded: boolean = useSelector((state: RootState) => state.setSidebarExpanded.sideBarExpanded)
-    const lastCheckedTime: { [key: string]: number } = useSelector((state: RootState) => state.setLastCheckedTime.lastCheckedTime)
-    const [changed, setChanged] = useState("")
-    const [unCheckedMessage, setUnCheckedMessage] = useState<{ [key: string]: number }>({})
+
 
     const setLastCheckedTime = (lastCheckedTime: { [key: string]: number }) => {
-        dispatch(lastCheckedTimeAction.setLastCheckedTime({ lastCheckedTime: lastCheckedTime }))
+        dispatch(lastCheckedTimeAction.setLastCheckedTime({ TimeOrMessage: lastCheckedTime }))
     }
 
     // Get user's chat room and listen changes.
@@ -61,67 +60,24 @@ const Message = () => {
         }
 
     }, [chatRoomsKeys])
-
-    useEffect(() => {  
-        // At first
-        if (Object.keys(lastCheckedTime).length > 0 && changed === "") {
-            
-            Object.keys(lastCheckedTime).forEach((key) => {
-                onValue(ref(rtDBRef, `chatRooms/${key}/messages`), (snap) => {
-                    let tmp = Object.keys(snap.val()).map((date) => (parseInt(date)))
-                    
-                    let tmp2 = []
-                    for (let i = 0; i < tmp.length; i++) {
-                        if (tmp[tmp.length - (i + 1)] > lastCheckedTime[key]) {
-                            tmp2.push(0)
-                        } else {
-                            break
-                        }
-                    }
-                    setUnCheckedMessage((origin) => {
-                        let tmp = Object.assign({}, origin)
-                        tmp[key] = tmp2.length
-                        return {...unCheckedMessage, ...tmp}
-                    })
-                });
-            })
-        } else {
-            // When LastCheckedTime change event occurs
-                if (Object.keys(lastCheckedTime).length > 0 && changed !== "" && changed !== '1') {
-                onValue(ref(rtDBRef, `chatRooms/${changed}/messages`), (snap) => {
-                    let tmp = Object.keys(snap.val()).map((date) => (parseInt(date)))
-                    let tmp2 = []
-                    for (let i = 0; i < tmp.length; i++) {
-                        if (tmp[tmp.length - (i + 1)] > lastCheckedTime[changed]) {
-                            tmp2.push(0)
-                        }
-                    }
-                        setChanged('1')
-                        
-                    setUnCheckedMessage((origin) => {
-                        let tmp = Object.assign({}, origin)
-                        tmp[changed] = tmp2.length
-                        return tmp
-                    })
-                });
-            }
-        }
-    }, [lastCheckedTime])
-    
     
     useEffect(() => {
         onValue(ref(rtDBRef, 'lastCheckedTime'), (snap) => {
             setLastCheckedTime(snap.val())
         });
-        onChildChanged(ref(rtDBRef, 'lastCheckedTime'), (snap) => {
-            const key: string = snap.key as string
-            setChanged(key)
-        });
+
     }, [])
-    
+
     return (
     <motion.div layout className={`h-screen flex pt-5 flex-col items-center col-span-3 ${sideExpanded ? "col-start-4" : "col-start-3"} sm:col-span-7 sm:mx-5 sm:col-start-1`}>
-        <div className="w-full font-noto">
+            <div className="w-full font-noto">
+                <button
+                onClick={()=>{
+                    sendMessage("-Mt21qOjUbB8yf-oNpqP", "fff", "lX8fJDnfFkO1Z6WjqicdVG6QJps1")
+                }}
+                >
+                    test
+                </button>
             <span className="text-3xl font-black">Chats</span>
             <div className="mt-5">
                 {!noChatRoom ?
@@ -132,7 +88,7 @@ const Message = () => {
                             info={chatRoomInfo[chatRoomKey]}
                             chatRoomKey={chatRoomKey}
                             users={users[chatRoomKey]}
-                            unCheckedMessage={unCheckedMessage[chatRoomKey]} />
+                            />
                         ))
                         :
                     <div>

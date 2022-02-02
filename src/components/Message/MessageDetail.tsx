@@ -1,8 +1,12 @@
+import { timeStamp } from "console";
 import { onValue, orderByChild, query, ref } from "firebase/database";
 import { AnimatePresence } from "framer-motion";
 import { useContext, useEffect, useRef, useState } from "react"
+import { useDispatch, useSelector } from "react-redux";
 import UserContext from "../../context/user";
 import { rtDBRef } from "../../lib/firebase";
+import { lastCheckedTimeAction } from "../../redux";
+import { RootState } from "../../redux/store";
 import { sendMessage, updateLastCheckedTime } from "../../services/firebase";
 import { chatRoomInfoType, getUserType } from "../../types"
 import MessageRow from "./MessageRow";
@@ -12,6 +16,7 @@ interface MessageDetailProps {
     chatRoomKey: string
     user: { [key: string]: getUserType }
     setExpanded:React.Dispatch<React.SetStateAction<boolean>>
+    
 }
 
 const MessageDetail: React.FC<MessageDetailProps> = ({ info, chatRoomKey, user, setExpanded }) => {
@@ -20,8 +25,22 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ info, chatRoomKey, user, 
     const [text, setText] = useState("")
     const { user: contextUser } = useContext(UserContext)
     const enterRef = useRef<HTMLDivElement | null>(null)
+    const lastCheckedTime: { [key: string]: number } = useSelector((state: RootState) => state.setLastCheckedTime.lastCheckedTime)
+    const unCheckedMessage: { [key: string]: number } = useSelector((state: RootState) => state.setLastCheckedTime.unCheckedMessage)
+    const dispatch = useDispatch()
+    const setLastCheckedTime = (lastCheckedTime: { [key: string]: number }) => {
+        dispatch(lastCheckedTimeAction.setLastCheckedTime({ TimeOrMessage: lastCheckedTime }))
+    }
+    const setUnCheckedMessage = (lastCheckedTime: { [key: string]: number }) => {
+        dispatch(lastCheckedTimeAction.setUnCheckedMessage({ TimeOrMessage: lastCheckedTime }))
+    }
 
     useEffect(() => {
+
+        let tmp = Object.assign({}, unCheckedMessage)
+        tmp[chatRoomKey] = 0
+        setUnCheckedMessage({ ...tmp })
+        
         const getMessages = (key: string) => {
             const q = query(ref(rtDBRef, `chatRooms/${key}/messages`), orderByChild("dateCreated"))
             
@@ -38,6 +57,7 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ info, chatRoomKey, user, 
     }, [])
 
     useEffect(() => {
+        
         setMessages((origin: any) => {
             if (origin[origin.length - 1].dateCreated !== info.dateCreated)
             {
@@ -46,6 +66,11 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ info, chatRoomKey, user, 
                 return origin
             }
         })
+        return () => {
+            let tmp = Object.assign({}, lastCheckedTime)
+            tmp[chatRoomKey] = info.dateCreated
+            setLastCheckedTime({ ...tmp })
+        }
     }, [info])
 
     const handleKeypress = (e: any) => {
@@ -133,3 +158,4 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ info, chatRoomKey, user, 
 }
 
 export default MessageDetail
+

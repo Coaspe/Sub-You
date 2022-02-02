@@ -95,23 +95,24 @@ app.post("/deletepost", (req: any, res: express.Response) => {
   })
 })
 
-app.post("/makeAuction", (req: any, res: express.Response) => {
+app.post("/makeAuction", async (req: any, res: express.Response) => {
 
   const endTime = moment().add(30, "minutes").valueOf()
-  const key = makeAuction(req.body.sellerUid, req.body.photoURL, req.body.firstPrice, endTime, res)
+  const key = await makeAuction(req.body.sellerUid, req.body.photoURL, req.body.firstPrice, endTime, res)
   
-  if (key === -1) {
+  if (key === null) {
     res.send("Error")
     res.end()
   } else {
     setTimeout(() => {
-      endAuction(key)
+      endAuction(key as string)
       res.send("Auction Completed")
       res.end()
     }, 1800000)
   
   }
 })
+
 app.post("/makeTransaction", (req: any, res: express.Response) => {
   console.log(makeTransaction(req.body.buyerUid, req.body.price, req.body.auctionKey, res))
 })
