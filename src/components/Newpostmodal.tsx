@@ -9,7 +9,7 @@ import Compressor from "compressorjs";
 import { useDispatch, useSelector } from 'react-redux';
 import { alertAction, postSetChangedAction, previewURLAction, imageLocationInModalAction } from '../redux';
 import { RootState } from '../redux/store';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 import Newpostmodalimage from './Newpostmodalimage';
 import FastAverageColor from 'fast-average-color'
@@ -103,7 +103,6 @@ const Newpostmodal: React.FC<newPostModalProps> = (
                         setFile(files)
                     }
                 })
-
             },
             error(err) {
                 console.log(err.message);

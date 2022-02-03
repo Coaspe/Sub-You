@@ -3,7 +3,7 @@ import { getUserByUserId } from "../../services/firebase";
 import { chatRoomInfoType, getUserType } from "../../types";
 import { AnimateSharedLayout, motion } from 'framer-motion'
 import MessageDetail from "./MessageDetail";
-import { onValue, ref} from "firebase/database"
+import { onValue, ref, update} from "firebase/database"
 import { rtDBRef } from "../../lib/firebase"
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
@@ -62,8 +62,7 @@ const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKe
                 }
                 let tmp = Object.assign({}, unCheckedMessage)
                 tmp[chatRoomKey] = tmp2.length
-                console.log(tmp);
-                setUnCheckedMessage({...tmp})
+                setUnCheckedMessage({ ...tmp })
             }
         }
     }, [messages])
@@ -85,8 +84,8 @@ const MessageListRow: React.FC<MessageListRowProps> = ({ info, users, chatRoomKe
                         <div className="flex items-center">
                             <img className="rounded-full w-10 h-10" src={userInfo[info.user].profileImg} alt="profile" />
                                 <div className="flex flex-col ml-6">
-                                    <div className="flex items-center">
-                                        <span className="font-black mb-1 text-sm">{userInfo[info.user].username}</span>
+                                    <div className="flex">
+                                        <span className="font-black mb-1 text-sm mr-2">{userInfo[info.user].username}</span>
                                         <div className={`flex rounded-full items-centers justify-center w-5 h-5 bg-red-600 ${!expanded && (unCheckedMessage[chatRoomKey] !== 0 && unCheckedMessage[chatRoomKey] !== undefined) ? "visible" : "hidden"}`}>
                                             <span className="text-sm text-white font-black">{unCheckedMessage[chatRoomKey]}</span>
                                         </div>

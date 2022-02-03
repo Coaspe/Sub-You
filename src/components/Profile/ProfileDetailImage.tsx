@@ -1,6 +1,8 @@
 import { DocumentData } from "firebase/firestore";
 import { AnimatePresence, LazyMotion, m, domAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 import { getPostByDocId } from "../../services/firebase";
 import { postContent } from "../../types";
 
@@ -12,9 +14,9 @@ interface profileDetailImageProps {
 const ProfileDetailImage: React.FC<profileDetailImageProps> = ({ docId, setDocId, firstImageSrc }) => {
 
     const [postInfo, setPostInfo] = useState<DocumentData | postContent | undefined>(undefined)
-    const [windowInfo, setWindowInfo] = useState(0)
     const [postImagePageIndex, setPostImagePageIndex] = useState(0)
     const [load, setLoad] = useState(false)
+    const windowRatio = useSelector((state: RootState) => state.setWindowRatio.windowRatio)
 
     // To improve images loading speed, In advance cache all photoes of post
     const cacheImages = async (srcArray: string[]) => {
@@ -32,18 +34,6 @@ const ProfileDetailImage: React.FC<profileDetailImageProps> = ({ docId, setDocId
         await Promise.all(promise).then(() => {
             setLoad(true)
         })
-    }
-
-    useEffect(() => {
-        // Check window ratio.
-        setWindowInfo(window.innerWidth / window.innerHeight)
-        return () => {
-            setDocId("")
-        }
-    }, [])
-    
-    window.onresize = function () {
-        setWindowInfo(window.innerWidth / window.innerHeight);
     }
 
     useEffect(() => {
@@ -86,7 +76,7 @@ const ProfileDetailImage: React.FC<profileDetailImageProps> = ({ docId, setDocId
                             style={{ pointerEvents: "auto" }}
                             layoutId={`container-${docId}`}
                             onClick={(event)=> {event.stopPropagation()}}
-                            className={`${windowInfo <= 0.9 ? "w-3/5" : "w-1/3"} relative z-50`}
+                            className={`${windowRatio > 1  ? "w-1/3" : "w-2/3"} relative z-50`}
                             >
                             {load && 
                                 <>

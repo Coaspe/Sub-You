@@ -4,21 +4,20 @@ import Avatar from '@mui/material/Avatar';
 
 import { signOutAuth } from '../helpers/auth-OAuth2';
 import { useNavigate } from 'react-router';
-import UserContext from '../context/user';
-import { memo, useCallback, useContext} from "react";
+import { memo, useCallback} from "react";
 import { getUserType } from '../types';
 import { useDispatch, useSelector } from 'react-redux';
 import { sideBarExpandedAction } from '../redux';
 import { RootState } from '../redux/store';
 
 interface headerProps {
-    userInfo : getUserType
+    userInfo: getUserType
+    me: getUserType
 }
 
-const Header : React.FC<headerProps> = ({ userInfo }) => {
+const Header : React.FC<headerProps> = ({ userInfo, me }) => {
 
     const navigate = useNavigate()
-    const { user } = useContext(UserContext);
     const dispatch = useDispatch()
     const sideExpanded: boolean = useSelector((state: RootState) => state.setSidebarExpanded.sideBarExpanded)
     
@@ -71,8 +70,8 @@ const Header : React.FC<headerProps> = ({ userInfo }) => {
                     </Paper>
                 </div>
                 <div className=" flex items-center justify-center mr-20 sm:mr-3 sm:hidden">
-                    <Avatar onClick={handleClickProfile} className="mr-2 cursor-pointer" alt="user avatar" src={userInfo.profileImg}/>
-                    <span onClick={handleClickProfile} className="text-md font-bold mr-5 cursor-pointer sm:text-sm sm:mr-0">{user.displayName}</span>
+                    <Avatar onClick={handleClickProfile} className="mr-2 cursor-pointer" alt="user avatar" src={me.profileImg}/>
+                    <span onClick={handleClickProfile} className="text-md font-bold mr-5 cursor-pointer sm:text-sm sm:mr-0">{me.username}</span>
                     <img className="w-7 cursor-pointer sm:hidden" src='/images/logout.png' alt="Logout" onClick={() => {
                         signOutAuth()
                         navigate('/login')

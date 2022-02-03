@@ -16,7 +16,7 @@ import { getUserByUserId, getPhotosInfiniteScroll, getTimelinePhotos, SUBSnapSho
 import { getUserType, postContent } from "../types";
 import ProfileSetting from '../components/Profile/ProfileSetting';
 import Artists from '../page/Artists';
-import { alertAction, postsAction, userInfoAction } from '../redux';
+import { alertAction, postsAction, userInfoAction, windowRatioAction } from '../redux';
 import { RootState } from '../redux/store';
 import Message from '../components/Message/Message';
 import Auction from '../components/Auction/Auction';
@@ -42,7 +42,7 @@ const Dashboard = () => {
     
     const [value, setValue] = useState(0);
     const [direction, setDirection] = useState(1);
-    const { user:contextUser } = useContext(UserContext);
+    const { user: contextUser } = useContext(UserContext);
     const [isLoading, setIsLoading] = useState(false)
     const [morePostLoading, setMorePostLoading] = useState(false)
     const [selectedPage, setSelectedPage] = useState("Timeline")
@@ -58,6 +58,10 @@ const Dashboard = () => {
     const postSetChanged: (string | boolean)[] = useSelector((state: RootState) => state.setPostSetChanged.postSetChanged)
     const sideExpanded: boolean = useSelector((state: RootState) => state.setSidebarExpanded.sideBarExpanded)
     
+    const setWindowRatio = useCallback((windowRatio: number) => {
+        dispatch(windowRatioAction.setWindowRatio({windowRatio: windowRatio}))
+    }, [dispatch])
+
     const doSetUserInfo = useCallback((userInfo: getUserType) => {
         dispatch(userInfoAction.setUserInfo({userInfo: userInfo}))
     }, [dispatch])
@@ -98,6 +102,13 @@ const Dashboard = () => {
         }
         setMorePostLoading(false)
     }, [contextUser.uid, key, userInfo.following, concatPosts]);
+
+    
+    useEffect(() => {
+        window.onresize = function () {
+            setWindowRatio(window.innerWidth / window.innerHeight);
+        }
+    }, [])
 
     // Supervise userInfo change
     useEffect(() => {
@@ -176,7 +187,7 @@ const Dashboard = () => {
                     </motion.div>
                 }
             </AnimatePresence>
-            <Header userInfo={userInfo}/>
+            <Header userInfo={userInfo} me={userInfo}/>
             <motion.div className="grid grid-cols-7 justify-between mx-auto max-w-screen-lg">
                 <Sidebar
                     userInfo={userInfo}
@@ -236,7 +247,7 @@ const Dashboard = () => {
                     </BottomNavigation>
                 </motion.div> : null}
             </AnimatePresence>
-            {selectedPage === "Timeline" && <div ref={divRef} className={`h-10 w-full absolute bottom-0 flex items-center justify-center`}>
+            {<div ref={selectedPage === "Timeline" ? divRef: null} className={`h-10 w-full absolute bottom-0 flex items-center justify-center`}>
             {morePostLoading && <span>loading...</span>}
             </div>}
         </div>

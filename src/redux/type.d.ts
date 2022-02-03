@@ -117,3 +117,15 @@ interface setLastCheckedTimePayload {
 interface setLastCheckedTimeAction {
     payload: setLastCheckedTimePayload
 }
+
+
+interface windowRatioState {
+    windowRatio: number
+}
+
+interface setWindowRatioPayload {
+    windowRatio: number
+}
+interface setWindowRatioAction {
+    payload: setWindowRatioPayload
+}

@@ -4,6 +4,7 @@ import { getDocFirstImage, getUserByEmail, updateLoggedInUserFollowing, updateFo
 import { useContext, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion"
 import UserContext from "../context/user";
+import { useNavigate } from "react-router-dom";
 
 interface artistProps {
     user : getUserType
@@ -21,7 +22,8 @@ const Artist: React.FC<artistProps> = ({ user }: artistProps) => {
     const [screen, setScreen] = useState(false)
     const [doesFollow, setDoesFollow] = useState(false)
     const { user: contextUser } = useContext(UserContext)
-    
+    const navigator = useNavigate()
+
     const divVariant = {
         hover: {
             scale: 1.2
@@ -93,7 +95,7 @@ const Artist: React.FC<artistProps> = ({ user }: artistProps) => {
             <motion.div
                 className="font-noto border-2 border-black rounded-md w-full flex flex-col items-center px-3 py-5 justify-between mt-3">
                 <div className="w-full flex items-center justify-between">
-                    <div className="flex items-center">
+                    <div className="flex items-center cursor-pointer" onClick={()=>{navigator(`/p/${user.userEmailEncrypted}`)}}>
                         <Avatar className="mr-2" alt="user avatar" src={user.profileImg} />
                         <span>{user.username}</span>
                     </div>

@@ -6,6 +6,7 @@ import { sidebarData } from "../data/sidebarData"
 import { useNavigate } from 'react-router';
 import Newpostmodal from "../components/Newpostmodal"
 import { CircularProgress } from "@mui/material"
+
 interface sidebarProps {
     userInfo: getUserType
 
@@ -37,9 +38,8 @@ const Sidebar: React.FC<sidebarProps> = (
     }) => {
 
     const [modalOpen, setModalOpen] = useState(false)
-    const [windowInfo, setWindowInfo] = useState(0)
+
     const navigate = useNavigate()
-    
     const handleClickProfile = () => {
         navigate(`/p/${userInfo?.userEmailEncrypted}`)
     }
@@ -56,17 +56,10 @@ const Sidebar: React.FC<sidebarProps> = (
             },
     }
     useEffect(() => {
+        
         cacheImages("/images/logo.png")
     }, [])
 
-    window.onresize = function () {
-        setWindowInfo(window.innerWidth / window.innerHeight);
-    }
-
-    useEffect(() => {
-        setWindowInfo(window.innerWidth / window.innerHeight)
-    }, [])
-    
     return (
       <>
         <AnimatePresence initial={false}>
@@ -75,14 +68,14 @@ const Sidebar: React.FC<sidebarProps> = (
                     variants={divVariants}
                     initial="initial"
                     animate="animate"
-                    className={`shadow-lg col-span-2 h-full font-noto items-center bg-main bg-opacity-10 flex flex-col sm:hidden z-10`}>
+                    className={`shadow-lg col-span-2 h-screen font-noto items-center bg-main bg-opacity-10 flex flex-col sm:hidden z-10`}>
                     {userInfo.postDocId ? (
                         <motion.div
                         initial={{opacity:0}}
                         animate={{opacity:1}}
                         className={`flex flex-col items-center left-2 h-full w-full`}>
                                 <div className="flex flex-col items-center w-3/5 mt-10 pb-10">
-                                    <img className="w-full max-h-full max-w-full object-cover shadow-lg rounded-md mb-5" src={userInfo.profileImg} alt="profile" />
+                                <img className={`w-full max-h-full max-w-full object-cover shadow-lg rounded-md mb-5`} src={userInfo.profileImg} alt="profile" />
                                     <div className="flex items-center">
                                         {isLoading ? (<CircularProgress size={20} />) : (<img className="w-4" src="/images/check.png" alt="No Problems" />)}
                                         <span onClick={handleClickProfile} className="cursor-pointer font-black text-lg ml-2">{userInfo.username}</span>

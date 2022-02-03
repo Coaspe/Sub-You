@@ -1,6 +1,6 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
 import { getUserType } from "../types";
-import { alertState, concatPostsAction, concatPostsPayload, imageLocationInModalState, lastCheckedTimeState, postSetChangedState, postsState, previewURLState, setAlertAction, setAlertPayload, setImageLocationInModalAction, setImageLocationInModalPayload, setLastCheckedTimeAction, setLastCheckedTimePayload, setMyLocationAction, setMyLocationPayload, setPostsAction, setPostSetChangedAction, setPostSetChangedPayload, setPostsPayload, setPreviewURLAction, setPreviewURLPayload, setSideBarExpandedAction, setSideBarExpandedPayload, setUserInfoAction, setUserInfoPayload, sideBarExpandedState, userInfoState } from "./type";
+import { alertState, concatPostsAction, concatPostsPayload, imageLocationInModalState, lastCheckedTimeState, postSetChangedState, postsState, previewURLState, setAlertAction, setAlertPayload, setImageLocationInModalAction, setImageLocationInModalPayload, setLastCheckedTimeAction, setLastCheckedTimePayload, setMyLocationAction, setMyLocationPayload, setPostsAction, setPostSetChangedAction, setPostSetChangedPayload, setPostsPayload, setPreviewURLAction, setPreviewURLPayload, setSideBarExpandedAction, setSideBarExpandedPayload, setUserInfoAction, setUserInfoPayload, setWindowRatioAction, setWindowRatioPayload, sideBarExpandedState, userInfoState, windowRatioState } from "./type";
 
 export const postsAction = {
     setPosts: createAction<setPostsPayload>("SETPOSTS"),
@@ -168,4 +168,21 @@ export const setLastCheckedTimeReducer = createReducer(lastCheckedTimeInitialSta
     builder
         .addCase(lastCheckedTimeAction.setLastCheckedTime, lastCheckedTimeReducer.setLastCheckedTime)
         .addCase(lastCheckedTimeAction.setUnCheckedMessage, lastCheckedTimeReducer.setUnCheckedMessage)
+})
+
+export const windowRatioAction = {
+    setWindowRatio: createAction<setWindowRatioPayload>("SETWINDOWRATIO"),
+}
+const windowRatioInitialState: windowRatioState = {
+    windowRatio: 0,
+}
+export const windowRatioReducer = {
+    setWindowRatio: (state: windowRatioState, action: setWindowRatioAction) => {
+        state.windowRatio = action.payload.windowRatio
+    },
+
+}
+export const setWindowRatioReducer = createReducer(windowRatioInitialState, builder => {
+    builder
+        .addCase(windowRatioAction.setWindowRatio, windowRatioReducer.setWindowRatio)
 })

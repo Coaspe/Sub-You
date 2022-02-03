@@ -158,10 +158,10 @@ const Auction = () => {
                 </motion.div>
 
                 {/* Hot Auctions */}
-                <motion.div layout key="Hot Aunctions" className="w-full font-noto flex flex-col items-center">
+                {/* <motion.div layout key="Hot Aunctions" className="w-full font-noto flex flex-col items-center">
                     <span className="text-xl font-black">Hot Auctions</span>
                     <div className="w-full h-screen">No</div>
-                </motion.div>
+                </motion.div> */}
             </AnimatePresence>
         </motion.div>
     )

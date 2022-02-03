@@ -1,4 +1,3 @@
-import { timeStamp } from "console";
 import { onValue, orderByChild, query, ref } from "firebase/database";
 import { AnimatePresence } from "framer-motion";
 import { useContext, useEffect, useRef, useState } from "react"
@@ -20,23 +19,24 @@ interface MessageDetailProps {
 }
 
 const MessageDetail: React.FC<MessageDetailProps> = ({ info, chatRoomKey, user, setExpanded }) => {
-    
+    // info : lastest message row information
+    // chatRoomKey: Chatting room's realtime database key
+    // user : chatroom's users
+    // setExpanded : setStateAction controls MessageDetail modal
+
     const [messages, setMessages] = useState<any>([])
     const [text, setText] = useState("")
     const { user: contextUser } = useContext(UserContext)
     const enterRef = useRef<HTMLDivElement | null>(null)
-    const lastCheckedTime: { [key: string]: number } = useSelector((state: RootState) => state.setLastCheckedTime.lastCheckedTime)
     const unCheckedMessage: { [key: string]: number } = useSelector((state: RootState) => state.setLastCheckedTime.unCheckedMessage)
     const dispatch = useDispatch()
-    const setLastCheckedTime = (lastCheckedTime: { [key: string]: number }) => {
-        dispatch(lastCheckedTimeAction.setLastCheckedTime({ TimeOrMessage: lastCheckedTime }))
-    }
+
     const setUnCheckedMessage = (lastCheckedTime: { [key: string]: number }) => {
         dispatch(lastCheckedTimeAction.setUnCheckedMessage({ TimeOrMessage: lastCheckedTime }))
     }
 
     useEffect(() => {
-
+        // 확인하지 않은 메시지가 없게 갱신
         let tmp = Object.assign({}, unCheckedMessage)
         tmp[chatRoomKey] = 0
         setUnCheckedMessage({ ...tmp })
@@ -46,8 +46,6 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ info, chatRoomKey, user, 
             
             onValue(q, (snap) => {
                 setMessages(Object.values(snap.val()))
-            }, {
-                onlyOnce: true
             });
         }
         
@@ -55,23 +53,6 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ info, chatRoomKey, user, 
             getMessages(chatRoomKey)
         }
     }, [])
-
-    useEffect(() => {
-        
-        setMessages((origin: any) => {
-            if (origin[origin.length - 1].dateCreated !== info.dateCreated)
-            {
-                return [...origin, info]
-            } else {
-                return origin
-            }
-        })
-        return () => {
-            let tmp = Object.assign({}, lastCheckedTime)
-            tmp[chatRoomKey] = info.dateCreated
-            setLastCheckedTime({ ...tmp })
-        }
-    }, [info])
 
     const handleKeypress = (e: any) => {
         if (e.key === 'Enter') {

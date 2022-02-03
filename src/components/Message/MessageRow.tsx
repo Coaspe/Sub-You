@@ -4,15 +4,16 @@ import UserContext from "../../context/user"
 import { getUserType } from "../../types"
 
 interface MessageRowProps {
-    src: string
-    message: string
-    user: getUserType
+    src: string // for user profile image
+    message: string // message
+    user: getUserType // for user uid
 }
 const MessageRow: React.FC<MessageRowProps> = ({ src, message, user }) => {
+    
     const divRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        divRef.current?.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start" })
+        divRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" })
     }, [])
     
     const { user: contextUser } = useContext(UserContext)
